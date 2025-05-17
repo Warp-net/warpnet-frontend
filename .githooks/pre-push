@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "Pre-push hook started..."
+
+FILE="version"
+CURRENT_VERSION=$(cat $FILE)
+
+# Проверяем, установлен ли SKIP_PRE_PUSH
+if [ "$SKIP_PRE_PUSH" == "1" ]; then
+    echo "Skipping pre-push hook to avoid recursion."
+    exit 0
+fi
+git tag -a "v$CURRENT_VERSION" -m "Version $CURRENT_VERSION"
+
+echo "Pushing tag v$CURRENT_VERSION ..."
+# Устанавливаем SKIP_PRE_PUSH для предотвращения рекурсии
+SKIP_PRE_PUSH=1 git push origin "v$CURRENT_VERSION"

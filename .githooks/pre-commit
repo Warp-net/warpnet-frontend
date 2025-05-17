@@ -1,0 +1,17 @@
+#!/bin/bash
+echo 'Run pre-commit hook...'
+
+FILE="version"
+PACKAGE_FILE="package.json"
+
+CURRENT_VERSION=$(cat $FILE)
+IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+PATCH=$((PATCH + 1))
+NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+echo "$NEW_VERSION" > $FILE
+
+sed -i.bak -E "s/\"version\": \"[^\"]+\"/\"version\": \"$NEW_VERSION\"/" "$PACKAGE_FILE" && rm "${PACKAGE_FILE}.bak"
+echo "Updated package.json to version $NEW_VERSION"
+
+git add .
+
