@@ -5,11 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c857f0b3-f33c-456f-a19f-dd44c1bd2a70" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/assets/tailwind.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/tailwind.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ReplyOverlay.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ReplyOverlay.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/TweetBlock.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TweetBlock.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/views/Profile.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/Profile.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tailwind.config.js" beforeDir="false" afterPath="$PROJECT_DIR$/tailwind.config.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,6 +33,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Makefile Target.rebuild.executor": "Run",
     "Makefile Target.setup-hooks.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.GoLinterPluginOnboarding": "true",

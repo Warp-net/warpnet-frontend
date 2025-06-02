@@ -359,6 +359,13 @@ export default {
       html.classList.add("mastodon");
       localStorage.setItem("theme", "mastodon");
     },
+    disableMastodonMode() {
+      const html = document.documentElement;
+      if (html.classList.contains("mastodon")) {
+        html.classList.remove("mastodon");
+        localStorage.setItem("theme", "light");
+      }
+    }
   },
   async created() {
     console.log("loading component:", this.$options.name);
@@ -381,6 +388,8 @@ export default {
       }
       if (this.profile.network === "mastodon") {
         this.enableMastodonMode()
+      } else {
+        this.disableMastodonMode();
       }
 
       this.profile.background_image = await warpnetService.getImage(
