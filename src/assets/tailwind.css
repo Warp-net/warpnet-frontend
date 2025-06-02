@@ -77,6 +77,9 @@ a:hover {
   .dark body {
     @apply bg-darktheme-background text-darktheme-text;
   }
+  .mastodon body {
+    @apply bg-mastodon-background text-mastodon-text;
+  }
 
   input, textarea {
     @apply bg-white text-black border border-gray-300;
@@ -84,32 +87,45 @@ a:hover {
   .dark input, .dark textarea {
     @apply bg-darktheme-input text-darktheme-text border-gray-600;
   }
+  .mastodon input, .mastodon textarea {
+    @apply bg-mastodon-input text-mastodon-text border-gray-600;
+  }
 
-  /* Стили для боксов (например, "Who to Follow") */
   .card {
     @apply bg-lighter p-4 rounded-lg shadow;
   }
   .dark .card {
     @apply bg-darktheme-card text-darktheme-text;
   }
-
+  .mastodon .card {
+    @apply bg-mastodon-card text-mastodon-text;
+  }
   .dark .bg-lightest {
     background-color: theme("colors.darktheme.card") !important;
   }
+  .mastodon .bg-lightest {
+    background-color: theme("colors.mastodon.card") !important;
+  }
 
-  /* Ховер-фон */
   .dark .hover\:bg-lighter:hover {
     background-color: theme("colors.darktheme.foreground") !important;
   }
+  .mastodon .hover\:bg-lighter:hover {
+    background-color: theme("colors.mastodon.foreground") !important;
+  }
 
-  /* Граница */
   .dark .border-lighter {
     border-color: theme("colors.gray.700") !important;
   }
+  .mastodon .border-lighter {
+    border-color: theme("colors.gray.700") !important;
+  }
 
-  /* Цвет текста для второстепенных элементов */
   .dark .text-dark {
     color: theme("colors.darktheme.secondary") !important;
+  }
+  .mastodon .text-dark {
+    color: theme("colors.mastodon.secondary") !important;
   }
 }
 

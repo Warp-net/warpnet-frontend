@@ -353,7 +353,12 @@ export default {
     async loadMore() {
       const tweets = await warpnetService.getTweets({userId:this.profile.id, cursorReset:false});
       this.tweets = this.tweets.concat(tweets);
-    }
+    },
+    enableMastodonMode() {
+      const html = document.documentElement;
+      html.classList.add("mastodon");
+      localStorage.setItem("theme", "mastodon");
+    },
   },
   async created() {
     console.log("loading component:", this.$options.name);
@@ -362,6 +367,7 @@ export default {
       const profileId = this.$route.params.id;
       if (!profileId) {
         this.noUser = true;
+        this.loading = false;
         return;
       }
 
@@ -370,7 +376,11 @@ export default {
       this.profile = await warpnetService.getProfile(profileId);
       if (!this.profile) {
         this.noUser = true;
+        this.loading = false;
         return;
+      }
+      if (this.profile.network === "mastodon") {
+        this.enableMastodonMode()
       }
 
       this.profile.background_image = await warpnetService.getImage(

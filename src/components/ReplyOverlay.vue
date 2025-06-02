@@ -76,7 +76,7 @@ resulting from the use or misuse of this software.
         </div>
 
         <!-- ReplyBlock -->
-        <div class="p-3 flex flex-row">
+        <div v-if="profile.network === 'warpnet'" class="p-3 flex flex-row">
           <div class="flex-none mr-4">
             <img
               :src="`${profile.avatar || 'default_profile.png'}`"

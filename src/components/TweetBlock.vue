@@ -55,7 +55,7 @@ resulting from the use or misuse of this software.
         <div>
           <i @click="showDropdown = !showDropdown" class="fas fa-angle-down text-sm ml-auto text-dark cursor-pointer"></i>
           <div v-if="showDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-            <a @click="delete" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Delete tweet</a>
+            <a @click="deleteTweet" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Delete tweet</a>
           </div>
         </div>
       </div>
@@ -160,7 +160,7 @@ export default {
       }
       this.showReplyOverlay = true;
     },
-    async delete() {
+    async deleteTweet() {
       if (!this.tweet.parent_id || this.tweet.parent_id === '') {
         const deleteObject = {
           userId: this.tweet.user_id,
@@ -214,6 +214,9 @@ export default {
       this.retweetsCount.set(this.tweet.id, retweetsNum)
     },
     async like() {
+      if (this.tweet.network !== "warpnet") {
+        return
+      }
       let likesNum = 0
       const alreadyLiked = await warpnetService.hasLiker(this.tweet.id, this.profile.id)
       try {
