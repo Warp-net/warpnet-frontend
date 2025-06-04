@@ -160,7 +160,7 @@ export const warpnetService = {
         return result.users;
     },
 
-    async getWhoToFollow(cursorReset) {
+    async getWhoToFollow(profileId, cursorReset) {
         let cursor = this.getCursor('whotofollow')
         if (cursorReset) {
             cursor = ''
@@ -170,9 +170,10 @@ export const warpnetService = {
         }
 
         const owner = this.getOwnerProfile()
+        const profile =  this.getProfile(profileId)
 
         let result = await api.getUsers(
-            {ownerNodeId: owner.node_id, userId: owner.id, limit: defaultLimit, cursor: cursor},
+            {ownerNodeId: profile.node_id, userId: profile.id, limit: defaultLimit, cursor: cursor},
         );
         if (!result) {
             return []
@@ -180,7 +181,10 @@ export const warpnetService = {
         this.setCursor('whotofollow', result.cursor || "")
 
         const followers = await this.getFollowers({userId:owner.id, cursorReset:cursorReset});
-        result.users = result.users.filter(item => !followers.includes(item));
+
+        result.users = result.users.filter(user => !followers.includes(user)); // remove own followers
+        result.users = result.users.filter(user => user.avatar_key !== '');
+        result.users = result.users.filter(user => user.tweets_count !== 0);
 
         return result.users;
     },

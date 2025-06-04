@@ -66,6 +66,9 @@ import {warpnetService} from "@/service/service";
 
 export default {
   name: 'WhoToFollow',
+  props: {
+    currentProfile: Object,
+  },
   data() {
     return {
       userProfile: undefined,
@@ -100,14 +103,14 @@ export default {
       this.profilesAvatars.set(userId, img)
     },
     async loadMore() {
-      const users = await warpnetService.getWhoToFollow(false)
+      const users = await warpnetService.getWhoToFollow(this.currentProfile.id,false)
       this.profiles = [...this.profiles, ...users];
     },
    },
   async created() {
     console.log("loading component:", this.$options.name);
     this.userProfile = warpnetService.getOwnerProfile();
-    this.profiles = await warpnetService.getWhoToFollow(true)
+    this.profiles = await warpnetService.getWhoToFollow(this.currentProfile.id, true)
   },
 };
 </script>

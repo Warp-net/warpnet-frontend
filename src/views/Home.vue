@@ -124,7 +124,9 @@ resulting from the use or misuse of this software.
         :position="infoPosition"
     />
     <!-- default right bar -->
-    <DefaultRightBar />
+    <DefaultRightBar
+        :profile="profile"
+    />
   </div>
 </template>
 

@@ -24,7 +24,9 @@ resulting from the use or misuse of this software.
 <template>
    <div class="hidden md:block w-1/3 h-full border-l border-lighter px-6 py-2 relative min-w-max">
       <SearchBar />
-      <WhoToFollow />
+      <WhoToFollow
+          :currentProfile="profile"
+      />
     </div>
 </template>
 <script>
@@ -32,6 +34,9 @@ import SearchBar from './SearchBar.vue';
 import WhoToFollow from './WhoToFollow.vue';
 export default {
   name: 'DefaultRightBar',
+  props: {
+    profile: Object,
+  },
   components: {
     SearchBar,
     WhoToFollow,
