@@ -238,7 +238,9 @@ resulting from the use or misuse of this software.
       <div
         class="hidden md:block w-1/3 z-0 h-full border-l border-lighter px-6 py-2 overflow-y-scroll no-scrollbar relative"
       >
-        <DefaultRightBar />
+        <DefaultRightBar
+            :profile="profile"
+        />
       </div>
 
       <SetUpProfileOverlay

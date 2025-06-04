@@ -6,10 +6,21 @@
   <component name="ChangeListManager">
     <list default="true" id="c857f0b3-f33c-456f-a19f-dd44c1bd2a70" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/DefaultRightBar.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/DefaultRightBar.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/dist/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/501.025d21fd.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/501.025d21fd.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/app.46e11aff.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/app.46e11aff.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/home.199a60ab.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/home.199a60ab.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/notifications.7b62c088.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/notifications.7b62c088.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/profile.1453eca2.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/js/profile.1453eca2.js.map" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/service-worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/dist/service-worker.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/service-worker.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/dist/service-worker.js.map" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/WhoToFollow.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/WhoToFollow.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/service/service.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/service.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/views/Home.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/Home.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/views/Profile.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/Profile.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

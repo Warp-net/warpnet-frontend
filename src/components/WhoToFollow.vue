@@ -110,6 +110,9 @@ export default {
   async created() {
     console.log("loading component:", this.$options.name);
     this.userProfile = warpnetService.getOwnerProfile();
+    if (!this.currentProfile) {
+      this.currentProfile = this.userProfile;
+    }
     this.profiles = await warpnetService.getWhoToFollow(this.currentProfile.id, true)
   },
 };
