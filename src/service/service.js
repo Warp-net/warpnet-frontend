@@ -170,7 +170,10 @@ export const warpnetService = {
         }
 
         const owner = this.getOwnerProfile()
-        const profile =  this.getProfile(profileId)
+        let profile =  this.getProfile(profileId)
+        if (!profile) {
+            profile = owner
+        }
 
         let result = await api.getUsers(
             {ownerNodeId: profile.node_id, userId: profile.id, limit: defaultLimit, cursor: cursor},
