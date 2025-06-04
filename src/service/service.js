@@ -161,6 +161,7 @@ export const warpnetService = {
     },
 
     async getWhoToFollow(profileId, cursorReset) {
+        console.log("getWhoToFollow: profileId passed in:", profileId);
         let cursor = this.getCursor('whotofollow')
         if (cursorReset) {
             cursor = ''
@@ -170,7 +171,11 @@ export const warpnetService = {
         }
 
         const owner = this.getOwnerProfile()
+        console.log("getWhoToFollow: owner:", owner);
+
         let profile =  this.getProfile(profileId)
+        console.log("getWhoToFollow: profile:", owner);
+
         if (!profile) {
             profile = owner
         }
@@ -178,7 +183,7 @@ export const warpnetService = {
         let result = await api.getUsers(
             {ownerNodeId: profile.node_id, userId: profile.id, limit: defaultLimit, cursor: cursor},
         );
-        if (!result) {
+        if (!result || !result.users || result.users.length === 0) {
             return []
         }
         this.setCursor('whotofollow', result.cursor || "")

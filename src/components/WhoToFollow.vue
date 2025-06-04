@@ -26,7 +26,7 @@ resulting from the use or misuse of this software.
     <div class="p-3">
       <p class="text-lg font-bold">Who to follow</p>
     </div>
-    <div v-for="profile in profiles" :key="profile.id" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
+    <div v-if="currentProfile" v-for="profile in profiles" :key="profile.id" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
       <img 
         @click="pushToProfilePage(profile.id)" 
         :src="getAvatar(profile.id, profile.avatar_key) || 'default_profile.png'"
