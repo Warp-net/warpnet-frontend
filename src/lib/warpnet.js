@@ -163,6 +163,7 @@ export default {
   },
 
   async getUsers({ownerNodeId, userId, limit, cursor}) {
+    console.log("client: get users request:", ownerNodeId, userId, limit, cursor)
     let id = await client.sendMessage({
       path: PUBLIC_GET_USERS,
       node_id: ownerNodeId,
