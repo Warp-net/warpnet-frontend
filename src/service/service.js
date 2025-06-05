@@ -193,9 +193,9 @@ export const warpnetService = {
 
         const followers = await this.getFollowers({userId:owner.id, cursorReset:cursorReset});
 
-        //result.users = result.users.filter(user => !followers.includes(user)); // remove own followers
-        // result.users = result.users.filter(user => user.avatar_key !== '');
-        // result.users = result.users.filter(user => user.tweets_count !== 0);
+        result.users = result.users.filter(user => !followers.includes(user)); // remove own followers
+        result.users = result.users.filter(user => user.avatar_key !== 'https://mastodon.social/avatars/original/missing.png');
+        result.users = result.users.filter(user => user.tweets_count !== 0);
 
         return result.users;
     },
