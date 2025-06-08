@@ -41,6 +41,7 @@ const PRIVATE_POST_USER = "/private/post/user/0.0.0"
 const PUBLIC_POST_UNFOLLOW = "/public/post/unfollow/0.0.0"
 const PUBLIC_GET_USER = "/public/get/user/0.0.0"
 const PUBLIC_GET_USERS = "/public/get/users/0.0.0"
+const PUBLIC_GET_WHOTOFOLLOW = "/public/get/whotofollow/0.0.0"
 const PUBLIC_GET_REPLIES = "/public/get/replies/0.0.0"
 const PUBLIC_GET_FOLLOWERS = "/public/get/followers/0.0.0"
 const PUBLIC_POST_FOLLOW = "/public/post/follow/0.0.0"
@@ -164,6 +165,21 @@ export default {
 
   async getUsers({ownerNodeId, userId, limit, cursor}) {
     console.log("client: get users request:", ownerNodeId, userId, limit, cursor)
+    let id = await client.sendMessage({
+      path: PUBLIC_GET_USERS,
+      node_id: ownerNodeId,
+      timestamp: new Date().toISOString(),
+      body: {
+        limit: limit,
+        cursor: cursor,
+        user_id: userId,
+      },
+    });
+
+    return await client.getResponse(id)
+  },
+
+  async getWhoToFollow({ownerNodeId, userId, limit, cursor}) {
     let id = await client.sendMessage({
       path: PUBLIC_GET_USERS,
       node_id: ownerNodeId,

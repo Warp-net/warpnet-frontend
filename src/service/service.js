@@ -183,19 +183,13 @@ export const warpnetService = {
         }
         console.log("getWhoToFollow: request:", req);
 
-        let result = await api.getUsers(req);
+        let result = await api.getWhoToFollow(req);
         console.log("getWhoToFollow: response:", result);
 
-        if (!result || !result.users || result.users.length === 0) {
+        if (!result) {
             return []
         }
         this.setCursor('whotofollow', result.cursor || "")
-
-        const followers = await this.getFollowers({userId:owner.id, cursorReset:cursorReset});
-
-        result.users = result.users.filter(user => !followers.includes(user)); // remove own followers
-        result.users = result.users.filter(user => user.avatar_key !== 'https://mastodon.social/avatars/original/missing.png');
-        result.users = result.users.filter(user => user.tweets_count !== 0);
 
         return result.users;
     },

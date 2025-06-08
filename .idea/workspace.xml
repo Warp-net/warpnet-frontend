@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c857f0b3-f33c-456f-a19f-dd44c1bd2a70" name="Changes" comment="" />
+    <list default="true" id="c857f0b3-f33c-456f-a19f-dd44c1bd2a70" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/src/lib/warpnet.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/warpnet.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/service/service.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/service.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -75,14 +78,6 @@
         <item itemvalue="Makefile Target.setup-hooks" />
       </list>
     </recent_temporary>
-  </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="bundled-gosdk-3b128438d3f6-4b567d62c776-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-251.25410.140" />
-        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-GO-251.25410.140" />
-      </set>
-    </attachedChunks>
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
