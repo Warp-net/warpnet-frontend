@@ -52,7 +52,7 @@ resulting from the use or misuse of this software.
     },
     methods: {
       startProgress() {
-        const totalTime = 25000; // TODO sync with backend
+        const totalTime = 15000; // TODO sync with backend
         const stepTime = 500;
         const steps = totalTime / stepTime;
         const increment = 100 / steps;

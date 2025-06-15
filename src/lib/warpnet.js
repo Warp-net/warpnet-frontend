@@ -181,7 +181,7 @@ export default {
 
   async getWhoToFollow({ownerNodeId, userId, limit, cursor}) {
     let id = await client.sendMessage({
-      path: PUBLIC_GET_USERS,
+      path: PUBLIC_GET_WHOTOFOLLOW,
       node_id: ownerNodeId,
       timestamp: new Date().toISOString(),
       body: {
