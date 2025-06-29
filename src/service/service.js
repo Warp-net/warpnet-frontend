@@ -243,9 +243,10 @@ export const warpnetService = {
         }
 
         const cacheKey = `timeline::${defaultLimit}::${cursor}`;
-        if (stateMap.has(cacheKey)) {
-            return stateMap.get(cacheKey);
-        }
+        // if (stateMap.has(cacheKey)) {
+        //     return stateMap.get(cacheKey);
+        // }
+        // TODO temp
 
         const owner = this.getOwnerProfile()
         const result = await api.getMyTimeline(
@@ -276,9 +277,10 @@ export const warpnetService = {
         }
 
         const cacheKey = `tweets::${userId}::${defaultLimit}::${cursor}`;
-        if (stateMap.has(cacheKey)) {
-            return stateMap.get(cacheKey);
-        }
+        // if (stateMap.has(cacheKey)) {
+        //     return stateMap.get(cacheKey);
+        // }
+        // TODO temp
 
         const owner = this.getOwnerProfile()
         const result = await api.getTweets({
