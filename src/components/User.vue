@@ -34,7 +34,13 @@ resulting from the use or misuse of this software.
     <div class="ml-2 flex flex-col w-full">
       <div class="flex flex-row justify-between w-full">
         <div class="flex flex-col">
-          <p class="font-bold">{{ user.username }}</p>
+
+          <p v-if="!user.moderation || user.moderation.is_ok">
+            <p class="font-bold">{{ user.username }}</p>
+          </p>
+          <p v-else>
+            <p class="font-bold">Moderated</p>
+          </p>
           <p class="text-dark text-sm">@{{ user.id }}</p>
         </div>
         <div v-if="profile && profile.id !== user.id">
@@ -58,6 +64,12 @@ resulting from the use or misuse of this software.
       </div>
       <div>
         <p>{{ user.bio }}</p>
+        <p v-if="!user.moderation || user.moderation.is_ok">
+          {{ user.bio }}
+        </p>
+        <p v-else class="pb-2 bg-red-300">
+          Moderated: {{ user.moderation.reason }}
+        </p>
       </div>
     </div>
   </div>

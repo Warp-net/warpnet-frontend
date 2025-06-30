@@ -6,6 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="c857f0b3-f33c-456f-a19f-dd44c1bd2a70" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/TweetBlock.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TweetBlock.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/User.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/User.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/service/service.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/service/service.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

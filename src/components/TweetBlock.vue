@@ -63,7 +63,7 @@ resulting from the use or misuse of this software.
         {{ tweet.text }} 
       </p>
       <p v-else class="pb-2 bg-red-300">
-        Moderated. {{ tweet.moderation.reason }}
+        Moderated: {{ tweet.moderation.reason }}
       </p>
       <div v-if="tweet.image" class="mt-2">
         <img
