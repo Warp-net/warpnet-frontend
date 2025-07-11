@@ -22,7 +22,6 @@ Use at your own risk. The maintainers shall not be liable for any damages or dat
 resulting from the use or misuse of this software.
 */
 
-import api from '@/lib/warpnet';
 import {buildQRCode} from "@/lib/qr";
 
 const stateMap = new Map();
@@ -72,15 +71,27 @@ export const warpnetService = {
     },
 
     async signInUser(form) {
-        const resp = await api.loginUser(form)
+        let request = {
+            path: PRIVATE_POST_LOGIN,
+            node_id: "None",
+            body: {
+                username: form.username,
+                password: form.password,
+            }
+        }
+        const result = await window.go.main.App.Route(request);
+        const resp = result.body;
         if (!resp || !resp.identity) {
+            alert("Login failed: no response")
             throw new Error("Login failed: no response")
         }
         if (resp.code) {
+            alert(resp.message)
             throw new Error(resp.message)
         }
 
         if (!resp.identity) {
+            alert("Login failed: no identity")
             throw new Error("Login failed: no identity")
         }
 
@@ -88,11 +99,12 @@ export const warpnetService = {
         resp.identity.token = null // for security reasons
 
         if (!resp.identity.owner) {
+            alert("Login failed: owner identity not received")
             console.error("Login failed: owner identity not received")
             return;
         }
 
-        const request = {
+        request = {
             path: PUBLIC_GET_USER,
             node_id: resp.identity.owner.node_id,
             timestamp: new Date().toISOString(),
@@ -115,7 +127,13 @@ export const warpnetService = {
         if (owner && owner.node_id) {
             nodeId = owner.node_id
         }
-        await api.logoutUser(nodeId)
+        const request = {
+                    path: PRIVATE_POST_LOGOUT,
+                    node_id: nodeId,
+                    body: {}
+                }
+
+        await window.go.main.App.Route(request);
         this.reset();
     },
 
@@ -131,7 +149,8 @@ export const warpnetService = {
             },
         }
 
-        return await window.go.main.App.Route(request);
+        const result = await window.go.main.App.Route(request);
+        return result.body;
     },
 
     async getUsers({profileId, cursorReset}) {
@@ -162,22 +181,23 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const usersResp = result.body;
+        if (!usersResp) {
             return []
         }
-        this.setCursor('users', result.cursor || "")
-        if (!result.users || result.users.length === 0) {
+        this.setCursor('users', usersResp.cursor || "")
+        if (!usersResp.users || usersResp.users.length === 0) {
             return []
         }
 
-        result.users = result.users.filter(user => user.id !== profileId);
+        usersResp.users = usersResp.users.filter(user => user.id !== profileId);
 
-        for (const u of result.users) {
+        for (const u of usersResp.users) {
             stateMap.set(`user::${u.id}`, u);
         }
 
-        stateMap.set(cacheKey, result.users);
-        return result.users;
+        stateMap.set(cacheKey, usersResp.users);
+        return usersResp.users;
     },
 
     async getWhoToFollow(profileId, cursorReset) {
@@ -207,12 +227,13 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const followResp = result.body;
+        if (!followResp) {
             return []
         }
-        this.setCursor('whotofollow', result.cursor || "")
+        this.setCursor('whotofollow', followResp.cursor || "")
 
-        return result.users;
+        return followResp.users;
     },
 
     async uploadImage(imgFile) {
@@ -230,7 +251,8 @@ export const warpnetService = {
             },
         }
 
-        const hashKey = await window.go.main.App.Route(request);
+        const result = await window.go.main.App.Route(request);
+        const hashKey = result.body.key
         if (!hashKey || hashKey.length === 0) {
             return ''
         }
@@ -267,9 +289,9 @@ export const warpnetService = {
         if (!result) {
             return null
         }
-        stateMap.set(cacheKey, result);
+        stateMap.set(cacheKey, result.file);
 
-        return result;
+        return result.file;
     },
 
     async getMyTimeline(cursorReset) {
@@ -301,17 +323,18 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const timelineResp = result.body;
+        if (!timelineResp) {
             return []
         }
 
-        this.setCursor('timeline', result.cursor || 'end')
-        if (!result.tweets || result.tweets.length === 0) {
+        this.setCursor('timeline', timelineResp.cursor || 'end')
+        if (!timelineResp.tweets || timelineResp.tweets.length === 0) {
             return []
         }
-        stateMap.set(cacheKey, result.tweets);
+        stateMap.set(cacheKey, timelineResp.tweets);
 
-        return result.tweets;
+        return timelineResp.tweets;
     },
 
     async getTweets({userId,cursorReset}) {
@@ -342,16 +365,17 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const tweetsResp = result.body;
+        if (!tweetsResp) {
             return []
         }
-        this.setCursor('tweets', result.cursor || 'end')
-        if (!result.tweets || result.tweets.length === 0) {
+        this.setCursor('tweets', tweetsResp.cursor || 'end')
+        if (!tweetsResp.tweets || tweetsResp.tweets.length === 0) {
             return []
         }
-        stateMap.set(cacheKey, result.tweets);
+        stateMap.set(cacheKey, tweetsResp.tweets);
 
-        return result.tweets;
+        return tweetsResp.tweets;
     },
 
     async createTweet({text, imageKey}) {
@@ -370,7 +394,8 @@ export const warpnetService = {
             },
         }
 
-        const tweet = await window.go.main.App.Route(request);
+        const result = await window.go.main.App.Route(request);
+        const tweet = result.body;
 
         this.invalidate(`timeline`);
         this.invalidate(`tweets::${tweet.user_id}`);
@@ -395,11 +420,12 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
+        const tweet = result.body;
 
         this.invalidate(`timeline`);
         this.invalidate(`tweets::${userId}`);
         stateMap.delete(`tweet::${userId}::${tweetId}`)
-        return result;
+        return tweet;
     },
 
     async getTweet({userId, tweetId}) {
@@ -419,11 +445,12 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const tweet = result.body;
+        if (!tweet) {
             return null
         }
-        stateMap.set(cacheKey, result);
-        return result;
+        stateMap.set(cacheKey, tweet);
+        return tweet;
     },
 
     async followUser(profileId) {
@@ -440,7 +467,8 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const followResp = result.body;
+        if (!followResp) {
             return null
         }
         const cacheKey = `isFollowed::${profileId}`;
@@ -449,7 +477,7 @@ export const warpnetService = {
         this.invalidate(`followees::${profileId}`);
         this.invalidate(`user::${profileId}`);
         this.invalidate(`user::${owner.id}`);
-        return result;
+        return followResp;
     },
 
     isFollowed(profileId) {
@@ -476,7 +504,8 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const unfollowResp = result.body;
+        if (!unfollowResp) {
             return null
         }
         stateMap.delete(`isFollowed::${profileId}`);
@@ -484,7 +513,7 @@ export const warpnetService = {
         this.invalidate(`followees::${profileId}`);
         this.invalidate(`user::${profileId}`);
         this.invalidate(`user::${owner.id}`);
-        return result;
+        return unfollowResp;
     },
 
     async getFollowers({userId, cursorReset}) {
@@ -513,22 +542,23 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const followersResp = result.body;
+        if (!followersResp) {
             return []
         }
-        this.setCursor('followers', result.cursor || 'end')
+        this.setCursor('followers', followersResp.cursor || 'end')
         if (!result.followers || result.followers.length === 0) {
             return []
         }
-        result.followers = result.followers.filter(follower => follower !== userId);
+        followersResp.followers = followersResp.followers.filter(follower => follower !== userId);
 
-        stateMap.set(cacheKey, result.followers);
-        for (const follower of result.followers || []) {
+        stateMap.set(cacheKey, followersResp.followers);
+        for (const follower of followersResp.followers || []) {
             const followerKey = `isFollower::${follower}`;
             stateMap.set(followerKey, {})
         }
 
-        return result.followers;
+        return followersResp.followers;
     },
 
     async getFollowees({userId, cursorReset}) {
@@ -557,17 +587,18 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const followeesResp = result.body;
+        if (!followeesResp) {
             return []
         }
-        this.setCursor('followees', result.cursor || 'end')
-        if (!result.followees || result.followees.length === 0) {
+        this.setCursor('followees', followeesResp.cursor || 'end')
+        if (!followeesResp.followees || followeesResp.followees.length === 0) {
             return []
         }
-        result.followees = result.followees.filter(followee => followee !== userId);
+        followeesResp.followees = followeesResp.followees.filter(followee => followee !== userId);
 
-        stateMap.set(cacheKey, result.followees);
-        return result.followees;
+        stateMap.set(cacheKey, followeesResp.followees);
+        return followeesResp.followees;
     },
 
     async getTweetStats(tweetId, userId) {
@@ -587,12 +618,13 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const statsResp = result.body;
+        if (!statsResp) {
             return null
         }
-        stateMap.set(cacheKey, result);
+        stateMap.set(cacheKey, statsResp);
 
-        return result;
+        return statsResp;
     },
 
     // create reply
@@ -615,14 +647,15 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const replyResp = result.body;
+        if (!replyResp) {
             return null
         }
-        const cacheKey = `reply::${rootId}::${result.id}`;
-        stateMap.set(cacheKey, result);
+        const cacheKey = `reply::${rootId}::${replyResp.id}`;
+        stateMap.set(cacheKey, replyResp);
         this.invalidate(`replies::${rootId}`)
         this.invalidate(`tweetstats::${rootId}`)
-        return result;
+        return replyResp;
     },
 
     async getReplies({rootId, parentId, cursorReset}) {
@@ -652,15 +685,16 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const repliesResp = result.body;
+        if (!repliesResp) {
             return []
         }
-        this.setCursor('replies', result.cursor || 'end')
-        if (!result.replies || result.replies.length === 0) {
+        this.setCursor('replies', repliesResp.cursor || 'end')
+        if (!repliesResp.replies || repliesResp.replies.length === 0) {
             return []
         }
-        stateMap.set(cacheKey, result.replies);
-        return result.replies;
+        stateMap.set(cacheKey, repliesResp.replies);
+        return repliesResp.replies;
     },
 
     async getReply({rootId, replyId}) {
@@ -679,11 +713,12 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const replyResp = result.body;
+        if (!replyResp) {
             return null
         }
-        stateMap.set(cacheKey, result);
-        return result;
+        stateMap.set(cacheKey, replyResp);
+        return replyResp;
     },
 
     async deleteReply({userId, rootId, replyId}) {
@@ -701,11 +736,13 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
+        const replyResp = result.body;
+
         const cacheKey = `reply::${rootId}::${replyId}`;
         stateMap.delete(cacheKey);
         this.invalidate(`tweetstats::${rootId}`)
         this.invalidate(`replies::${rootId}`)
-        return result;
+        return replyResp;
     },
 
     async likeTweet(tweetId, userId) {
@@ -723,8 +760,10 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
+        const likeResp = result.body;
+
         this.invalidate(`tweetstats::${tweetId}`)
-        return result;
+        return likeResp.count;
     },
 
     async unlikeTweet(tweetId, userId) {
@@ -742,8 +781,10 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
+        const unlikeResp = result.body;
+
         this.invalidate(`tweetstats::${tweetId}`)
-        return result;
+        return unlikeResp.count;
     },
 
     async setLiker(tweetId, profileId, profileObj) {
@@ -784,10 +825,11 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
+        const retweetResp = result.body;
 
         this.invalidate(`timeline`)
         this.invalidate(`tweetstats::${tweetId}`)
-        return result;
+        return retweetResp;
     },
 
     async unretweetTweet(tweetId) {
@@ -804,9 +846,10 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
+        const unretweetResp = result.body;
 
         this.invalidate(`tweetstats::${tweetId}`)
-        return result;
+        return unretweetResp;
     },
 
     async setRetweeter(tweetId, profileId, profileObj) {
@@ -842,14 +885,15 @@ export const warpnetService = {
             },
         }
 
-        const chat = await window.go.main.App.Route(request);
-        if (!chat) {
+        const result = await window.go.main.App.Route(request);
+        const chatResp = result.body;
+        if (!chatResp) {
             return null
         }
         this.invalidate('chats')
-        const cacheKey = `chat::${chat.id}`
-        stateMap.set(cacheKey, chat)
-        return chat;
+        const cacheKey = `chat::${chatResp.id}`
+        stateMap.set(cacheKey, chatResp)
+        return chatResp;
     },
 
     async getChat(chatId) {
@@ -867,12 +911,13 @@ export const warpnetService = {
             },
         }
 
-        const chat = await window.go.main.App.Route(request);
-        if (!chat) {
+        const result = await window.go.main.App.Route(request);
+        const chatResp = result.body;
+        if (!chatResp) {
             return null
         }
-        stateMap.set(cacheKey, chat)
-        return chat;
+        stateMap.set(cacheKey, chatResp)
+        return chatResp;
     },
 
     async getChats(cursorReset) {
@@ -901,20 +946,21 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const chatsResp = result.body;
+        if (!chatsResp) {
             return []
         }
-        this.setCursor('chats', result.cursor || 'end')
-        if (!result.chats || result.chats.length === 0) {
+        this.setCursor('chats', chatsResp.cursor || 'end')
+        if (!chatsResp.chats || chatsResp.chats.length === 0) {
             return []
         }
 
-        for (const chat of result.chats) {
+        for (const chat of chatsResp.chats) {
             stateMap.set(`chat::${chat.id}`, chat)
         }
 
-        stateMap.set(cacheKey, result.chats)
-        return result.chats;
+        stateMap.set(cacheKey, chatsResp.chats)
+        return chatsResp.chats;
     },
 
     async sendDirectMessage({chatId, receiverId, text}) {
@@ -931,7 +977,8 @@ export const warpnetService = {
             },
         }
 
-        return await window.go.main.App.Route(request);
+        const result =  await window.go.main.App.Route(request);
+        return result.body;
     },
 
     async getDirectMessages({chatId, cursorReset}) {
@@ -960,16 +1007,17 @@ export const warpnetService = {
         }
 
         const result = await window.go.main.App.Route(request);
-        if (!result) {
+        const messagesResp = result.body;
+        if (!messagesResp) {
             return []
         }
-        this.setCursor('messages', result.cursor || 'end')
-        if (!result.messages || result.messages.length === 0) {
+        this.setCursor('messages', messagesResp.cursor || 'end')
+        if (!messagesResp.messages || messagesResp.messages.length === 0) {
             return []
         }
 
-        stateMap.set(cacheKey, result.messages)
-        return result.messages;
+        stateMap.set(cacheKey, messagesResp.messages)
+        return messagesResp.messages;
     },
 
     async editMyProfile(newProfile) {
@@ -990,7 +1038,8 @@ export const warpnetService = {
             },
         }
 
-        return await window.go.main.App.Route(request);
+        const result = await window.go.main.App.Route(request);
+        return result.body;
     },
 
     async getNodeInfo(){
@@ -1002,7 +1051,8 @@ export const warpnetService = {
             body: {},
         }
 
-        return await window.go.main.App.Route(request);
+        const result =  await window.go.main.App.Route(request);
+        return result.body;
     }
 }
 
