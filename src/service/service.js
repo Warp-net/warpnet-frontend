@@ -92,9 +92,16 @@ export const warpnetService = {
             return;
         }
 
-        const ownerProfile = await api.getProfile(
-            {ownerNodeId: resp.identity.owner.node_id, userId: resp.identity.owner.user_id},
-            )
+        const request = {
+            path: PUBLIC_GET_USER,
+            node_id: resp.identity.owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                user_id: resp.identity.owner.user_id,
+            },
+        }
+
+        const ownerProfile = await window.go.main.App.Route(request);
 
         warpnetService.setOwnerProfile(ownerProfile)
 
@@ -113,15 +120,18 @@ export const warpnetService = {
     },
 
     async getProfile(userId) {
-        const cacheKey = `user::${userId}`;
-        if (stateMap.has(cacheKey)) {
-            return stateMap.get(cacheKey);
+        const owner = this.getOwnerProfile()
+
+        const request = {
+            path: PUBLIC_GET_USER,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                user_id: userId,
+            },
         }
 
-        const owner = this.getOwnerProfile()
-        const result = await api.getProfile({ownerNodeId: owner.node_id, userId: userId});
-        stateMap.set(cacheKey, result);
-        return result;
+        return await window.go.main.App.Route(request);
     },
 
     async getUsers({profileId, cursorReset}) {
@@ -139,9 +149,19 @@ export const warpnetService = {
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const owner = this.getOwnerProfile()
-        const result = await api.getUsers(
-            {ownerNodeId: owner.node_id, userId: profileId, limit: defaultLimit, cursor: cursor},
-        );
+
+        const request = {
+            path: PUBLIC_GET_USERS,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                limit: defaultLimit,
+                cursor: cursor,
+                user_id: profileId,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return []
         }
@@ -175,17 +195,18 @@ export const warpnetService = {
             profileId = owner.id
         }
 
-        const req =  {
-            ownerNodeId: owner.node_id,
-            userId: profileId,
-            limit: defaultLimit,
-            cursor: cursor,
+        const request = {
+            path: PUBLIC_GET_WHOTOFOLLOW,
+                node_id: owner.node_id,
+                timestamp: new Date().toISOString(),
+                body: {
+                limit: defaultLimit,
+                    cursor: cursor,
+                    user_id: profileId,
+            },
         }
-        console.log("getWhoToFollow: request:", req);
 
-        let result = await api.getWhoToFollow(req);
-        console.log("getWhoToFollow: response:", result);
-
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return []
         }
@@ -199,9 +220,17 @@ export const warpnetService = {
             return ''
         }
         const owner = this.getOwnerProfile()
-        const hashKey = await api.uploadImage(
-            {ownerNodeId: owner.node_id, imgFile: imgFile},
-        );
+
+        const request = {
+            path: PRIVATE_POST_UPLOAD_IMAGE,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                file: imgFile,
+            },
+        }
+
+        const hashKey = await window.go.main.App.Route(request);
         if (!hashKey || hashKey.length === 0) {
             return ''
         }
@@ -223,7 +252,18 @@ export const warpnetService = {
         }
 
         const owner = this.getOwnerProfile()
-        const result = await api.getImage({ownerNodeId: owner.node_id, userId: userId, key: key});
+
+        const request = {
+            path: PUBLIC_GET_IMAGE,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                user_id: userId,
+                key: key,
+            }
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return null
         }
@@ -248,14 +288,22 @@ export const warpnetService = {
         }
 
         const owner = this.getOwnerProfile()
-        const result = await api.getMyTimeline(
-            {ownerNodeId: owner.node_id, ownerUserId: owner.id, limit: defaultLimit, cursor: cursor},
-        );
+
+        const request = {
+            path: PRIVATE_GET_TIMELINE,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                limit: defaultLimit,
+                cursor: cursor,
+                user_id: owner.id,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return []
         }
-
-        console.log("timeline OUT CURSOR", result.cursor)
 
         this.setCursor('timeline', result.cursor || 'end')
         if (!result.tweets || result.tweets.length === 0) {
@@ -281,12 +329,19 @@ export const warpnetService = {
         }
 
         const owner = this.getOwnerProfile()
-        const result = await api.getTweets({
-            ownerNodeId: owner.node_id,
-            userId: userId,
-            limit: defaultLimit,
-            cursor: cursor
-        });
+
+        const request = {
+            path: PUBLIC_GET_TWEETS,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                limit: defaultLimit,
+                cursor: cursor,
+                user_id: userId,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return []
         }
@@ -301,12 +356,22 @@ export const warpnetService = {
 
     async createTweet({text, imageKey}) {
         const owner = this.getOwnerProfile()
-        const tweet = await api.createTweet(
-            {
-                ownerNodeId: owner.node_id, ownerUserId: owner.id, ownerUsername: owner.username,
-                text: text, imageKey: imageKey,
+
+        const request ={
+            path: PRIVATE_POST_TWEET,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                user_id: owner.id,
+                username: owner.username,
+                text: text,
+                image_key: imageKey,
+                created_at: new Date().toISOString(),
             },
-        );
+        }
+
+        const tweet = await window.go.main.App.Route(request);
+
         this.invalidate(`timeline`);
         this.invalidate(`tweets::${tweet.user_id}`);
         this.invalidate(`user::${tweet.user_id}`);
@@ -318,7 +383,19 @@ export const warpnetService = {
 
     async deleteTweet({userId, tweetId}) {
         const owner = this.getOwnerProfile()
-        const result = await api.deleteTweet({ownerNodeId: owner.node_id, userId: userId, tweetId: tweetId});
+
+        const request = {
+            path: PRIVATE_DELETE_TWEET,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                user_id: userId,
+                tweet_id: tweetId,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
+
         this.invalidate(`timeline`);
         this.invalidate(`tweets::${userId}`);
         stateMap.delete(`tweet::${userId}::${tweetId}`)
@@ -330,7 +407,18 @@ export const warpnetService = {
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const owner = this.getOwnerProfile()
-        const result = await api.getTweet({ownerNodeId: owner.node_id, userId: userId, tweetId: tweetId});
+
+        const request = {
+            path: PUBLIC_GET_TWEET,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                user_id: userId,
+                tweet_id: tweetId,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return null
         }
@@ -340,9 +428,18 @@ export const warpnetService = {
 
     async followUser(profileId) {
         const owner = this.getOwnerProfile()
-        const result = await api.followUser(
-            {ownerNodeId: owner.node_id, ownerUserId: owner.id, profileId: profileId},
-        );
+
+        const request = {
+            path: PUBLIC_POST_FOLLOW,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                followee: profileId,
+                follower: owner.id,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return null
         }
@@ -367,11 +464,18 @@ export const warpnetService = {
 
     async unfollowUser(profileId) {
         const owner = this.getOwnerProfile()
-        const result = await api.unfollowUser({
-            ownerNodeId: owner.node_id,
-            ownerUserId: owner.id,
-            profileId: profileId
-        });
+
+        const request = {
+            path: PUBLIC_POST_UNFOLLOW,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                followee: profileId,
+                follower: owner.id,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return null
         }
@@ -396,9 +500,19 @@ export const warpnetService = {
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const owner = this.getOwnerProfile()
-        const result = await api.getFollowers(
-            {ownerNodeId: owner.node_id, userId: userId, limit: defaultLimit, cursor: cursor},
-        );
+
+        const request = {
+            path: PUBLIC_GET_FOLLOWERS,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                user_id: userId,
+                cursor: cursor,
+                limit: defaultLimit,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return []
         }
@@ -430,9 +544,19 @@ export const warpnetService = {
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const owner = this.getOwnerProfile()
-        const result = await api.getFollowing(
-            {ownerNodeId: owner.node_id, userId: userId, limit: defaultLimit, cursor: cursor},
-        );
+
+        const request = {
+            path: PUBLIC_GET_FOLLOWEES,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                user_id: userId,
+                cursor: cursor,
+                limit: defaultLimit,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return []
         }
@@ -451,9 +575,18 @@ export const warpnetService = {
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const owner = this.getOwnerProfile()
-        const result = await api.getTweetStats(
-            {ownerNodeId: owner.node_id, userId:userId, tweetId: tweetId},
-        );
+
+        const request = {
+            path: PUBLIC_GET_TWEET_STATS,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                user_id: userId,
+                tweet_id: tweetId,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return null
         }
@@ -465,12 +598,23 @@ export const warpnetService = {
     // create reply
     async replyTweet({rootId, parentId, parentUserId, text}) {
         const owner = this.getOwnerProfile()
-        const result = await api.replyTweet(
-            {
-                ownerNodeId: owner.node_id, ownerUserId: owner.id, rootId: rootId,
-                username: owner.username, parentId: parentId, parentUserId: parentUserId, text: text,
+
+        const request = {
+            path: PUBLIC_POST_REPLY,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                root_id: rootId,
+                parent_id: parentId,
+                user_id: owner.id,
+                username: owner.username,
+                parent_user_id: parentUserId,
+                text: text,
+                created_at: new Date().toISOString(),
             },
-        );
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return null
         }
@@ -494,9 +638,20 @@ export const warpnetService = {
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const owner = this.getOwnerProfile()
-        const result = await api.getReplies(
-            {ownerNodeId: owner.node_id, rootId: rootId, parentId: parentId, limit: defaultLimit, cursor: cursor},
-        );
+
+        const request = {
+            path: PUBLIC_GET_REPLIES,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                root_id: rootId,
+                parent_id: parentId,
+                limit: defaultLimit,
+                cursor: cursor,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return []
         }
@@ -513,7 +668,17 @@ export const warpnetService = {
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const owner = this.getOwnerProfile()
-        const result = await api.getTweetReply({ownerNodeId: owner.node_id, rootId: rootId, replyId: replyId});
+        const request = {
+            path: PUBLIC_GET_REPLY,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                root_id: rootId,
+                reply_id: replyId,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return null
         }
@@ -523,12 +688,19 @@ export const warpnetService = {
 
     async deleteReply({userId, rootId, replyId}) {
         const owner = this.getOwnerProfile()
-        const result = await api.deleteTweetReply({
-            ownerNodeId: owner.node_id,
-            userId: userId,
-            rootId: rootId,
-            replyId: replyId
-        });
+
+        const request = {
+            path: PUBLIC_DELETE_REPLY,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                user_id: userId,
+                root_id: rootId,
+                reply_id: replyId,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         const cacheKey = `reply::${rootId}::${replyId}`;
         stateMap.delete(cacheKey);
         this.invalidate(`tweetstats::${rootId}`)
@@ -538,18 +710,38 @@ export const warpnetService = {
 
     async likeTweet(tweetId, userId) {
         const owner = this.getOwnerProfile()
-        const result = await api.likeTweet(
-            {ownerNodeId: owner.node_id, ownerUserId: owner.id,userId: userId, tweetId: tweetId},
-        );
+
+        const request = {
+            path: PUBLIC_POST_LIKE,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                user_id: userId,
+                tweet_id: tweetId,
+                owner_id: owner.id,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         this.invalidate(`tweetstats::${tweetId}`)
         return result;
     },
 
     async unlikeTweet(tweetId, userId) {
         const owner = this.getOwnerProfile()
-        const result = await api.unlikeTweet(
-            {ownerNodeId: owner.node_id, ownerUserId: owner.id,userId: userId, tweetId: tweetId},
-        );
+
+        const request = {
+            path: PUBLIC_POST_UNLIKE,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                user_id: userId,
+                tweet_id: tweetId,
+                owner_id: owner.id,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         this.invalidate(`tweetstats::${tweetId}`)
         return result;
     },
@@ -576,12 +768,23 @@ export const warpnetService = {
 
     async retweetTweet({tweetId, userId, username, text}) {
         const owner = this.getOwnerProfile()
-        const result = await api.retweetTweet(
-            {
-                ownerNodeId: owner.node_id, ownerUserId: owner.id, tweetId: tweetId,
-                userId: userId, username: username, text: text,
+
+        const request = {
+            path: PUBLIC_POST_RETWEET,
+            node_id:  owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                id: tweetId,
+                user_id: userId,
+                username: username,
+                text: text,
+                retweeted_by: owner.id,
+                created_at: new Date().toISOString(),
             },
-        );
+        }
+
+        const result = await window.go.main.App.Route(request);
+
         this.invalidate(`timeline`)
         this.invalidate(`tweetstats::${tweetId}`)
         return result;
@@ -589,9 +792,19 @@ export const warpnetService = {
 
     async unretweetTweet(tweetId) {
         const owner = this.getOwnerProfile()
-        const result = await api.unretweetTweet(
-            {ownerNodeId: owner.node_id, ownerUserId: owner.id, tweetId: tweetId},
-        );
+
+        const request = {
+            path: PUBLIC_POST_UNRETWEET,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                retweeter_id: owner.id,
+                tweet_id: tweetId,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
+
         this.invalidate(`tweetstats::${tweetId}`)
         return result;
     },
@@ -618,11 +831,18 @@ export const warpnetService = {
 
     async createChat(otherUserId) {
         const owner = this.getOwnerProfile()
-        const chat = await api.createChat({
-            ownerNodeId: owner.node_id,
-            ownerUserId: owner.id,
-            otherUserId: otherUserId
-        });
+
+        const request = {
+            path: PUBLIC_POST_CHAT,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                owner_id: owner.id,
+                other_user_id: otherUserId,
+            },
+        }
+
+        const chat = await window.go.main.App.Route(request);
         if (!chat) {
             return null
         }
@@ -637,7 +857,17 @@ export const warpnetService = {
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const owner = this.getOwnerProfile()
-        const chat = await api.getChat({ownerNodeId: owner.node_id, chatId: chatId});
+
+        const request = {
+            path: PRIVATE_GET_CHAT,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                chat_id: chatId,
+            },
+        }
+
+        const chat = await window.go.main.App.Route(request);
         if (!chat) {
             return null
         }
@@ -659,9 +889,18 @@ export const warpnetService = {
 
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
-        const result = await api.getChats(
-            {ownerNodeId: owner.node_id, ownerUserId: owner.id, limit: defaultLimit, cursor: cursor},
-        );
+        const request = {
+            path: PRIVATE_GET_CHATS,
+                node_id: owner.node_id,
+                timestamp: new Date().toISOString(),
+                body: {
+                user_id: owner.id,
+                    limit: defaultLimit,
+                    cursor: cursor,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return []
         }
@@ -680,15 +919,19 @@ export const warpnetService = {
 
     async sendDirectMessage({chatId, receiverId, text}) {
         const owner = this.getOwnerProfile();
-        return await api.sendDirectMessage(
-            {
-                ownerNodeId:owner.node_id,
-                ownerUserId: owner.id,
-                receiverId: receiverId,
-                chatId:chatId,
-                text:text,
-            }
-        )
+        const request = {
+            path: PUBLIC_POST_MESSAGE,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                sender_id: owner.id,
+                receiver_id: receiverId,
+                chat_id: chatId,
+                text: text,
+            },
+        }
+
+        return await window.go.main.App.Route(request);
     },
 
     async getDirectMessages({chatId, cursorReset}) {
@@ -704,9 +947,19 @@ export const warpnetService = {
 
         const cacheKey = `messages::${owner.id}::${defaultLimit}::${cursor}`
 
-        const result = await api.getDirectMessages(
-            {ownerNodeId:owner.node_id, ownerUserId:owner.id,  chatId:chatId, limit:defaultLimit, cursor:cursor},
-        )
+        const request = {
+            path: PRIVATE_GET_MESSAGES,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                owner_id: owner.id,
+                chat_id: chatId,
+                limit: defaultLimit,
+                cursor: cursor,
+            },
+        }
+
+        const result = await window.go.main.App.Route(request);
         if (!result) {
             return []
         }
@@ -721,16 +974,35 @@ export const warpnetService = {
 
     async editMyProfile(newProfile) {
         const owner = this.getOwnerProfile();
-        return await api.editMyProfile({ownerNodeId:owner.node_id, newProfile:newProfile})
-    },
+        const request = {
+            path: PRIVATE_POST_USER,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {
+                bio: newProfile.bio,
+                avatar: newProfile.avatar,
+                avatar_key: newProfile.avatar_key,
+                username: newProfile.username,
+                background_image: newProfile.background_image,
+                background_image_key: newProfile.background_image_key,
+                website: newProfile.website,
+                birthdate: newProfile.birthdate,
+            },
+        }
 
-    async resetConsensus() {
-        return await api.resetConsensus('None')
+        return await window.go.main.App.Route(request);
     },
 
     async getNodeInfo(){
         const owner = this.getOwnerProfile();
-        return await api.getNodeInfo(owner.node_id)
+        const request = {
+            path: PRIVATE_GET_STATS,
+            node_id: owner.node_id,
+            timestamp: new Date().toISOString(),
+            body: {},
+        }
+
+        return await window.go.main.App.Route(request);
     }
 }
 
