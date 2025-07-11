@@ -23,6 +23,7 @@ resulting from the use or misuse of this software.
 */
 
 import {buildQRCode} from "@/lib/qr";
+import {generateUUID} from "@/lib/uuid";
 
 export const PUBLIC_GET_TWEET = "/public/get/tweet/0.0.0"
 export const PUBLIC_GET_TWEET_STATS   = "/public/get/tweetstats/0.0.0"
@@ -108,6 +109,7 @@ export const warpnetService = {
 
     async signInUser(form) {
         let request = {
+            message_id: generateUUID(),
             path: PRIVATE_POST_LOGIN,
             node_id: "None",
             body: {
@@ -141,6 +143,7 @@ export const warpnetService = {
         }
 
         request = {
+            message_id: generateUUID(),
             path: PUBLIC_GET_USER,
             node_id: resp.identity.owner.node_id,
             timestamp: new Date().toISOString(),
@@ -164,6 +167,7 @@ export const warpnetService = {
             nodeId = owner.node_id
         }
         const request = {
+            message_id: generateUUID(),
                     path: PRIVATE_POST_LOGOUT,
                     node_id: nodeId,
                     body: {}
@@ -177,6 +181,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_GET_USER,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -206,6 +211,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_GET_USERS,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -252,6 +258,7 @@ export const warpnetService = {
         }
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_GET_WHOTOFOLLOW,
                 node_id: owner.node_id,
                 timestamp: new Date().toISOString(),
@@ -279,6 +286,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PRIVATE_POST_UPLOAD_IMAGE,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -312,6 +320,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_GET_IMAGE,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -348,6 +357,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PRIVATE_GET_TIMELINE,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -390,6 +400,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_GET_TWEETS,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -446,6 +457,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PRIVATE_DELETE_TWEET,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -471,6 +483,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_GET_TWEET,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -493,6 +506,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_POST_FOLLOW,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -530,6 +544,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_POST_UNFOLLOW,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -567,6 +582,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_GET_FOLLOWERS,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -612,6 +628,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_GET_FOLLOWEES,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -644,6 +661,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_GET_TWEET_STATS,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -668,6 +686,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_POST_REPLY,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -709,6 +728,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_GET_REPLIES,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -739,6 +759,7 @@ export const warpnetService = {
 
         const owner = this.getOwnerProfile()
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_GET_REPLY,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -761,6 +782,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_DELETE_REPLY,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -785,6 +807,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_POST_LIKE,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -806,6 +829,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_POST_UNLIKE,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -847,6 +871,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_POST_RETWEET,
             node_id:  owner.node_id,
             timestamp: new Date().toISOString(),
@@ -872,6 +897,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_POST_UNRETWEET,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -912,6 +938,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_POST_CHAT,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -939,6 +966,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
+            message_id: generateUUID(),
             path: PRIVATE_GET_CHAT,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -971,6 +999,7 @@ export const warpnetService = {
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const request = {
+            message_id: generateUUID(),
             path: PRIVATE_GET_CHATS,
                 node_id: owner.node_id,
                 timestamp: new Date().toISOString(),
@@ -1002,6 +1031,7 @@ export const warpnetService = {
     async sendDirectMessage({chatId, receiverId, text}) {
         const owner = this.getOwnerProfile();
         const request = {
+            message_id: generateUUID(),
             path: PUBLIC_POST_MESSAGE,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -1031,6 +1061,7 @@ export const warpnetService = {
         const cacheKey = `messages::${owner.id}::${defaultLimit}::${cursor}`
 
         const request = {
+            message_id: generateUUID(),
             path: PRIVATE_GET_MESSAGES,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -1059,6 +1090,7 @@ export const warpnetService = {
     async editMyProfile(newProfile) {
         const owner = this.getOwnerProfile();
         const request = {
+            message_id: generateUUID(),
             path: PRIVATE_POST_USER,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
@@ -1081,6 +1113,7 @@ export const warpnetService = {
     async getNodeInfo(){
         const owner = this.getOwnerProfile();
         const request = {
+            message_id: generateUUID(),
             path: PRIVATE_GET_STATS,
             node_id: owner.node_id,
             timestamp: new Date().toISOString(),
