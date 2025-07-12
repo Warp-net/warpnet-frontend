@@ -969,7 +969,7 @@ export const warpnetService = {
         request.timestamp = new Date().toISOString()
 
         const strReq = JSON.stringify(request)
-        const result = await window.go.main.Router.Route(strReq);
+        const result = await window.go.main.App.Route(strReq);
         if (!result) {
             throw new Error(`Unable to send ${request.message_id}`);
         }
