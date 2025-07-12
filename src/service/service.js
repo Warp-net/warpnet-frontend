@@ -109,16 +109,13 @@ export const warpnetService = {
 
     async signInUser(form) {
         let request = {
-            message_id: generateUUID(),
             path: PRIVATE_POST_LOGIN,
-            node_id: "None",
             body: {
                 username: form.username,
                 password: form.password,
             }
         }
-        const result = await window.go.main.Router.Route(request);
-        const resp = result.body;
+        const resp = await sendToNode(request);
         if (!resp || !resp.identity) {
             alert("Login failed: no response")
             throw new Error("Login failed: no response")
@@ -142,56 +139,31 @@ export const warpnetService = {
             return;
         }
 
-        request = {
-            message_id: generateUUID(),
-            path: PUBLIC_GET_USER,
-            node_id: resp.identity.owner.node_id,
-            timestamp: new Date().toISOString(),
-            body: {
-                user_id: resp.identity.owner.user_id,
-            },
-        }
-
-        const ownerProfile = await window.go.main.Router.Route(request);
-
-        warpnetService.setOwnerProfile(ownerProfile)
+        warpnetService.setOwnerProfile(resp.identity.owner)
 
         const qrCode = await buildQRCode(qrData)
         warpnetService.setQR(qrCode)
     },
 
     async logoutUser() {
-        const owner = this.getOwnerProfile()
-        let nodeId = "None"
-        if (owner && owner.node_id) {
-            nodeId = owner.node_id
-        }
         const request = {
-            message_id: generateUUID(),
-                    path: PRIVATE_POST_LOGOUT,
-                    node_id: nodeId,
-                    body: {}
-                }
+            path: PRIVATE_POST_LOGOUT,
+            body: {}
+        }
 
-        await window.go.main.Router.Route(request);
+        await sendToNode(request);
         this.reset();
     },
 
     async getProfile(userId) {
-        const owner = this.getOwnerProfile()
-
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_GET_USER,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 user_id: userId,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        return result.body;
+        return await sendToNode(request);
     },
 
     async getUsers({profileId, cursorReset}) {
@@ -208,13 +180,9 @@ export const warpnetService = {
         const cacheKey = `users::${profileId}::${defaultLimit}::${cursor}`;
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
-        const owner = this.getOwnerProfile()
 
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_GET_USERS,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 limit: defaultLimit,
                 cursor: cursor,
@@ -222,8 +190,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const usersResp = result.body;
+        const usersResp = await sendToNode(request);
         if (!usersResp) {
             return []
         }
@@ -258,19 +225,15 @@ export const warpnetService = {
         }
 
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_GET_WHOTOFOLLOW,
-                node_id: owner.node_id,
-                timestamp: new Date().toISOString(),
-                body: {
-                limit: defaultLimit,
-                    cursor: cursor,
-                    user_id: profileId,
+            body: {
+            limit: defaultLimit,
+                cursor: cursor,
+                user_id: profileId,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const followResp = result.body;
+        const followResp = await sendToNode(request);
         if (!followResp) {
             return []
         }
@@ -286,23 +249,21 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
-            message_id: generateUUID(),
             path: PRIVATE_POST_UPLOAD_IMAGE,
-            node_id: owner.node_id,
             timestamp: new Date().toISOString(),
             body: {
                 file: imgFile,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const hashKey = result.body.key
+        const result = await sendToNode(request);
+        const hashKey = result.key
         if (!hashKey || hashKey.length === 0) {
             return ''
         }
-        this.invalidate(`user::${owner.id}`);
+        this.invalidate(`user::${owner.user_id}`);
 
-        const cacheKey = `image::${owner.id}::${hashKey}`;
+        const cacheKey = `image::${owner.user_id}::${hashKey}`;
         stateMap.set(cacheKey, imgFile);
         return hashKey;
     },
@@ -317,20 +278,15 @@ export const warpnetService = {
             return stateMap.get(cacheKey);
         }
 
-        const owner = this.getOwnerProfile()
-
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_GET_IMAGE,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 user_id: userId,
                 key: key,
             }
         }
 
-        const result = await window.go.main.Router.Route(request);
+        const result = await sendToNode(request);
         if (!result) {
             return null
         }
@@ -357,19 +313,15 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
-            message_id: generateUUID(),
             path: PRIVATE_GET_TIMELINE,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 limit: defaultLimit,
                 cursor: cursor,
-                user_id: owner.id,
+                user_id: owner.user_id,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const timelineResp = result.body;
+        const timelineResp = await sendToNode(request);
         if (!timelineResp) {
             return []
         }
@@ -397,13 +349,8 @@ export const warpnetService = {
             return stateMap.get(cacheKey);
         }
 
-        const owner = this.getOwnerProfile()
-
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_GET_TWEETS,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 limit: defaultLimit,
                 cursor: cursor,
@@ -411,8 +358,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const tweetsResp = result.body;
+        const tweetsResp = await sendToNode(request);
         if (!tweetsResp) {
             return []
         }
@@ -430,10 +376,8 @@ export const warpnetService = {
 
         const request ={
             path: PRIVATE_POST_TWEET,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
-                user_id: owner.id,
+                user_id: owner.user_id,
                 username: owner.username,
                 text: text,
                 image_key: imageKey,
@@ -441,8 +385,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const tweet = result.body;
+        const tweet = await sendToNode(request);
 
         this.invalidate(`timeline`);
         this.invalidate(`tweets::${tweet.user_id}`);
@@ -454,21 +397,15 @@ export const warpnetService = {
     },
 
     async deleteTweet({userId, tweetId}) {
-        const owner = this.getOwnerProfile()
-
         const request = {
-            message_id: generateUUID(),
             path: PRIVATE_DELETE_TWEET,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 user_id: userId,
                 tweet_id: tweetId,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const tweet = result.body;
+        const tweet = await sendToNode(request);
 
         this.invalidate(`timeline`);
         this.invalidate(`tweets::${userId}`);
@@ -480,21 +417,15 @@ export const warpnetService = {
         const cacheKey = `tweet::${userId}::${tweetId}`;
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
-        const owner = this.getOwnerProfile()
-
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_GET_TWEET,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 user_id: userId,
                 tweet_id: tweetId,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const tweet = result.body;
+        const tweet = await sendToNode(request);
         if (!tweet) {
             return null
         }
@@ -506,18 +437,14 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_POST_FOLLOW,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 followee: profileId,
-                follower: owner.id,
+                follower: owner.user_id,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const followResp = result.body;
+        const followResp = await sendToNode(request);
         if (!followResp) {
             return null
         }
@@ -526,7 +453,7 @@ export const warpnetService = {
         this.invalidate(`followers::${profileId}`);
         this.invalidate(`followees::${profileId}`);
         this.invalidate(`user::${profileId}`);
-        this.invalidate(`user::${owner.id}`);
+        this.invalidate(`user::${owner.user_id}`);
         return followResp;
     },
 
@@ -544,18 +471,14 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_POST_UNFOLLOW,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 followee: profileId,
-                follower: owner.id,
+                follower: owner.user_id,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const unfollowResp = result.body;
+        const unfollowResp = await sendToNode(request);
         if (!unfollowResp) {
             return null
         }
@@ -563,7 +486,7 @@ export const warpnetService = {
         this.invalidate(`followers::${profileId}`);
         this.invalidate(`followees::${profileId}`);
         this.invalidate(`user::${profileId}`);
-        this.invalidate(`user::${owner.id}`);
+        this.invalidate(`user::${owner.user_id}`);
         return unfollowResp;
     },
 
@@ -579,13 +502,8 @@ export const warpnetService = {
         const cacheKey = `followers::${userId}::${defaultLimit}::${cursor}`;
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
-        const owner = this.getOwnerProfile()
-
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_GET_FOLLOWERS,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 user_id: userId,
                 cursor: cursor,
@@ -593,13 +511,12 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const followersResp = result.body;
+        const followersResp = await sendToNode(request);
         if (!followersResp) {
             return []
         }
         this.setCursor('followers', followersResp.cursor || 'end')
-        if (!result.followers || result.followers.length === 0) {
+        if (!followersResp.followers || followersResp.followers.length === 0) {
             return []
         }
         followersResp.followers = followersResp.followers.filter(follower => follower !== userId);
@@ -625,13 +542,8 @@ export const warpnetService = {
         const cacheKey = `followees::${userId}::${defaultLimit}::${cursor}`;
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
-        const owner = this.getOwnerProfile()
-
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_GET_FOLLOWEES,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 user_id: userId,
                 cursor: cursor,
@@ -639,8 +551,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const followeesResp = result.body;
+        const followeesResp = await sendToNode(request);
         if (!followeesResp) {
             return []
         }
@@ -658,21 +569,15 @@ export const warpnetService = {
         const cacheKey = `tweetstats::${tweetId}`;
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
-        const owner = this.getOwnerProfile()
-
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_GET_TWEET_STATS,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 user_id: userId,
                 tweet_id: tweetId,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const statsResp = result.body;
+        const statsResp = await sendToNode(request);
         if (!statsResp) {
             return null
         }
@@ -686,14 +591,11 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_POST_REPLY,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 root_id: rootId,
                 parent_id: parentId,
-                user_id: owner.id,
+                user_id: owner.user_id,
                 username: owner.username,
                 parent_user_id: parentUserId,
                 text: text,
@@ -701,8 +603,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const replyResp = result.body;
+        const replyResp = await sendToNode(request);
         if (!replyResp) {
             return null
         }
@@ -725,13 +626,8 @@ export const warpnetService = {
         const cacheKey = `replies::${rootId}::${parentId}::${defaultLimit}::${cursor}`;
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
-        const owner = this.getOwnerProfile()
-
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_GET_REPLIES,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 root_id: rootId,
                 parent_id: parentId,
@@ -740,8 +636,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const repliesResp = result.body;
+        const repliesResp = await sendToNode(request);
         if (!repliesResp) {
             return []
         }
@@ -757,20 +652,15 @@ export const warpnetService = {
         const cacheKey = `reply::${rootId}::${replyId}`;
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
-        const owner = this.getOwnerProfile()
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_GET_REPLY,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 root_id: rootId,
                 reply_id: replyId,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const replyResp = result.body;
+        const replyResp = await sendToNode(request);
         if (!replyResp) {
             return null
         }
@@ -779,13 +669,8 @@ export const warpnetService = {
     },
 
     async deleteReply({userId, rootId, replyId}) {
-        const owner = this.getOwnerProfile()
-
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_DELETE_REPLY,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 user_id: userId,
                 root_id: rootId,
@@ -793,8 +678,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const replyResp = result.body;
+        const replyResp = await sendToNode(request);
 
         const cacheKey = `reply::${rootId}::${replyId}`;
         stateMap.delete(cacheKey);
@@ -807,19 +691,15 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_POST_LIKE,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 user_id: userId,
                 tweet_id: tweetId,
-                owner_id: owner.id,
+                owner_id: owner.user_id,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const likeResp = result.body;
+        const likeResp = await sendToNode(request);
 
         this.invalidate(`tweetstats::${tweetId}`)
         return likeResp.count;
@@ -829,19 +709,15 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_POST_UNLIKE,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 user_id: userId,
                 tweet_id: tweetId,
-                owner_id: owner.id,
+                owner_id: owner.user_id,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const unlikeResp = result.body;
+        const unlikeResp = await sendToNode(request);
 
         this.invalidate(`tweetstats::${tweetId}`)
         return unlikeResp.count;
@@ -871,22 +747,18 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_POST_RETWEET,
-            node_id:  owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 id: tweetId,
                 user_id: userId,
                 username: username,
                 text: text,
-                retweeted_by: owner.id,
+                retweeted_by: owner.user_id,
                 created_at: new Date().toISOString(),
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const retweetResp = result.body;
+        const retweetResp = await sendToNode(request);
 
         this.invalidate(`timeline`)
         this.invalidate(`tweetstats::${tweetId}`)
@@ -897,18 +769,15 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_POST_UNRETWEET,
-            node_id: owner.node_id,
             timestamp: new Date().toISOString(),
             body: {
-                retweeter_id: owner.id,
+                retweeter_id: owner.user_id,
                 tweet_id: tweetId,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const unretweetResp = result.body;
+        const unretweetResp = await sendToNode(request);
 
         this.invalidate(`tweetstats::${tweetId}`)
         return unretweetResp;
@@ -938,18 +807,14 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_POST_CHAT,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
-                owner_id: owner.id,
+                owner_id: owner.user_id,
                 other_user_id: otherUserId,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const chatResp = result.body;
+        const chatResp = await sendToNode(request);
         if (!chatResp) {
             return null
         }
@@ -963,20 +828,14 @@ export const warpnetService = {
         const cacheKey = `chat::${chatId}`
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
-        const owner = this.getOwnerProfile()
-
         const request = {
-            message_id: generateUUID(),
             path: PRIVATE_GET_CHAT,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 chat_id: chatId,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const chatResp = result.body;
+        const chatResp = await sendToNode(request);
         if (!chatResp) {
             return null
         }
@@ -999,19 +858,15 @@ export const warpnetService = {
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const request = {
-            message_id: generateUUID(),
             path: PRIVATE_GET_CHATS,
-                node_id: owner.node_id,
-                timestamp: new Date().toISOString(),
-                body: {
-                user_id: owner.id,
-                    limit: defaultLimit,
-                    cursor: cursor,
+            body: {
+                user_id: owner.user_id,
+                limit: defaultLimit,
+                cursor: cursor,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const chatsResp = result.body;
+        const chatsResp = await sendToNode(request);
         if (!chatsResp) {
             return []
         }
@@ -1031,20 +886,16 @@ export const warpnetService = {
     async sendDirectMessage({chatId, receiverId, text}) {
         const owner = this.getOwnerProfile();
         const request = {
-            message_id: generateUUID(),
             path: PUBLIC_POST_MESSAGE,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
-                sender_id: owner.id,
+                sender_id: owner.user_id,
                 receiver_id: receiverId,
                 chat_id: chatId,
                 text: text,
             },
         }
 
-        const result =  await window.go.main.Router.Route(request);
-        return result.body;
+        return await sendToNode(request);
     },
 
     async getDirectMessages({chatId, cursorReset}) {
@@ -1061,20 +912,16 @@ export const warpnetService = {
         const cacheKey = `messages::${owner.id}::${defaultLimit}::${cursor}`
 
         const request = {
-            message_id: generateUUID(),
             path: PRIVATE_GET_MESSAGES,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
-                owner_id: owner.id,
+                owner_id: owner.user_id,
                 chat_id: chatId,
                 limit: defaultLimit,
                 cursor: cursor,
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        const messagesResp = result.body;
+        const messagesResp = await sendToNode(request);
         if (!messagesResp) {
             return []
         }
@@ -1088,12 +935,8 @@ export const warpnetService = {
     },
 
     async editMyProfile(newProfile) {
-        const owner = this.getOwnerProfile();
         const request = {
-            message_id: generateUUID(),
             path: PRIVATE_POST_USER,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {
                 bio: newProfile.bio,
                 avatar: newProfile.avatar,
@@ -1106,22 +949,16 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.Router.Route(request);
-        return result.body;
+        return await sendToNode(request);
     },
 
     async getNodeInfo(){
-        const owner = this.getOwnerProfile();
         const request = {
-            message_id: generateUUID(),
             path: PRIVATE_GET_STATS,
-            node_id: owner.node_id,
-            timestamp: new Date().toISOString(),
             body: {},
         }
 
-        const result =  await window.go.main.Router.Route(request);
-        return result.body;
+        return await sendToNode(request);
     }
 }
 
@@ -1150,3 +987,18 @@ function startCacheCleaner() {
 }
 
 startCacheCleaner();
+
+async function sendToNode(request) {
+    const owner = this.getOwnerProfile()
+
+    request.message_id = generateUUID()
+    request.node_id = owner?.node_id || "None"
+    request.timestamp = new Date().toISOString()
+
+    const strReq = JSON.stringify(request)
+    const result = await window.go.main.Router.Route(strReq);
+    if (!result) {
+        throw new Error(`Unable to send ${request.message_id}`);
+    }
+    return JSON.parse(result.body);
+}
