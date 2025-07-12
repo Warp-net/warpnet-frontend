@@ -117,7 +117,7 @@ export const warpnetService = {
                 password: form.password,
             }
         }
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const resp = result.body;
         if (!resp || !resp.identity) {
             alert("Login failed: no response")
@@ -152,7 +152,7 @@ export const warpnetService = {
             },
         }
 
-        const ownerProfile = await window.go.main.App.Route(request);
+        const ownerProfile = await window.go.gui.App.Route(request);
 
         warpnetService.setOwnerProfile(ownerProfile)
 
@@ -173,7 +173,7 @@ export const warpnetService = {
                     body: {}
                 }
 
-        await window.go.main.App.Route(request);
+        await window.go.gui.App.Route(request);
         this.reset();
     },
 
@@ -190,7 +190,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         return result.body;
     },
 
@@ -222,7 +222,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const usersResp = result.body;
         if (!usersResp) {
             return []
@@ -269,7 +269,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const followResp = result.body;
         if (!followResp) {
             return []
@@ -295,7 +295,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const hashKey = result.body.key
         if (!hashKey || hashKey.length === 0) {
             return ''
@@ -330,7 +330,7 @@ export const warpnetService = {
             }
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         if (!result) {
             return null
         }
@@ -368,7 +368,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const timelineResp = result.body;
         if (!timelineResp) {
             return []
@@ -411,7 +411,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const tweetsResp = result.body;
         if (!tweetsResp) {
             return []
@@ -441,7 +441,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const tweet = result.body;
 
         this.invalidate(`timeline`);
@@ -467,7 +467,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const tweet = result.body;
 
         this.invalidate(`timeline`);
@@ -493,7 +493,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const tweet = result.body;
         if (!tweet) {
             return null
@@ -516,7 +516,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const followResp = result.body;
         if (!followResp) {
             return null
@@ -554,7 +554,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const unfollowResp = result.body;
         if (!unfollowResp) {
             return null
@@ -593,7 +593,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const followersResp = result.body;
         if (!followersResp) {
             return []
@@ -639,7 +639,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const followeesResp = result.body;
         if (!followeesResp) {
             return []
@@ -671,7 +671,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const statsResp = result.body;
         if (!statsResp) {
             return null
@@ -701,7 +701,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const replyResp = result.body;
         if (!replyResp) {
             return null
@@ -740,7 +740,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const repliesResp = result.body;
         if (!repliesResp) {
             return []
@@ -769,7 +769,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const replyResp = result.body;
         if (!replyResp) {
             return null
@@ -793,7 +793,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const replyResp = result.body;
 
         const cacheKey = `reply::${rootId}::${replyId}`;
@@ -818,7 +818,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const likeResp = result.body;
 
         this.invalidate(`tweetstats::${tweetId}`)
@@ -840,7 +840,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const unlikeResp = result.body;
 
         this.invalidate(`tweetstats::${tweetId}`)
@@ -885,7 +885,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const retweetResp = result.body;
 
         this.invalidate(`timeline`)
@@ -907,7 +907,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const unretweetResp = result.body;
 
         this.invalidate(`tweetstats::${tweetId}`)
@@ -948,7 +948,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const chatResp = result.body;
         if (!chatResp) {
             return null
@@ -975,7 +975,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const chatResp = result.body;
         if (!chatResp) {
             return null
@@ -1010,7 +1010,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const chatsResp = result.body;
         if (!chatsResp) {
             return []
@@ -1043,7 +1043,7 @@ export const warpnetService = {
             },
         }
 
-        const result =  await window.go.main.App.Route(request);
+        const result =  await window.go.gui.App.Route(request);
         return result.body;
     },
 
@@ -1073,7 +1073,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         const messagesResp = result.body;
         if (!messagesResp) {
             return []
@@ -1106,7 +1106,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await window.go.main.App.Route(request);
+        const result = await window.go.gui.App.Route(request);
         return result.body;
     },
 
@@ -1120,7 +1120,7 @@ export const warpnetService = {
             body: {},
         }
 
-        const result =  await window.go.main.App.Route(request);
+        const result =  await window.go.gui.App.Route(request);
         return result.body;
     }
 }
