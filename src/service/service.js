@@ -115,7 +115,7 @@ export const warpnetService = {
                 password: form.password,
             }
         }
-        const resp = await sendToNode(request);
+        const resp = await this.sendToNode(request);
         if (!resp || !resp.identity) {
             alert("Login failed: no response")
             throw new Error("Login failed: no response")
@@ -151,7 +151,7 @@ export const warpnetService = {
             body: {}
         }
 
-        await sendToNode(request);
+        await this.sendToNode(request);
         this.reset();
     },
 
@@ -163,7 +163,7 @@ export const warpnetService = {
             },
         }
 
-        return await sendToNode(request);
+        return await this.sendToNode(request);
     },
 
     async getUsers({profileId, cursorReset}) {
@@ -190,7 +190,7 @@ export const warpnetService = {
             },
         }
 
-        const usersResp = await sendToNode(request);
+        const usersResp = await this.sendToNode(request);
         if (!usersResp) {
             return []
         }
@@ -233,7 +233,7 @@ export const warpnetService = {
             },
         }
 
-        const followResp = await sendToNode(request);
+        const followResp = await this.sendToNode(request);
         if (!followResp) {
             return []
         }
@@ -256,7 +256,7 @@ export const warpnetService = {
             },
         }
 
-        const result = await sendToNode(request);
+        const result = await this.sendToNode(request);
         const hashKey = result.key
         if (!hashKey || hashKey.length === 0) {
             return ''
@@ -286,7 +286,7 @@ export const warpnetService = {
             }
         }
 
-        const result = await sendToNode(request);
+        const result = await this.sendToNode(request);
         if (!result) {
             return null
         }
@@ -321,7 +321,7 @@ export const warpnetService = {
             },
         }
 
-        const timelineResp = await sendToNode(request);
+        const timelineResp = await this.sendToNode(request);
         if (!timelineResp) {
             return []
         }
@@ -358,7 +358,7 @@ export const warpnetService = {
             },
         }
 
-        const tweetsResp = await sendToNode(request);
+        const tweetsResp = await this.sendToNode(request);
         if (!tweetsResp) {
             return []
         }
@@ -385,7 +385,7 @@ export const warpnetService = {
             },
         }
 
-        const tweet = await sendToNode(request);
+        const tweet = await this.sendToNode(request);
 
         this.invalidate(`timeline`);
         this.invalidate(`tweets::${tweet.user_id}`);
@@ -405,7 +405,7 @@ export const warpnetService = {
             },
         }
 
-        const tweet = await sendToNode(request);
+        const tweet = await this.sendToNode(request);
 
         this.invalidate(`timeline`);
         this.invalidate(`tweets::${userId}`);
@@ -425,7 +425,7 @@ export const warpnetService = {
             },
         }
 
-        const tweet = await sendToNode(request);
+        const tweet = await this.sendToNode(request);
         if (!tweet) {
             return null
         }
@@ -444,7 +444,7 @@ export const warpnetService = {
             },
         }
 
-        const followResp = await sendToNode(request);
+        const followResp = await this.sendToNode(request);
         if (!followResp) {
             return null
         }
@@ -478,7 +478,7 @@ export const warpnetService = {
             },
         }
 
-        const unfollowResp = await sendToNode(request);
+        const unfollowResp = await this.sendToNode(request);
         if (!unfollowResp) {
             return null
         }
@@ -511,7 +511,7 @@ export const warpnetService = {
             },
         }
 
-        const followersResp = await sendToNode(request);
+        const followersResp = await this.sendToNode(request);
         if (!followersResp) {
             return []
         }
@@ -551,7 +551,7 @@ export const warpnetService = {
             },
         }
 
-        const followeesResp = await sendToNode(request);
+        const followeesResp = await this.sendToNode(request);
         if (!followeesResp) {
             return []
         }
@@ -577,7 +577,7 @@ export const warpnetService = {
             },
         }
 
-        const statsResp = await sendToNode(request);
+        const statsResp = await this.sendToNode(request);
         if (!statsResp) {
             return null
         }
@@ -603,7 +603,7 @@ export const warpnetService = {
             },
         }
 
-        const replyResp = await sendToNode(request);
+        const replyResp = await this.sendToNode(request);
         if (!replyResp) {
             return null
         }
@@ -636,7 +636,7 @@ export const warpnetService = {
             },
         }
 
-        const repliesResp = await sendToNode(request);
+        const repliesResp = await this.sendToNode(request);
         if (!repliesResp) {
             return []
         }
@@ -660,7 +660,7 @@ export const warpnetService = {
             },
         }
 
-        const replyResp = await sendToNode(request);
+        const replyResp = await this.sendToNode(request);
         if (!replyResp) {
             return null
         }
@@ -678,7 +678,7 @@ export const warpnetService = {
             },
         }
 
-        const replyResp = await sendToNode(request);
+        const replyResp = await this.sendToNode(request);
 
         const cacheKey = `reply::${rootId}::${replyId}`;
         stateMap.delete(cacheKey);
@@ -699,7 +699,7 @@ export const warpnetService = {
             },
         }
 
-        const likeResp = await sendToNode(request);
+        const likeResp = await this.sendToNode(request);
 
         this.invalidate(`tweetstats::${tweetId}`)
         return likeResp.count;
@@ -717,7 +717,7 @@ export const warpnetService = {
             },
         }
 
-        const unlikeResp = await sendToNode(request);
+        const unlikeResp = await this.sendToNode(request);
 
         this.invalidate(`tweetstats::${tweetId}`)
         return unlikeResp.count;
@@ -758,7 +758,7 @@ export const warpnetService = {
             },
         }
 
-        const retweetResp = await sendToNode(request);
+        const retweetResp = await this.sendToNode(request);
 
         this.invalidate(`timeline`)
         this.invalidate(`tweetstats::${tweetId}`)
@@ -777,7 +777,7 @@ export const warpnetService = {
             },
         }
 
-        const unretweetResp = await sendToNode(request);
+        const unretweetResp = await this.sendToNode(request);
 
         this.invalidate(`tweetstats::${tweetId}`)
         return unretweetResp;
@@ -814,7 +814,7 @@ export const warpnetService = {
             },
         }
 
-        const chatResp = await sendToNode(request);
+        const chatResp = await this.sendToNode(request);
         if (!chatResp) {
             return null
         }
@@ -835,7 +835,7 @@ export const warpnetService = {
             },
         }
 
-        const chatResp = await sendToNode(request);
+        const chatResp = await this.sendToNode(request);
         if (!chatResp) {
             return null
         }
@@ -866,7 +866,7 @@ export const warpnetService = {
             },
         }
 
-        const chatsResp = await sendToNode(request);
+        const chatsResp = await this.sendToNode(request);
         if (!chatsResp) {
             return []
         }
@@ -895,7 +895,7 @@ export const warpnetService = {
             },
         }
 
-        return await sendToNode(request);
+        return await this.sendToNode(request);
     },
 
     async getDirectMessages({chatId, cursorReset}) {
@@ -921,7 +921,7 @@ export const warpnetService = {
             },
         }
 
-        const messagesResp = await sendToNode(request);
+        const messagesResp = await this.sendToNode(request);
         if (!messagesResp) {
             return []
         }
@@ -949,7 +949,7 @@ export const warpnetService = {
             },
         }
 
-        return await sendToNode(request);
+        return await this.sendToNode(request);
     },
 
     async getNodeInfo(){
@@ -958,7 +958,22 @@ export const warpnetService = {
             body: {},
         }
 
-        return await sendToNode(request);
+        return await this.sendToNode(request);
+    },
+
+    async sendToNode(request) {
+        const owner = this.getOwnerProfile()
+
+        request.message_id = generateUUID()
+        request.node_id = owner?.node_id || "None"
+        request.timestamp = new Date().toISOString()
+
+        const strReq = JSON.stringify(request)
+        const result = await window.go.main.Router.Route(strReq);
+        if (!result) {
+            throw new Error(`Unable to send ${request.message_id}`);
+        }
+        return JSON.parse(result.body);
     }
 }
 
@@ -988,17 +1003,3 @@ function startCacheCleaner() {
 
 startCacheCleaner();
 
-async function sendToNode(request) {
-    const owner = this.getOwnerProfile()
-
-    request.message_id = generateUUID()
-    request.node_id = owner?.node_id || "None"
-    request.timestamp = new Date().toISOString()
-
-    const strReq = JSON.stringify(request)
-    const result = await window.go.main.Router.Route(strReq);
-    if (!result) {
-        throw new Error(`Unable to send ${request.message_id}`);
-    }
-    return JSON.parse(result.body);
-}
