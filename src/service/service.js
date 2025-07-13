@@ -24,6 +24,7 @@ resulting from the use or misuse of this software.
 
 import {buildQRCode} from "@/lib/qr";
 import {generateUUID} from "@/lib/uuid";
+import {Call} from "../../wailsjs/go/main/App";
 
 export const PUBLIC_GET_TWEET = "/public/get/tweet/0.0.0"
 export const PUBLIC_GET_TWEET_STATS   = "/public/get/tweetstats/0.0.0"
@@ -969,7 +970,7 @@ export const warpnetService = {
         request.timestamp = new Date().toISOString()
 
         const strReq = JSON.stringify(request)
-        const result = await window.go.main.App.Route(strReq);
+        const result = await Call(strReq);
         if (!result) {
             throw new Error(`Unable to send ${request.message_id}`);
         }
