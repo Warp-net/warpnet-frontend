@@ -969,12 +969,11 @@ export const warpnetService = {
         request.node_id = owner?.node_id || "None"
         request.timestamp = new Date().toISOString()
 
-        const strReq = JSON.stringify(request)
-        const result = await Call(strReq);
+        const result = await Call(request);
         if (!result) {
             throw new Error(`Unable to send ${request.message_id}`);
         }
-        return JSON.parse(result.body);
+        return result.body;
     }
 }
 
