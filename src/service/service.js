@@ -222,7 +222,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         if (!profileId || profileId === '') {
-            profileId = owner.id
+            profileId = owner.user_id
         }
 
         const request = {
@@ -854,7 +854,7 @@ export const warpnetService = {
         }
 
         const owner = this.getOwnerProfile()
-        const cacheKey = `chats::${owner.id}::${defaultLimit}::${cursor}`
+        const cacheKey = `chats::${owner.user_id}::${defaultLimit}::${cursor}`
 
         if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
@@ -910,7 +910,7 @@ export const warpnetService = {
 
         const owner = this.getOwnerProfile();
 
-        const cacheKey = `messages::${owner.id}::${defaultLimit}::${cursor}`
+        const cacheKey = `messages::${owner.user_id}::${defaultLimit}::${cursor}`
 
         const request = {
             path: PRIVATE_GET_MESSAGES,
