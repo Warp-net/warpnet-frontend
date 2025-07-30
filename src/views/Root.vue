@@ -249,7 +249,6 @@ resulting from the use or misuse of this software.
 </template>
 
 <script>
-import {connectClient} from "@/lib/client";
 import {defineAsyncComponent} from "vue";
 import {warpnetService} from "@/service/service";
 export default {
@@ -275,7 +274,6 @@ export default {
   mounted() {
     this.isFirstRun = window.isFirstRun || false;
     console.log("Is first run:", this.isFirstRun);
-    connectClient();
   },
   methods: {
     async signMeUp() {
