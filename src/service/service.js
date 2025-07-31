@@ -36,7 +36,6 @@ export const PUBLIC_POST_REPLY = "/public/post/reply/0.0.0"
 export const PUBLIC_GET_FOLLOWEES = "/public/get/followees/0.0.0"
 export const PUBLIC_GET_REPLY = "/public/get/reply/0.0.0"
 export const PRIVATE_GET_STATS = "/private/get/admin/stats/0.0.0"
-export const PRIVATE_POST_RESET       = "/private/post/reset/0.0.0"
 export const PUBLIC_DELETE_REPLY = "/public/delete/reply/0.0.0"
 export const PRIVATE_DELETE_TWEET = "/private/delete/tweet/0.0.0"
 export const PRIVATE_POST_USER = "/private/post/user/0.0.0"
@@ -61,7 +60,6 @@ export const PUBLIC_DELETE_MESSAGE = "/public/delete/message/0.0.0"
 export const PRIVATE_POST_UPLOAD_IMAGE = "/private/post/image/0.0.0"
 export const PUBLIC_GET_IMAGE = "/public/get/image/0.0.0"
 export const PRIVATE_POST_LOGIN = "/private/post/login/0.0.0"
-export const PRIVATE_POST_LOGOUT = "/private/post/logout/0.0.0"
 
 const stateMap = new Map();
 const defaultLimit = 20
@@ -146,16 +144,6 @@ export const warpnetService = {
         warpnetService.setQR(qrCode)
     },
 
-    async logoutUser() {
-        const request = {
-            path: PRIVATE_POST_LOGOUT,
-            body: {}
-        }
-
-        await this.sendToNode(request);
-        this.reset();
-    },
-
     async getProfile(userId) {
         const request = {
             path: PUBLIC_GET_USER,
@@ -178,10 +166,6 @@ export const warpnetService = {
             return []
         }
 
-        const cacheKey = `users::${profileId}::${defaultLimit}::${cursor}`;
-        if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
-
-
         const request = {
             path: PUBLIC_GET_USERS,
             body: {
@@ -202,11 +186,6 @@ export const warpnetService = {
 
         usersResp.users = usersResp.users.filter(user => user.id !== profileId);
 
-        for (const u of usersResp.users) {
-            stateMap.set(`user::${u.id}`, u);
-        }
-
-        stateMap.set(cacheKey, usersResp.users);
         return usersResp.users;
     },
 
@@ -301,14 +280,9 @@ export const warpnetService = {
         if (cursorReset) {
             cursor = ''
         }
-        console.log("timeline IN CURSOR", cursor)
+
         if (cursor === endCursor) {
             return []
-        }
-
-        const cacheKey = `timeline::${defaultLimit}::${cursor}`;
-        if (stateMap.has(cacheKey)) {
-            return stateMap.get(cacheKey);
         }
 
         const owner = this.getOwnerProfile()
@@ -331,7 +305,6 @@ export const warpnetService = {
         if (!timelineResp.tweets || timelineResp.tweets.length === 0) {
             return []
         }
-        stateMap.set(cacheKey, timelineResp.tweets);
 
         return timelineResp.tweets;
     },
@@ -343,11 +316,6 @@ export const warpnetService = {
         }
         if (cursor === endCursor) {
             return []
-        }
-
-        const cacheKey = `tweets::${userId}::${defaultLimit}::${cursor}`;
-        if (stateMap.has(cacheKey)) {
-            return stateMap.get(cacheKey);
         }
 
         const request = {
@@ -367,7 +335,6 @@ export const warpnetService = {
         if (!tweetsResp.tweets || tweetsResp.tweets.length === 0) {
             return []
         }
-        stateMap.set(cacheKey, tweetsResp.tweets);
 
         return tweetsResp.tweets;
     },
@@ -386,15 +353,7 @@ export const warpnetService = {
             },
         }
 
-        const tweet = await this.sendToNode(request);
-
-        this.invalidate(`timeline`);
-        this.invalidate(`tweets::${tweet.user_id}`);
-        this.invalidate(`user::${tweet.user_id}`);
-
-        const cacheKey = `tweet::${tweet.user_id}::${tweet.id}`;
-        stateMap.set(cacheKey, tweet)
-        return tweet;
+        return await this.sendToNode(request);
     },
 
     async deleteTweet({userId, tweetId}) {
@@ -406,18 +365,10 @@ export const warpnetService = {
             },
         }
 
-        const tweet = await this.sendToNode(request);
-
-        this.invalidate(`timeline`);
-        this.invalidate(`tweets::${userId}`);
-        stateMap.delete(`tweet::${userId}::${tweetId}`)
-        return tweet;
+        return await this.sendToNode(request);
     },
 
     async getTweet({userId, tweetId}) {
-        const cacheKey = `tweet::${userId}::${tweetId}`;
-        if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
-
         const request = {
             path: PUBLIC_GET_TWEET,
             body: {
@@ -426,12 +377,7 @@ export const warpnetService = {
             },
         }
 
-        const tweet = await this.sendToNode(request);
-        if (!tweet) {
-            return null
-        }
-        stateMap.set(cacheKey, tweet);
-        return tweet;
+        return await this.sendToNode(request);
     },
 
     async followUser(profileId) {
@@ -451,10 +397,6 @@ export const warpnetService = {
         }
         const cacheKey = `isFollowed::${profileId}`;
         stateMap.set(cacheKey, {})
-        this.invalidate(`followers::${profileId}`);
-        this.invalidate(`followees::${profileId}`);
-        this.invalidate(`user::${profileId}`);
-        this.invalidate(`user::${owner.user_id}`);
         return followResp;
     },
 
@@ -484,10 +426,6 @@ export const warpnetService = {
             return null
         }
         stateMap.delete(`isFollowed::${profileId}`);
-        this.invalidate(`followers::${profileId}`);
-        this.invalidate(`followees::${profileId}`);
-        this.invalidate(`user::${profileId}`);
-        this.invalidate(`user::${owner.user_id}`);
         return unfollowResp;
     },
 
@@ -499,9 +437,6 @@ export const warpnetService = {
         if (cursor === endCursor) {
             return []
         }
-
-        const cacheKey = `followers::${userId}::${defaultLimit}::${cursor}`;
-        if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const request = {
             path: PUBLIC_GET_FOLLOWERS,
@@ -522,7 +457,6 @@ export const warpnetService = {
         }
         followersResp.followers = followersResp.followers.filter(follower => follower !== userId);
 
-        stateMap.set(cacheKey, followersResp.followers);
         for (const follower of followersResp.followers || []) {
             const followerKey = `isFollower::${follower}`;
             stateMap.set(followerKey, {})
@@ -539,9 +473,6 @@ export const warpnetService = {
         if (cursor === endCursor) {
             return []
         }
-
-        const cacheKey = `followees::${userId}::${defaultLimit}::${cursor}`;
-        if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const request = {
             path: PUBLIC_GET_FOLLOWEES,
@@ -562,14 +493,10 @@ export const warpnetService = {
         }
         followeesResp.followees = followeesResp.followees.filter(followee => followee !== userId);
 
-        stateMap.set(cacheKey, followeesResp.followees);
         return followeesResp.followees;
     },
 
     async getTweetStats(tweetId, userId) {
-        const cacheKey = `tweetstats::${tweetId}`;
-        if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
-
         const request = {
             path: PUBLIC_GET_TWEET_STATS,
             body: {
@@ -582,7 +509,6 @@ export const warpnetService = {
         if (!statsResp) {
             return null
         }
-        stateMap.set(cacheKey, statsResp);
 
         return statsResp;
     },
@@ -603,16 +529,7 @@ export const warpnetService = {
                 created_at: new Date().toISOString(),
             },
         }
-
-        const replyResp = await this.sendToNode(request);
-        if (!replyResp) {
-            return null
-        }
-        const cacheKey = `reply::${rootId}::${replyResp.id}`;
-        stateMap.set(cacheKey, replyResp);
-        this.invalidate(`replies::${rootId}`)
-        this.invalidate(`tweetstats::${rootId}`)
-        return replyResp;
+        return await this.sendToNode(request);
     },
 
     async getReplies({rootId, parentId, cursorReset}) {
@@ -623,9 +540,6 @@ export const warpnetService = {
         if (cursor === endCursor) {
             return []
         }
-
-        const cacheKey = `replies::${rootId}::${parentId}::${defaultLimit}::${cursor}`;
-        if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const request = {
             path: PUBLIC_GET_REPLIES,
@@ -645,14 +559,10 @@ export const warpnetService = {
         if (!repliesResp.replies || repliesResp.replies.length === 0) {
             return []
         }
-        stateMap.set(cacheKey, repliesResp.replies);
         return repliesResp.replies;
     },
 
     async getReply({rootId, replyId}) {
-        const cacheKey = `reply::${rootId}::${replyId}`;
-        if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
-
         const request = {
             path: PUBLIC_GET_REPLY,
             body: {
@@ -661,12 +571,7 @@ export const warpnetService = {
             },
         }
 
-        const replyResp = await this.sendToNode(request);
-        if (!replyResp) {
-            return null
-        }
-        stateMap.set(cacheKey, replyResp);
-        return replyResp;
+        return await this.sendToNode(request);
     },
 
     async deleteReply({userId, rootId, replyId}) {
@@ -679,13 +584,7 @@ export const warpnetService = {
             },
         }
 
-        const replyResp = await this.sendToNode(request);
-
-        const cacheKey = `reply::${rootId}::${replyId}`;
-        stateMap.delete(cacheKey);
-        this.invalidate(`tweetstats::${rootId}`)
-        this.invalidate(`replies::${rootId}`)
-        return replyResp;
+        return await this.sendToNode(request);
     },
 
     async likeTweet(tweetId, userId) {
@@ -701,8 +600,6 @@ export const warpnetService = {
         }
 
         const likeResp = await this.sendToNode(request);
-
-        this.invalidate(`tweetstats::${tweetId}`)
         return likeResp.count;
     },
 
@@ -719,8 +616,6 @@ export const warpnetService = {
         }
 
         const unlikeResp = await this.sendToNode(request);
-
-        this.invalidate(`tweetstats::${tweetId}`)
         return unlikeResp.count;
     },
 
@@ -759,11 +654,7 @@ export const warpnetService = {
             },
         }
 
-        const retweetResp = await this.sendToNode(request);
-
-        this.invalidate(`timeline`)
-        this.invalidate(`tweetstats::${tweetId}`)
-        return retweetResp;
+        return await this.sendToNode(request);
     },
 
     async unretweetTweet(tweetId) {
@@ -778,10 +669,7 @@ export const warpnetService = {
             },
         }
 
-        const unretweetResp = await this.sendToNode(request);
-
-        this.invalidate(`tweetstats::${tweetId}`)
-        return unretweetResp;
+        return await this.sendToNode(request);
     },
 
     async setRetweeter(tweetId, profileId, profileObj) {
@@ -815,20 +703,10 @@ export const warpnetService = {
             },
         }
 
-        const chatResp = await this.sendToNode(request);
-        if (!chatResp) {
-            return null
-        }
-        this.invalidate('chats')
-        const cacheKey = `chat::${chatResp.id}`
-        stateMap.set(cacheKey, chatResp)
-        return chatResp;
+        return await this.sendToNode(request);
     },
 
     async getChat(chatId) {
-        const cacheKey = `chat::${chatId}`
-        if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
-
         const request = {
             path: PRIVATE_GET_CHAT,
             body: {
@@ -836,12 +714,7 @@ export const warpnetService = {
             },
         }
 
-        const chatResp = await this.sendToNode(request);
-        if (!chatResp) {
-            return null
-        }
-        stateMap.set(cacheKey, chatResp)
-        return chatResp;
+        return await this.sendToNode(request);
     },
 
     async getChats(cursorReset) {
@@ -854,9 +727,6 @@ export const warpnetService = {
         }
 
         const owner = this.getOwnerProfile()
-        const cacheKey = `chats::${owner.user_id}::${defaultLimit}::${cursor}`
-
-        if (stateMap.has(cacheKey)) return stateMap.get(cacheKey);
 
         const request = {
             path: PRIVATE_GET_CHATS,
@@ -876,11 +746,6 @@ export const warpnetService = {
             return []
         }
 
-        for (const chat of chatsResp.chats) {
-            stateMap.set(`chat::${chat.id}`, chat)
-        }
-
-        stateMap.set(cacheKey, chatsResp.chats)
         return chatsResp.chats;
     },
 
@@ -910,8 +775,6 @@ export const warpnetService = {
 
         const owner = this.getOwnerProfile();
 
-        const cacheKey = `messages::${owner.user_id}::${defaultLimit}::${cursor}`
-
         const request = {
             path: PRIVATE_GET_MESSAGES,
             body: {
@@ -931,7 +794,6 @@ export const warpnetService = {
             return []
         }
 
-        stateMap.set(cacheKey, messagesResp.messages)
         return messagesResp.messages;
     },
 
@@ -980,10 +842,6 @@ export const warpnetService = {
 // TTL in ms
 const ttlMap = {
     'image': 6_000_000,
-    'user': 60_000,
-    'timeline': 6_000,
-    'replies': 6_000,
-    'tweetstats': 6_000,
 }
 
 function startCacheCleaner() {

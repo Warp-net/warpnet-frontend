@@ -75,7 +75,6 @@ import SearchBar from "../components/SearchBar.vue";
 import Users from "../components/Users.vue";
 import Loader from "../components/Loader.vue";
 import {warpnetService} from "@/service/service";
-import user from "@/components/User.vue";
 
 export default {
   name: "Followers",

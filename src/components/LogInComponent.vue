@@ -57,15 +57,6 @@ resulting from the use or misuse of this software.
     <div v-if="showErrorModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div class="bg-white rounded-xl p-6 w-80 shadow-lg text-center">
         <p class="text-lg font-bold bg-blue mb-4">{{ errorMessage }}</p>
-        <div class="flex space-x-4">
-          <button
-              @click="handleLogout"
-              class="flex-1 bg-blue text-white font-bold py-2 px-4 rounded"
-          >
-            Logout
-          </button>
-
-        </div>
       </div>
     </div>
   </template>
@@ -103,16 +94,6 @@ export default {
       } finally {
         this.isLoading = false;
         this.$router.push({ name: "Home" });
-      }
-    },
-    async handleLogout() {
-      try {
-        await warpnetService.logoutUser();
-        console.log("User has been logged out");
-      } catch (error) {
-        console.error("Error logging out", error);
-      } finally {
-        this.showErrorModal = false;
       }
     },
   },

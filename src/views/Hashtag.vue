@@ -85,22 +85,22 @@ resulting from the use or misuse of this software.
         </div>
 
         <!-- tweets -->
-        <Loader :loading="loading" />
-        <div
-          v-if="!loading && results && results.length === 0"
-          class="flex flex-col items-center justify-center w-full pt-10"
-        >
-          <div class="w-3/5">
-            <p class="font-bold text-lg">No results for "{{ noResults }}"</p>
-            <p class="text-sm text-dark">
-              The term you entered did not bring up any results. You may have
-              mistyped your term or your Search settings could be protecting you
-              from some potentially sensitive content.
-            </p>
-          </div>
-        </div>
+<!--        <Loader :loading="loading" />-->
+<!--        <div-->
+<!--          v-if="!loading && results && results.length === 0"-->
+<!--          class="flex flex-col items-center justify-center w-full pt-10"-->
+<!--        >-->
+<!--          <div class="w-3/5">-->
+<!--            <p class="font-bold text-lg">No results for "{{ noResults }}"</p>-->
+<!--            <p class="text-sm text-dark">-->
+<!--              The term you entered did not bring up any results. You may have-->
+<!--              mistyped your term or your Search settings could be protecting you-->
+<!--              from some potentially sensitive content.-->
+<!--            </p>-->
+<!--          </div>-->
+<!--        </div>-->
 
-        <Results :results="results" />
+<!--        <Results :results="results" />-->
       </div>
 
       <div
