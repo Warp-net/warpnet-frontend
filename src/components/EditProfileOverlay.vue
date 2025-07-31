@@ -222,8 +222,8 @@ export default {
 
       this.profile = await warpnetService.editMyProfile(p);
 
-      this.background_image = await warpnetService.getImage({userId:this.profile.id, key:this.profile.background_image_key});
-      this.avatar = await warpnetService.getImage({userId:this.profile.id, key:this.profile.avatar_key})
+      this.background_image = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.background_image_key});
+      this.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.avatar_key})
 
       this.$emit("close");
     },
@@ -239,8 +239,8 @@ export default {
     console.log(this.$options.name);
     this.profile = warpnetService.getOwnerProfile();
     this.username = this.profile.username;
-    this.background_image = await warpnetService.getImage({userId:this.profile.id, key:this.profile.background_image_key});
-    this.avatar = await warpnetService.getImage({userId:this.profile.id, key:this.profile.avatar_key})
+    this.background_image = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.background_image_key});
+    this.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.avatar_key})
     this.bio = this.profile.bio;
     this.website = this.profile.website;
     this.birthdate = this.profile.birthdate;

@@ -292,7 +292,7 @@ export default {
   },
   methods: {
     isMySelf(profileId) {
-      return profileId === this.ownerProfile.id;
+      return profileId === this.ownerProfile.user_id;
     },
     joinedDate(createdAt) {
       return moment(createdAt).format("MMMM YYYY");
@@ -388,7 +388,7 @@ export default {
         this.loading = false;
         return;
       }
-      if (this.profile.network === "mastodon") {
+      if (this.profile.network && this.profile.network === "mastodon") {
         this.enableMastodonMode()
       } else {
         this.disableMastodonMode();

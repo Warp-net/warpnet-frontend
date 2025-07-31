@@ -98,7 +98,7 @@ export default {
       this.$router.push({
         name: "Profile",
         params: {
-          id: this.profile.id,
+          id: this.profile.user_id,
         },
       });
     },
@@ -106,7 +106,7 @@ export default {
       this.$router.push({
         name: "Followers",
         params: {
-          id: this.profile.id,
+          id: this.profile.user_id,
         },
       });
     },

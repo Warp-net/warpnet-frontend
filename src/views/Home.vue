@@ -221,10 +221,10 @@ export default {
     this.profile = warpnetService.getOwnerProfile();
 
     this.profile.background_image = await warpnetService.getImage(
-        {userId:this.profile.id, key:this.profile.background_image_key},
+        {userId:this.profile.user_id, key:this.profile.background_image_key},
     );
     this.profile.avatar = await warpnetService.getImage(
-        {userId:this.profile.id, key:this.profile.avatar_key},
+        {userId:this.profile.user_id, key:this.profile.avatar_key},
     )
 
     this.timeline = await warpnetService.getMyTimeline(true);

@@ -169,7 +169,7 @@ resulting from the use or misuse of this software.
             {{ profile.username }}
           </div>
           <div class="text-left text-sm leading-tight text-dark truncate">
-            {{ profile.id }}
+            {{ profile.user_id }}
           </div>
         </div>
         <i class="hidden xl:block fas fa-angle-down ml-auto text-lg"></i>
@@ -192,7 +192,7 @@ resulting from the use or misuse of this software.
               {{ profile.username }}
             </p>
             <p class="text-left text-sm leading-tight text-dark">
-              {{ profile.id }}
+              {{ profile.user_id }}
             </p>
           </div>
           <i class="fas fa-check ml-auto text-blue"></i>
@@ -246,12 +246,12 @@ export default {
       const current = this.$route.name;
       if (
         target !== current ||
-        this.$route.params.id !== this.profile.id
+        this.$route.params.id !== this.profile.user_id
       ) {
         this.$router.push({
           name: target,
           params: {
-            id: this.profile.id,
+            id: this.profile.user_id,
           },
         });
       }
@@ -278,7 +278,7 @@ export default {
     console.log("loading component:", this.$options.name);
     this.profile = warpnetService.getOwnerProfile();
     console.log("profile", this.profile)
-    this.profile.avatar = await warpnetService.getImage({userId:this.profile.id, key:this.profile.avatar_key})
+    this.profile.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.avatar_key})
   },
 };
 </script>

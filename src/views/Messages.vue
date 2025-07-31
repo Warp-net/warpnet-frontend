@@ -112,7 +112,7 @@ resulting from the use or misuse of this software.
           <div ref="scrollToMe"></div>
           <div v-for="message in messages" :key="message.id">
             <!-- Own message -->
-            <div v-if="message.sender_id === ownerProfile.id" class="flex justify-end mb-4">
+            <div v-if="message.sender_id === ownerProfile.user_id" class="flex justify-end mb-4">
               <div class="bg-blue text-white py-2 px-4 rounded-tl-3xl rounded-bl-3xl rounded-tr-xl">
                 {{ message.text }}
               </div>
@@ -228,7 +228,7 @@ export default {
       });
     },
     async selected(user) {
-      if (!this.ownerProfile.id || !user.id) {
+      if (!this.ownerProfile.user_id || !user.id) {
         console.log("messages: no selected(user)", this.ownerProfile, user)
         return;
       }
@@ -237,7 +237,7 @@ export default {
       let currentChat = null
       for (const chat of this.chats) {
         const participants = [chat.owner_id, chat.other_user_id];
-        if (participants.includes(this.ownerProfile.id) && participants.includes(user.id)) {
+        if (participants.includes(this.ownerProfile.user_id) && participants.includes(user.id)) {
           currentChat = chat;
           break;
         }
@@ -247,7 +247,7 @@ export default {
         currentChat = {
           id: "",
           other_user_id: user.id,
-          owner_id: this.ownerProfile.id,
+          owner_id: this.ownerProfile.user_id,
         };
       }
       await this.selectChat(currentChat);
@@ -289,7 +289,7 @@ export default {
     console.log("messages: route chat id:", this.$route.params.chatId)
 
     this.ownerProfile = warpnetService.getOwnerProfile()
-    await this.loadChatUser(this.ownerProfile.id)
+    await this.loadChatUser(this.ownerProfile.user_id)
 
     const chats = await warpnetService.getChats(true)
     if (chats.length === 0) {
@@ -308,7 +308,7 @@ export default {
         console.log('ACTIVE CHAT owner', chat.owner_id, "other", chat.other_user_id)
         activeChat = chat
       }
-      if (chat.owner_id !== this.ownerProfile.id) {
+      if (chat.owner_id !== this.ownerProfile.user_id) {
         [chat.owner_id, chat.other_user_id] = [chat.other_user_id, chat.owner_id];
       }
     }

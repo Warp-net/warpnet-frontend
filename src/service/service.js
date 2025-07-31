@@ -138,6 +138,13 @@ export const warpnetService = {
             return;
         }
 
+        // type Owner struct {
+        // 	CreatedAt time.Time `json:"created_at"`
+        // 	NodeId    string    `json:"node_id"`
+        // 	UserId    string    `json:"user_id"`
+        // 	Username  string    `json:"username"`
+        // }
+
         warpnetService.setOwnerProfile(resp.identity.owner)
 
         const qrCode = await buildQRCode(qrData)

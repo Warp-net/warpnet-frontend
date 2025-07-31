@@ -43,7 +43,7 @@ resulting from the use or misuse of this software.
           </p>
           <p class="text-dark text-sm">@{{ user.id }}</p>
         </div>
-        <div v-if="profile && profile.id !== user.id">
+        <div v-if="profile && profile.user_id !== user.id">
           <button
             v-if="!user.following"
             @click="follow"
@@ -125,8 +125,8 @@ export default {
   async created() {
     console.log("loading component:", this.$options.name);
     this.profile = warpnetService.getOwnerProfile();
-    this.profile.background_image = await warpnetService.getImage({userId:this.profile.id, key:this.profile.background_image_key});
-    this.profile.avatar = await warpnetService.getImage({userId:this.profile.id, key:this.profile.avatar_key})
+    this.profile.background_image = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.background_image_key});
+    this.profile.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.avatar_key})
     this.user.avatar = await warpnetService.getImage({userId:this.user.id, key:this.user.avatar_key})
   },
 };
