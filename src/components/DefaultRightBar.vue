@@ -25,7 +25,7 @@ resulting from the use or misuse of this software.
    <div class="hidden md:block w-1/3 h-full border-l border-lighter px-6 py-2 relative min-w-max">
       <SearchBar />
       <WhoToFollow
-          :currentProfile="profile"
+          :profile="profile"
       />
     </div>
 </template>

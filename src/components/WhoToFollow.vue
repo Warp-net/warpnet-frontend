@@ -26,7 +26,7 @@ resulting from the use or misuse of this software.
     <div class="p-3">
       <p class="text-lg font-bold">Who to follow</p>
     </div>
-    <div v-if="currentProfile" v-for="profile in profiles" :key="profile.id" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
+    <div v-if="profile" v-for="profile in profiles" :key="profile.id" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
       <img 
         @click="pushToProfilePage(profile.id)" 
         :src="getAvatar(profile.id, profile.avatar_key) || 'default_profile.png'"
@@ -66,12 +66,10 @@ import {warpnetService} from "@/service/service";
 
 export default {
   name: 'WhoToFollow',
-  props: {
-    currentProfile: Object,
-  },
+  props: ["profile"],
   data() {
     return {
-      userProfile: undefined,
+      ownerProfile: undefined,
       profiles: [],
       profilesAvatars: new Map(),
     };
@@ -103,18 +101,18 @@ export default {
       this.profilesAvatars.set(userId, img)
     },
     async loadMore() {
-      const users = await warpnetService.getWhoToFollow(this.currentProfile.id,false)
+      const users = await warpnetService.getWhoToFollow(this.profile.id,false)
       this.profiles = [...this.profiles, ...users];
     },
    },
   async created() {
     console.log("loading component:", this.$options.name);
-    console.log("currentProfile:", this.currentProfile);
-    this.userProfile = warpnetService.getOwnerProfile();
-    if (!this.currentProfile) {
-      this.currentProfile = this.userProfile;
+    console.log("profile:", this.profile);
+    this.ownerProfile = warpnetService.getOwnerProfile();
+    if (!this.profile) {
+      this.profile = this.ownerProfile;
     }
-    this.profiles = await warpnetService.getWhoToFollow(this.currentProfile.id, true)
+    this.profiles = await warpnetService.getWhoToFollow(this.profile.id, true)
   },
 };
 </script>
