@@ -279,6 +279,13 @@ export default {
     this.profile = warpnetService.getOwnerProfile();
     console.log("profile", this.profile)
     this.profile.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.avatar_key})
+
+    const resp = await warpnetService.getNotifications(
+        {userId:this.profile.user_id, cursorReset:true},
+    )
+    if (resp) {
+      this.newNotifications = resp.unread_count;
+    }
   },
 };
 </script>

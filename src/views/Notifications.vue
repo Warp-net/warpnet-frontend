@@ -28,6 +28,12 @@ resulting from the use or misuse of this software.
 
       <div class="w-full md:w-1/2 h-full overflow-y-scroll no-scrollbar">
         <div class="px-5 py-3 border-lighter flex items-center justify-between">
+          <button
+              @click="gotoHome()"
+              class="rounded-full md:pr-2 focus:outline-none hover:bg-lightblue"
+          >
+            <i class="fas fa-arrow-left text-blue"></i>
+          </button>
           <h1 class="text-xl font-bold">Notifications</h1>
           <i class="fas fa-cog text-xl text-blue"></i>
         </div>
@@ -54,7 +60,7 @@ resulting from the use or misuse of this software.
         <!-- notifications -->
         <div v-if="mode === 'All'">
           <div
-            v-if="!all || all.length === 0"
+            v-if="getNotifications() === 0"
             class="flex flex-col items-center justify-center w-full pt-10"
           >
             <div class="w-1/2 flex flex-col items-center justify-center">
@@ -63,22 +69,22 @@ resulting from the use or misuse of this software.
             </div>
           </div>
 
-          <div v-for="notification in all" :key="notification.id">
+          <div v-for="notification in getNotifications()" :key="notification.id">
             <div
               class="w-full p-2 pt-1 pb-1 md:p-4 md:pt-2 md:pb-2 border-b hover:bg-lightest flex"
             >
               <div class="w-full">
                 <div class="flex flex-row mr-2 md:mr-4 pt-1 text-2xl">
                   <i
-                    v-if="notification.type === 'Replied'"
+                    v-if="notification.type === 'reply'"
                     class="pt-1 fas fa-comment text-blue"
                   ></i>
                   <i
-                    v-if="notification.type === 'Liked'"
+                    v-if="notification.type === 'like'"
                     class="pt-1 fas fa-heart text-red-600"
                   ></i>
                   <i
-                    v-if="notification.type === 'Retweeted'"
+                    v-if="notification.type === 'retweet'"
                     class="pt-1 fas fa-retweet text-green-500"
                   ></i>
 
@@ -102,7 +108,7 @@ resulting from the use or misuse of this software.
         </div>
         <div v-if="mode === 'Mentions'">
           <div
-            v-if="!mentions || mentions.length === 0"
+            v-if="getNotifications() === 0"
             class="flex flex-col items-center justify-center w-full pt-10"
           >
             <div class="w-1/2 flex flex-col items-center justify-center">
@@ -110,8 +116,8 @@ resulting from the use or misuse of this software.
               <p class="text-sm text-dark">Wait until some get shown here.</p>
             </div>
           </div>
-          <div v-for="notification in mentions" :key="notification.id">
-            <div
+          <div v-for="notification in getNotifications()" :key="notification.id">
+            <div v-if="notification.type === 'mention'"
               class="w-full p-2 pt-1 pb-1 md:p-4 md:pt-2 md:pb-2 border-b hover:bg-lightest flex"
             >
               <div class="w-full">
@@ -145,6 +151,7 @@ resulting from the use or misuse of this software.
 <script>
 import SideNav from "../components/SideNav.vue";
 import DefaultRightBar from "../components/DefaultRightBar.vue";
+import {warpnetService} from "@/service/service";
 
 export default {
   name: "Notifications",
@@ -155,10 +162,22 @@ export default {
   data() {
     return {
       loading: false,
+      notifications: [],
+      profileId: this.$route.params.id,
       mode: this.$route.query.m || "All",
     };
   },
   methods: {
+    async getNotifications() {
+      const resp = await warpnetService.getNotifications(
+          {userId:this.profileId, cursorReset:true},
+      )
+      if (!resp || !resp.notifications || resp.notifications.length === 0) {
+        return [];
+      }
+
+      return resp.notifications;
+    },
     gotoHome() {
       this.$router.push({
         name: "Home",
@@ -174,7 +193,19 @@ export default {
   },
   async created() {
     console.log("loading component:", this.$options.name);
-
+    try {
+      this.loading = true;
+      const profileId = this.$route.params.id;
+      if (!profileId) {
+        this.noUser = true;
+        this.loading = false;
+      }
+    } catch (err) {
+      console.error('Failed to load notifications:', err);
+      this.noUser = true;
+    } finally {
+      this.loading = false;
+    }
   },
 };
 </script>

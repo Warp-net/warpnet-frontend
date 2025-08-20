@@ -30,6 +30,7 @@ export const PUBLIC_GET_TWEET = "/public/get/tweet/0.0.0"
 export const PUBLIC_GET_TWEET_STATS   = "/public/get/tweetstats/0.0.0"
 export const PRIVATE_GET_TIMELINE = "/private/get/timeline/0.0.0"
 export const PUBLIC_GET_TWEETS = "/public/get/tweets/0.0.0"
+export const PRIVATE_GET_NOTIFICATIONS = "/private/get/notifications/0.0.0"
 export const PUBLIC_POST_UNLIKE = "/public/post/unlike/0.0.0"
 export const PRIVATE_POST_TWEET = "/private/post/tweet/0.0.0"
 export const PUBLIC_POST_REPLY = "/public/post/reply/0.0.0"
@@ -314,6 +315,37 @@ export const warpnetService = {
         }
 
         return timelineResp.tweets;
+    },
+
+    async getNotifications({userId,cursorReset}) {
+        let cursor = this.getCursor('notifications')
+        if (cursorReset) {
+            cursor = ''
+        }
+        if (cursor === endCursor) {
+            return null
+        }
+        const cacheKey = `notifications`;
+        if (stateMap.has(cacheKey)) {
+            return stateMap.get(cacheKey);
+        }
+
+        const request = {
+            path: PRIVATE_GET_NOTIFICATIONS,
+            body: {
+                limit: defaultLimit,
+                cursor: cursor,
+                user_id: userId,
+            },
+        }
+
+        const resp = await this.sendToNode(request);
+        if (!resp) {
+            return null
+        }
+        this.setCursor('notifications', resp.cursor || 'end')
+        stateMap.set(cacheKey, {})
+        return resp;
     },
 
     async getTweets({userId,cursorReset}) {
@@ -868,3 +900,11 @@ function startCacheCleaner() {
 
 startCacheCleaner();
 
+function startRefreshNotifications() {
+    setInterval(() => {
+        const owner = warpnetService.getOwnerProfile
+        warpnetService.getNotifications({userId: owner.user_id, cursorReset: false}).then();
+    }, 2000);
+}
+
+startRefreshNotifications();
