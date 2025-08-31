@@ -1,4 +1,8 @@
 # WARPNET-FRONTEND
+
+[MAIN REPO](https://github.com/Warp-net/warpnet)
+[DOCS](https://github.com/Warp-net/docs)
+
 ## Requirements
 * npm version >= 9.2.0
 * [Golang v1.24](https://go.dev/doc/install)
@@ -6,7 +10,7 @@
 
 ## How to run node (dev mode)
 * commit and push your frontend changes (INCLUDING DIST FOLDER!)
-* switch to backend repo and call command:
+* switch to main repo and call command:
 
 ```bash 
      go get github.com/Warp-net/warpnet-frontend@latest && go mod vendor
