@@ -23,11 +23,11 @@ resulting from the use or misuse of this software.
 */
 
 import {
+    PRIVATE_POST_LOGIN,
     PUBLIC_GET_TWEET,
     PUBLIC_GET_TWEET_STATS,
     PRIVATE_GET_TIMELINE,
     PUBLIC_GET_TWEETS,
-    PRIVATE_GET_NOTIFICATIONS,
     PUBLIC_POST_UNLIKE,
     PRIVATE_POST_TWEET,
     PUBLIC_POST_REPLY,
@@ -57,13 +57,14 @@ import {
     PUBLIC_DELETE_MESSAGE,
     PRIVATE_POST_UPLOAD_IMAGE,
     PUBLIC_GET_IMAGE,
-    PRIVATE_POST_LOGIN
+    PRIVATE_GET_NOTIFICATIONS
 } from "@/service/service";
 import {generateUUID} from "@/lib/uuid";
 
+const mockMap = new Map();
 
-// [MOCK] window.go.main.App.Call({"path":"/private/get/notifications/0.0.0","body":{"limit":20,"cursor":""},
-// "message_id":"3e5c6206-b4c6-4418-882e-4c06c6b070b0","node_id":"None","timestamp":"2025-10-21T12:15:12.628Z"})
+// {"path":"/private/get/notifications/0.0.0","body":{"limit":20,"cursor":""},
+// "message_id":"3e5c6206-b4c6-4418-882e-4c06c6b070b0","node_id":"None","timestamp":"2025-10-21T12:15:12.628Z"}
 if (process.env.NODE_ENV === 'development') {
     console.warn("⚠️ Running in standalone mode — mocking window.go");
 
@@ -82,65 +83,259 @@ if (process.env.NODE_ENV === 'development') {
     };
 }
 
-const mockUser = {
-    avatar_key: "image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA", // MIME + base64
-    background_image_key: "image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD",
-    bio: "Developer and p2p enthusiast. Building WarpNet.",
-    birthdate: "1988-04-15",
-    created_at: "2025-01-01T12:00:00Z",
-    updated_at: "2025-10-21T10:30:00Z",
-    followees_count: 0,
-    followers_count: 0,
-    id: "7f4c2a91-d03e-4de5-a0a7-8429bdf17fa8",
-    isOffline: false,
-    node_id: "node-12aa3bb4",
-    network: "warpnet",
-    latency: 0,
-    tweets_count: 1,
-    username: "Vadim",
-    website: "https://warp-net.github.io/",
-    moderation: {is_ok: true},
-    metadata: {
-        theme: "dark",
-        locale: "en-US",
-        verified: "true",
-        join_method: "invite",
-    },
-};
-
-const mockTweet = {
-    created_at: "2025-10-20T14:25:00Z",
-    updated_at: "2025-10-21T09:10:00Z",
-    id: "8a21e4d5-912f-4f13-a7d3-8b7d6a1a51d1",
-    parent_id: null,
-    retweeted_by: null,
-    root_id: "8a21e4d5-912f-4f13-a7d3-8b7d6a1a51d1",
-    text: "WarpNet update: new decentralized feed algorithm! 🚀 #p2p #WarpNet",
-    user_id: mockUser.id,
-    username: mockUser.username,
-    image_key: "image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA",
-    network: "warpnet",
-    moderation: {is_ok: true},
-};
-
 
 function generateResponse(arg) {
-    console.log()
     switch (arg.path) {
-    case PRIVATE_POST_LOGIN:
-        let user_id = mockUser.id
-        if (arg.user_id) {
-            user_id = arg.user_id
-        }
-        const owner = {username: arg.body.username, node_id: arg.node_id, user_id: user_id, created_at: Date.now()}
-        mockUser.username = arg.body.username
-        return {identity: {token: generateUUID(), owner: owner}}
-    case PUBLIC_GET_USER:
-        return mockUser
-    case PRIVATE_GET_TIMELINE:
-        const tweets = [mockTweet]
-        return {cursor: arg.cursor, user_id: arg.user_id, tweets: tweets}
-    default:
+        case PRIVATE_POST_LOGIN:
+            const uid = generateUUID()
+
+            const owner = {
+                username: arg.body.username || "Missing!",
+                node_id: arg.node_id  || "None",
+                user_id: uid,
+                created_at: Date.now().toString(),
+            }
+
+            const u = {
+                avatar_key: "", // MIME + base64
+                background_image_key: "",
+                bio: "",
+                created_at: Date.now().toString(),
+                id: uid,
+                isOffline: false,
+                node_id: arg.node_id  || "None",
+                network: "warpnet",
+                username: arg.body.username || "Missing!",
+                website: "https://warp-net.github.io/",
+                moderation: {is_ok: true},
+                birthdate: "",
+                updated_at: "",
+                followees_count: 0,
+                followers_count: 0,
+                latency: 0,
+                tweets_count: 0,
+                metadata: {},
+            }
+            mockMap.set("user:"+u.id, u)
+            return {identity: {token: generateUUID(), owner: owner}}
+
+        case PRIVATE_POST_TWEET:
+            const tweetUid = generateUUID()
+            let t = {
+                id : tweetUid,
+                root_id : tweetUid,
+                user_id : arg.body.user_id || "",
+                username : arg.body.username || "",
+                text : arg.body.text || "",
+                image_key : arg.body.image_key || "",
+                created_at : arg.body.created_at || Date.now().toString(),
+                parent_id: null,
+                retweeted_by: null,
+                network: "warpnet",
+                moderation: {is_ok: true},
+            };
+
+            mockMap.set("tweet:"+t.id, t)
+
+            const timelineList = mockMap.get("timeline") || [];
+            timelineList.push(t)
+            mockMap.set("timeline", timelineList)
+
+            let stats = {
+                tweet_id: t.id,
+                retweets_count: 0,
+                likes_count: 0,
+                replies_count: 0,
+                views_count: 0,
+            }
+            mockMap.set("stats:"+t.id, stats)
+            return t
+
+        case PRIVATE_POST_USER:
+            let editedUser = mockMap.get("user:"+arg.body.user_id);
+            if (!editedUser) return {code:404, message:"User not found"};
+
+            Object.assign(editedUser, arg);
+            mockMap.set("user:"+arg.body.user_id, editedUser)
+            return editedUser
+
+        case PUBLIC_GET_USER:
+            const gotUser = mockMap.get("user:"+arg.body.user_id)
+            if (!gotUser) return {code:404, message:"User not found"};
+            return gotUser;
+        case PUBLIC_GET_TWEET_STATS:
+            const st = mockMap.get("stats:"+arg.body.tweet_id)
+            if (!st) return {code:404, message:"Stats not found"};
+            return st;
+
+        case PRIVATE_GET_STATS:
+            return Object.fromEntries(mockMap);
+
+        case PUBLIC_GET_TWEET:
+            const gotTweet =  mockMap.get("tweet:"+arg.body.tweet_id)
+            if (!gotTweet) return {code:404, message:"Tweet not found"};
+            return gotTweet;
+
+        case PRIVATE_GET_TIMELINE :
+            const timelineTweets = mockMap.get("timeline") || [];
+            return {cursor: "end", user_id: arg.body.user_id, tweets: timelineTweets}
+
+        case PUBLIC_GET_TWEETS:
+            let tweetsList = []
+            for (const [key, value] of mockMap) {
+                if (key.startsWith("tweet:")) {
+                    tweetsList.push(value)
+                }
+            }
+            return {cursor: "end", user_id: arg.body.user_id, tweets: tweetsList}
+
+        case PUBLIC_GET_USERS:
+            let usersList = []
+            for (const [key, value] of mockMap) {
+                if (key.startsWith("user:")) {
+                    usersList.push(value)
+                }
+            }
+            return {cursor: "end", user_id: arg.body.user_id, users: usersList}
+
+        case PRIVATE_POST_UPLOAD_IMAGE:
+            const imageKey = "img_"+generateUUID();
+            mockMap.set("image:"+imageKey, arg.body.file);
+            return {key: imageKey};
+
+        case PUBLIC_GET_IMAGE:
+            const gotImg =  {image: mockMap.get("image:"+arg.body.key)};
+            if (!gotImg) return {code:404, message:"Image not found"};
+            return gotImg;
+
+        case PUBLIC_GET_WHOTOFOLLOW:
+            const allUsers = [];
+            for (const [key, value] of mockMap) {
+                if (key.startsWith("user:")) allUsers.push(value);
+            }
+            return {users: allUsers.slice(0, 3)};
+
+        case PUBLIC_GET_FOLLOWERS:
+            return {cursor: "end", followers: [], followee: arg.body.user_id};
+        case PUBLIC_GET_FOLLOWEES:
+            return {cursor: "end", followees: [], follower: arg.body.user_id};
+
+        case PUBLIC_POST_FOLLOW:
+            return {code: 0, message: "Accepted"};
+
+        case PUBLIC_POST_UNFOLLOW:
+            return {code: 0, message: "Accepted"};
+
+        case PUBLIC_POST_LIKE:
+            let likeStats = mockMap.get("stats:"+arg.body.tweet_id)
+            likeStats.likes_count++
+            mockMap.set("stats:"+arg.body.tweet_id, likeStats)
+            return {count: likeStats.likes_count};
+
+        case PUBLIC_POST_UNLIKE:
+            let unlikeStats = mockMap.get("stats:"+arg.body.tweet_id)
+            unlikeStats.likes_count--
+            mockMap.set("stats:"+arg.body.tweet_id, unlikeStats)
+            return {count: unlikeStats.likes_count};
+
+        case PUBLIC_POST_RETWEET:
+            return {code: 0, message: "Accepted"}; // TODO
+
+        case PUBLIC_POST_UNRETWEET:
+            return {code: 0, message: "Accepted"}; // TODO
+
+        case PUBLIC_POST_REPLY:
+            let reply = {
+                id : generateUUID(),
+                root_id : arg.body.root_id,
+                parent_id : arg.body.parent_id,
+                text : arg.body.text || "Missing!",
+                username : arg.body.username || "Missing!",
+                user_id : arg.body.user_id,
+                parent_user_id : arg.body.parent_user_id,
+            };
+
+            mockMap.set("reply:"+reply.id, reply);
+
+            let replyStats = mockMap.get("stats:"+arg.body.root_id)
+            replyStats.replies_count++
+            mockMap.set("stats:"+arg.body.root_id, replyStats)
+            return reply;
+
+        case PUBLIC_GET_REPLIES:
+            const replies = [];
+            for (const [key, value] of mockMap) {
+                if (key.startsWith("reply:") && value.parent_id === arg.body.parent_id && value.root_id === arg.body.root_id)
+                    replies.push(value);
+            }
+            return {cursor: "end", replies: replies};
+
+        case PUBLIC_GET_REPLY:
+            const gotReply =  mockMap.get("reply:"+arg.body.reply_id);
+            if (!gotReply) return {code:404, message:"Reply not found"};
+            return gotReply;
+
+        case PUBLIC_DELETE_REPLY:
+            let deleteReplyStats = mockMap.get("stats:"+arg.body.root_id)
+            deleteReplyStats.replies_count--
+            mockMap.set("stats:"+arg.body.root_id, deleteReplyStats)
+
+            mockMap.delete("reply:"+arg.body.reply_id);
+            return {code:0,message:"Accepted"};
+
+        case PRIVATE_DELETE_TWEET:
+            mockMap.get("stats:"+arg.body.tweet_id) // delete from timeline
+            mockMap.delete("tweet:"+arg.body.tweet_id);
+            return {code:0, message:"Deleted"};
+
+        case PUBLIC_POST_CHAT:
+            const chatId = generateUUID();
+            mockMap.set("chat:"+chatId, {id: chatId, messages: []});
+            return {id: chatId};
+
+        case PRIVATE_GET_CHATS:
+            const chats = [];
+            for (const [key, value] of mockMap) {
+                if (key.startsWith("chat:")) chats.push(value);
+            }
+            return {chats: chats, cursor: "end", user_id: arg.body.user_id};
+
+        case PRIVATE_GET_CHAT:
+            const gotChat = mockMap.get("chat:"+arg.body.chat_id);
+            if (!gotChat) return {code:404, message:"Chat not found"};
+            return gotChat;
+
+        case PRIVATE_GET_MESSAGES:
+            const chat = mockMap.get("chat:"+arg.body.chat_id);
+            return chat ? {messages: chat.messages} : {messages: []};
+
+        case PUBLIC_POST_MESSAGE:
+            const msgId = generateUUID();
+            const message = {
+                id: msgId, chat_id: arg.body.chat_id, text: arg.body.text, created_at: new Date().toISOString(),
+            };
+            const targetChat = mockMap.get("chat:"+arg.body.chat_id);
+            if (targetChat) targetChat.messages.push(message);
+            mockMap.set("message:"+msgId, message);
+            return message;
+
+        case PRIVATE_GET_MESSAGE:
+            const gotMsg =  mockMap.get("message:"+arg.body.message_id);
+            if (!gotMsg) return {code:404, message:"Message not found"};
+            return gotMsg;
+
+        case PUBLIC_DELETE_MESSAGE:
+            mockMap.delete("message:"+arg.body.message_id);
+            return {code:0,message:"Accepted"};
+
+        case PRIVATE_DELETE_CHAT:
+            mockMap.delete("chat:"+arg.body.chat_id);
+            return {code:0,message:"Accepted"};
+
+        case PRIVATE_GET_NOTIFICATIONS:
+            return {notifications: []};
+
+        default:
         return {code:0,message:"Accepted"};
     }
 }
