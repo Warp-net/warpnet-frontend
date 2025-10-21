@@ -22,6 +22,7 @@ Use at your own risk. The maintainers shall not be liable for any damages or dat
 resulting from the use or misuse of this software.
 */
 
+import "./lib/backend-mock"
 import { createApp } from "vue";
 import App from "./App.vue";
 import "./assets/tailwind.css";

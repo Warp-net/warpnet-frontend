@@ -878,6 +878,7 @@ export const warpnetService = {
     }
 }
 
+
 // TTL in ms
 const ttlMap = {
     'image': 6_000_000,
@@ -902,8 +903,12 @@ startCacheCleaner();
 
 function startRefreshNotifications() {
     setInterval(() => {
-        const owner = warpnetService.getOwnerProfile
-        warpnetService.getNotifications({userId: owner.user_id, cursorReset: false}).then();
+        try {
+            const owner = warpnetService.getOwnerProfile
+            warpnetService.getNotifications({userId: owner.user_id, cursorReset: false}).then();
+        } catch (err) {
+            console.error(`failed to get notifications [${this.user.id}]`, err);
+        }
     }, 2000);
 }
 
