@@ -67,10 +67,6 @@ const defaultLimit = 20
 const endCursor = "end"
 
 export const warpnetService = {
-    reset() {
-        stateMap.clear()
-    },
-
     invalidate(prefix) {
         const keysToDelete = Array.from(stateMap.keys()).filter(k => k.startsWith(prefix));
         for (const key of keysToDelete) {
@@ -117,7 +113,6 @@ export const warpnetService = {
         }
         const resp = await this.sendToNode(request);
         if (!resp || !resp.identity) {
-            alert("Login failed: no response")
             throw new Error("Login failed: no response")
         }
         if (resp.code) {
@@ -126,7 +121,6 @@ export const warpnetService = {
         }
 
         if (!resp.identity) {
-            alert("Login failed: no identity")
             throw new Error("Login failed: no identity")
         }
 
@@ -134,7 +128,6 @@ export const warpnetService = {
         resp.identity.token = null // for security reasons
 
         if (!resp.identity.owner) {
-            alert("Login failed: owner identity not received")
             console.error("Login failed: owner identity not received")
             return;
         }
@@ -234,7 +227,6 @@ export const warpnetService = {
         if (!imgFile) {
             return ''
         }
-        const owner = this.getOwnerProfile()
 
         const request = {
             path: PRIVATE_POST_UPLOAD_IMAGE,
@@ -249,21 +241,13 @@ export const warpnetService = {
         if (!hashKey || hashKey.length === 0) {
             return ''
         }
-        this.invalidate(`user::${owner.user_id}`);
 
-        const cacheKey = `image::${owner.user_id}::${hashKey}`;
-        stateMap.set(cacheKey, imgFile);
         return hashKey;
     },
 
     async getImage({userId, key}) {
         if (!key || key.length === 0) {
             return null
-        }
-
-        const cacheKey = `image::${userId}::${key}`;
-        if (stateMap.has(cacheKey)) {
-            return stateMap.get(cacheKey);
         }
 
         const request = {
@@ -278,8 +262,6 @@ export const warpnetService = {
         if (!result) {
             return null
         }
-        stateMap.set(cacheKey, result.file);
-
         return result.file;
     },
 
@@ -325,10 +307,6 @@ export const warpnetService = {
         if (cursor === endCursor) {
             return null
         }
-        const cacheKey = `notifications`;
-        if (stateMap.has(cacheKey)) {
-            return stateMap.get(cacheKey);
-        }
 
         const request = {
             path: PRIVATE_GET_NOTIFICATIONS,
@@ -344,7 +322,6 @@ export const warpnetService = {
             return null
         }
         this.setCursor('notifications', resp.cursor || 'end')
-        stateMap.set(cacheKey, {})
         return resp;
     },
 
@@ -430,23 +407,15 @@ export const warpnetService = {
             },
         }
 
-        const followResp = await this.sendToNode(request);
-        if (!followResp) {
-            return null
-        }
-        const cacheKey = `isFollowed::${profileId}`;
-        stateMap.set(cacheKey, {})
-        return followResp;
+        return await this.sendToNode(request);
     },
 
     isFollowed(profileId) {
-        const cacheKey = `isFollowed::${profileId}`;
-        return stateMap.has(cacheKey);
+        // TODO
     },
 
     isFollower(profileId) {
-        const cacheKey = `isFollower::${profileId}`;
-        return stateMap.has(cacheKey)
+        // TODO
     },
 
     async unfollowUser(profileId) {
@@ -460,12 +429,7 @@ export const warpnetService = {
             },
         }
 
-        const unfollowResp = await this.sendToNode(request);
-        if (!unfollowResp) {
-            return null
-        }
-        stateMap.delete(`isFollowed::${profileId}`);
-        return unfollowResp;
+        return await this.sendToNode(request);
     },
 
     async getFollowers({userId, cursorReset}) {
@@ -495,12 +459,6 @@ export const warpnetService = {
             return []
         }
         followersResp.followers = followersResp.followers.filter(follower => follower !== userId);
-
-        for (const follower of followersResp.followers || []) {
-            const followerKey = `isFollower::${follower}`;
-            stateMap.set(followerKey, {})
-        }
-
         return followersResp.followers;
     },
 
@@ -544,12 +502,7 @@ export const warpnetService = {
             },
         }
 
-        const statsResp = await this.sendToNode(request);
-        if (!statsResp) {
-            return null
-        }
-
-        return statsResp;
+        return await this.sendToNode(request);
     },
 
     // create reply
@@ -877,29 +830,6 @@ export const warpnetService = {
         return result.body;
     }
 }
-
-
-// TTL in ms
-const ttlMap = {
-    'image': 6_000_000,
-}
-
-function startCacheCleaner() {
-    setInterval(() => {
-        for (const [prefix, ttl] of Object.entries(ttlMap)) {
-            const expirationKey = `${prefix}::expiration`;
-            const expiration = stateMap.get(expirationKey) || {createdAt: 0};
-            const now = Date.now();
-
-            if (now - expiration.createdAt > ttl) {
-                warpnetService.invalidate(prefix);
-                stateMap.set(expirationKey, {createdAt: now});
-            }
-        }
-    }, 1000);
-}
-
-startCacheCleaner();
 
 function startRefreshNotifications() {
     setInterval(() => {

@@ -23,59 +23,56 @@ resulting from the use or misuse of this software.
 */
 
 import {
+    PRIVATE_DELETE_CHAT,
+    PRIVATE_DELETE_TWEET,
+    PRIVATE_GET_CHAT,
+    PRIVATE_GET_CHATS,
+    PRIVATE_GET_MESSAGE,
+    PRIVATE_GET_MESSAGES,
+    PRIVATE_GET_NOTIFICATIONS,
+    PRIVATE_GET_STATS,
+    PRIVATE_GET_TIMELINE,
     PRIVATE_POST_LOGIN,
+    PRIVATE_POST_TWEET,
+    PRIVATE_POST_UPLOAD_IMAGE,
+    PRIVATE_POST_USER,
+    PUBLIC_DELETE_MESSAGE,
+    PUBLIC_DELETE_REPLY,
+    PUBLIC_GET_FOLLOWEES,
+    PUBLIC_GET_FOLLOWERS,
+    PUBLIC_GET_IMAGE,
+    PUBLIC_GET_REPLIES,
+    PUBLIC_GET_REPLY,
     PUBLIC_GET_TWEET,
     PUBLIC_GET_TWEET_STATS,
-    PRIVATE_GET_TIMELINE,
     PUBLIC_GET_TWEETS,
-    PUBLIC_POST_UNLIKE,
-    PRIVATE_POST_TWEET,
-    PUBLIC_POST_REPLY,
-    PUBLIC_GET_FOLLOWEES,
-    PUBLIC_GET_REPLY,
-    PRIVATE_GET_STATS,
-    PUBLIC_DELETE_REPLY,
-    PRIVATE_DELETE_TWEET,
-    PRIVATE_POST_USER,
-    PUBLIC_POST_UNFOLLOW,
     PUBLIC_GET_USER,
     PUBLIC_GET_USERS,
     PUBLIC_GET_WHOTOFOLLOW,
-    PUBLIC_GET_REPLIES,
-    PUBLIC_GET_FOLLOWERS,
+    PUBLIC_POST_CHAT,
     PUBLIC_POST_FOLLOW,
     PUBLIC_POST_LIKE,
-    PUBLIC_POST_RETWEET,
-    PUBLIC_POST_UNRETWEET,
-    PUBLIC_POST_CHAT,
-    PRIVATE_DELETE_CHAT,
-    PRIVATE_GET_CHATS,
-    PRIVATE_GET_CHAT,
-    PRIVATE_GET_MESSAGES,
     PUBLIC_POST_MESSAGE,
-    PRIVATE_GET_MESSAGE,
-    PUBLIC_DELETE_MESSAGE,
-    PRIVATE_POST_UPLOAD_IMAGE,
-    PUBLIC_GET_IMAGE,
-    PRIVATE_GET_NOTIFICATIONS
+    PUBLIC_POST_REPLY,
+    PUBLIC_POST_RETWEET,
+    PUBLIC_POST_UNFOLLOW,
+    PUBLIC_POST_UNLIKE,
+    PUBLIC_POST_UNRETWEET
 } from "@/service/service";
 import {generateUUID} from "@/lib/uuid";
 
 const mockMap = new Map();
 
-// {"path":"/private/get/notifications/0.0.0","body":{"limit":20,"cursor":""},
-// "message_id":"3e5c6206-b4c6-4418-882e-4c06c6b070b0","node_id":"None","timestamp":"2025-10-21T12:15:12.628Z"}
 if (process.env.NODE_ENV === 'development') {
-    console.warn("⚠️ Running in standalone mode — mocking window.go");
+    console.warn("⚠️ Running in standalone mode — mocking window.go ⚠️");
 
     window.go = {
         main: {
             App: {
                 Call: (arg1) => {
-                    console.log(`[MOCK] window.go.main.App.Call(${JSON.stringify(arg1)})`);
+                    console.debug(`[MOCK] window.go.main.App.Call(${JSON.stringify(arg1)})`);
                     const body = generateResponse(arg1);
-                    console.log(`[MOCK] window.go.main.App.Response(${JSON.stringify(body)})`);
-
+                    console.debug(`[MOCK] window.go.main.App.Response(${JSON.stringify(body)})`);
                     return Promise.resolve({body:body});
                 }
             }
@@ -96,26 +93,10 @@ function generateResponse(arg) {
                 created_at: Date.now().toString(),
             }
 
-            const u = {
-                avatar_key: "", // MIME + base64
-                background_image_key: "",
-                bio: "",
-                created_at: Date.now().toString(),
-                id: uid,
-                isOffline: false,
-                node_id: arg.node_id  || "None",
-                network: "warpnet",
-                username: arg.body.username || "Missing!",
-                website: "https://warp-net.github.io/",
-                moderation: {is_ok: true},
-                birthdate: "",
-                updated_at: "",
-                followees_count: 0,
-                followers_count: 0,
-                latency: 0,
-                tweets_count: 0,
-                metadata: {},
-            }
+            const u = newUser()
+            u.node_id = arg.node_id  || "None"
+            u.username = arg.body.username || "Missing!"
+
             mockMap.set("user:"+u.id, u)
             return {identity: {token: generateUUID(), owner: owner}}
 
@@ -141,13 +122,7 @@ function generateResponse(arg) {
             timelineList.push(t)
             mockMap.set("timeline", timelineList)
 
-            let stats = {
-                tweet_id: t.id,
-                retweets_count: 0,
-                likes_count: 0,
-                replies_count: 0,
-                views_count: 0,
-            }
+            let stats = newStats(t.id)
             mockMap.set("stats:"+t.id, stats)
             return t
 
@@ -191,6 +166,14 @@ function generateResponse(arg) {
 
         case PUBLIC_GET_USERS:
             let usersList = []
+            for (let i = 0; i < 5; i++)  {
+                const nu = newUser()
+                nu.username = ""+i
+                usersList.push(nu)
+                mockMap.set("user:"+nu.id, nu)
+            }
+
+
             for (const [key, value] of mockMap) {
                 if (key.startsWith("user:")) {
                     usersList.push(value)
@@ -211,20 +194,55 @@ function generateResponse(arg) {
         case PUBLIC_GET_WHOTOFOLLOW:
             const allUsers = [];
             for (const [key, value] of mockMap) {
-                if (key.startsWith("user:")) allUsers.push(value);
+                if (key.startsWith("user:")) {
+                    const id = key.substring("user:".length)
+                    if (id === arg.body.user_id) {
+                        continue
+                    }
+                    const followed = mockMap.get("follow:"+id)
+                    if (followed) {
+                        continue
+                    }
+                    allUsers.push(value);
+                }
             }
             return {users: allUsers.slice(0, 3)};
 
-        case PUBLIC_GET_FOLLOWERS:
-            return {cursor: "end", followers: [], followee: arg.body.user_id};
-        case PUBLIC_GET_FOLLOWEES:
-            return {cursor: "end", followees: [], follower: arg.body.user_id};
 
         case PUBLIC_POST_FOLLOW:
+            const followerUser = mockMap.get("user:"+arg.body.follower)
+            if (!followerUser) return {code:404, message:"User not found"};
+            followerUser.followees_count++
+            mockMap.set("user:"+arg.body.follower, followerUser)
+
+            mockMap.set("follow:"+arg.body.followee, {});
             return {code: 0, message: "Accepted"};
 
         case PUBLIC_POST_UNFOLLOW:
+            const unfollowerUser = mockMap.get("user:"+arg.body.follower)
+            if (!unfollowerUser) return {code: 0, message: "Accepted"};
+            unfollowerUser.followees_count--
+            mockMap.set("user:"+arg.body.follower, unfollowerUser)
+
+            mockMap.delete("follow:"+arg.body.followee)
             return {code: 0, message: "Accepted"};
+
+        case PUBLIC_GET_FOLLOWERS:
+            let followersList = []
+            for (const [key, value] of mockMap) {
+                if (key.startsWith("follow:")) {
+                    followersList.push(value)
+                }
+            }
+            return {cursor: "end", followers: followersList, followee: arg.body.user_id};
+        case PUBLIC_GET_FOLLOWEES:
+            let followeesList = [] // TODO pretend they're mutual
+            for (const [key, value] of mockMap) {
+                if (key.startsWith("follow:")) {
+                    followeesList.push(value)
+                }
+            }
+            return {cursor: "end", followees: followeesList, follower: arg.body.user_id};
 
         case PUBLIC_POST_LIKE:
             let likeStats = mockMap.get("stats:"+arg.body.tweet_id)
@@ -239,10 +257,20 @@ function generateResponse(arg) {
             return {count: unlikeStats.likes_count};
 
         case PUBLIC_POST_RETWEET:
-            return {code: 0, message: "Accepted"}; // TODO
+            let retweetStats = mockMap.get("stats:"+arg.body.tweet_id)
+            retweetStats.retweets_count++
+            mockMap.set("stats:"+arg.body.tweet_id, retweetStats)
+
+            const retweetedTweet = mockMap.get("tweet:"+arg.body.tweet_id)
+            retweetedTweet.retweeted_by = arg.body.retweeted_by
+            mockMap.set("tweet:"+retweetedTweet.id, retweetedTweet)
+            return retweetedTweet // TODO add to timeline and tweets
 
         case PUBLIC_POST_UNRETWEET:
-            return {code: 0, message: "Accepted"}; // TODO
+            let unretweetStats = mockMap.get("stats:"+arg.body.tweet_id)
+            unretweetStats.retweets_count--
+            mockMap.set("stats:"+arg.body.tweet_id, unretweetStats)
+            return {code:0, message:"Accepted"};
 
         case PUBLIC_POST_REPLY:
             let reply = {
@@ -286,7 +314,7 @@ function generateResponse(arg) {
         case PRIVATE_DELETE_TWEET:
             mockMap.get("stats:"+arg.body.tweet_id) // delete from timeline
             mockMap.delete("tweet:"+arg.body.tweet_id);
-            return {code:0, message:"Deleted"};
+            return {code:0, message:"Accepted"};
 
         case PUBLIC_POST_CHAT:
             const chatId = generateUUID();
@@ -336,6 +364,39 @@ function generateResponse(arg) {
             return {notifications: []};
 
         default:
-        return {code:0,message:"Accepted"};
+            return {code:0,message:"Accepted"};
+    }
+}
+
+function newUser() {
+    return {
+        avatar_key: "", // MIME + base64
+        background_image_key: "",
+        bio: "",
+        created_at: Date.now().toString(),
+        id: generateUUID(),
+        isOffline: false,
+        node_id: "None",
+        network: "warpnet",
+        username: "Missing!",
+        website: "https://warp-net.github.io/",
+        moderation: {is_ok: true},
+        birthdate: "",
+        updated_at: "",
+        followees_count: 0,
+        followers_count: 0,
+        latency: 0,
+        tweets_count: 0,
+        metadata: {},
+    }
+}
+
+function newStats(id) {
+    return {
+        tweet_id: id,
+        retweets_count: 0,
+        likes_count: 0,
+        replies_count: 0,
+        views_count: 0,
     }
 }
