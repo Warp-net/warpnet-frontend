@@ -415,7 +415,6 @@ export const warpnetService = {
         }
 
         const resp = await this.sendToNode(request);
-        console.log(JSON.stringify(resp), "isFollowing ????????")
         return resp?.is_following || false
     },
 
@@ -428,8 +427,6 @@ export const warpnetService = {
         }
 
         const resp = await this.sendToNode(request);
-        console.log(JSON.stringify(resp), "isFollower ????????")
-
         return resp?.is_follower || false
     },
 

@@ -108,6 +108,13 @@ export default {
         },
       });
     },
+    async loadMore() {
+      const followers = warpnetService.getFollowers({userId:this.profile.id, cursorReset: false})
+      for (const id of followers) {
+        const u = await warpnetService.getProfile(id)
+        this.profiles.push(u)
+      }
+    },
   },
   async created() {
     console.log("loading component:", this.$options.name);
@@ -122,7 +129,12 @@ export default {
     }
 
     this.profile = await warpnetService.getProfile(profileId);
-    this.profiles = await warpnetService.getUsers({profileId:profileId, cursorReset:true})
+
+    const followers = warpnetService.getFollowers({userId:profileId, cursorReset: true})
+    for (const id of followers) {
+      const u = await warpnetService.getProfile(id)
+      this.profiles.push(u)
+    }
     this.loading = false;
   },
 };

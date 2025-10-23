@@ -110,21 +110,28 @@ export default {
         },
       });
     },
+    async loadMore() {
+      const followings = warpnetService.getFollowings({userId:this.profile.id, cursorReset: false})
+      for (const id of followings) {
+        const u = await warpnetService.getProfile(id)
+        this.profiles.push(u)
+      }
+    },
   },
   async created() {
     console.log("loading component:", this.$options.name);
-    try {
-      if (this.profiles.length > 0) {
-        this.loading = false;
-      }
-      const profileId = this.$route.params.id;
-      this.profile = await warpnetService.getProfile(profileId);
-      this.profiles = await warpnetService.getUsers({profileId:profileId, cursorReset:true});
-      this.loading = false;
-    } catch (err) {
-      console.error('Ошибка при загрузке подписок:', err);
+    if (this.profiles.length > 0) {
       this.loading = false;
     }
+    const profileId = this.$route.params.id;
+    this.profile = await warpnetService.getProfile(profileId);
+
+    const followings = warpnetService.getFollowings({userId:profileId, cursorReset: true})
+    for (const id of followings) {
+      const u = await warpnetService.getProfile(id)
+      this.profiles.push(u)
+    }
+    this.loading = false;
   },
 };
 </script>
