@@ -45,14 +45,14 @@ resulting from the use or misuse of this software.
         </div>
         <div v-if="profile && profile.user_id !== user.id">
           <button
-            v-if="!user.following"
+            v-if="!isFollowing()"
             @click="follow"
             class="ml-auto text-blue font-bold px-4 py-1 rounded-full border border-blue mb-2 hover:bg-lightblue"
           >
             Follow
           </button>
           <button
-            v-if="user.following"
+            v-if="isFollowing()"
             @mouseover="followingLabel = 'Unfollow'"
             @mouseleave="followingLabel = 'Following'"
             @click="unfollow"
@@ -97,10 +97,15 @@ export default {
     };
   },
   methods: {
+    isFollower() {
+      return warpnetService.isFollower(this.user.id);
+    },
+    isFollowing() {
+      return warpnetService.isFollowing(this.user.id);
+    },
     async follow() {
       try {
         await warpnetService.followUser(this.user.id);
-        this.user.following = true;
       } catch (err) {
         console.error(`failed to follow [${this.user.id}]`, err);
       }
@@ -108,7 +113,6 @@ export default {
     async unfollow() {
       try {
         await warpnetService.unfollowUser(this.user.id);
-        this.user.following = false;
       } catch (err) {
         console.error(`failed to unfollow [${this.user.id}]`, err);
       }

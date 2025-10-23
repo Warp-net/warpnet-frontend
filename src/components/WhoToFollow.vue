@@ -38,14 +38,14 @@ resulting from the use or misuse of this software.
         <p class="text-left text-sm leading-tight text-dark">{{ profile.id.slice(0, 8) }}...</p>
       </div>
       <button
-        v-if="!isFollowed(profile.id)"
+        v-if="!isFollowing(profile.id)"
         @click="follow(profile.id)" 
         class="ml-auto text-sm text-blue font-bold px-4 py-1 rounded-full border border-blue m-2"
       >
         Follow
       </button>
       <button
-          v-if="isFollowed(profile.id)"
+          v-if="isFollowing(profile.id)"
           @click="unfollow(profile.id)"
           class="ml-auto text-sm text-blue font-bold px-4 py-1 rounded-full border border-blue m-2"
       >
@@ -83,8 +83,8 @@ export default {
         }
       });
     },
-    isFollowed(profileId) {
-      return warpnetService.isFollowed(profileId)
+    isFollowing(profileId) {
+      return warpnetService.isFollowing(profileId)
     },
     async follow(profileId) {
       await warpnetService.followUser(profileId);
