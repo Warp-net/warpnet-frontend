@@ -61,18 +61,14 @@ export const PUBLIC_DELETE_MESSAGE = "/public/delete/message/0.0.0"
 export const PRIVATE_POST_UPLOAD_IMAGE = "/private/post/image/0.0.0"
 export const PUBLIC_GET_IMAGE = "/public/get/image/0.0.0"
 export const PRIVATE_POST_LOGIN = "/private/post/login/0.0.0"
+export const PUBLIC_POST_IS_FOLLOWING  = "/public/post/isfollowing/0.0.0"
+export const PUBLIC_POST_IS_FOLLOWER   = "/public/post/isfollower/0.0.0"
 
 const stateMap = new Map();
 const defaultLimit = 20
 const endCursor = "end"
 
 export const warpnetService = {
-    invalidate(prefix) {
-        const keysToDelete = Array.from(stateMap.keys()).filter(k => k.startsWith(prefix));
-        for (const key of keysToDelete) {
-            stateMap.delete(key);
-        }
-    },
     setQR(qrData) {
         const key = `QR`;
         stateMap.set(key, qrData)
@@ -410,12 +406,28 @@ export const warpnetService = {
         return await this.sendToNode(request);
     },
 
-    isFollowed(profileId) {
-        // TODO
+    async isFollowing(profileId) {
+        const request = {
+            path: PUBLIC_POST_IS_FOLLOWING,
+            body: {
+                user_id: profileId,
+            },
+        }
+
+        const resp = await this.sendToNode(request);
+        return resp?.is_following || false
     },
 
-    isFollower(profileId) {
-        // TODO
+    async isFollower(profileId) {
+        const request = {
+            path: PUBLIC_POST_IS_FOLLOWER,
+            body: {
+                user_id: profileId,
+            },
+        }
+
+        const resp = await this.sendToNode(request);
+        return resp?.is_follower || false
     },
 
     async unfollowUser(profileId) {

@@ -110,14 +110,14 @@ resulting from the use or misuse of this software.
                 <i @click="sendMessage()" class="fas fa-envelope"></i>
               </button>
               <button
-                v-if="!isFollowed()"
+                v-if="!isFollowing()"
                 @click="follow()"
                 class="text-xs md:text-base md:ml-auto text-blue font-bold px-2 py-1 md:px-4 md:py-2 rounded-full border border-blue mb-2 hover:bg-lightblue w-24 md:w-28"
               >
                 Follow
               </button>
               <button
-                v-if="isFollowed()"
+                v-if="isFollowing()"
                 @mouseover="followingLabel = 'Unfollow'"
                 @mouseleave="followingLabel = 'Following'"
                 @click="unfollow()"
@@ -313,8 +313,8 @@ export default {
     isFollower() {
       return warpnetService.isFollower(this.profile.id);
     },
-    isFollowed() {
-      return warpnetService.isFollowed(this.profile.id);
+    isFollowing() {
+      return warpnetService.isFollowing(this.profile.id);
     },
     goToFollowing() {
       this.$router.push({
