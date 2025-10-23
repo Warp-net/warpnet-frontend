@@ -88,13 +88,13 @@ function generateResponse(arg) {
 
             const owner = {
                 username: arg.body.username || "Missing!",
-                node_id: arg.node_id  || "None",
+                node_id: arg.node_id,
                 user_id: uid,
                 created_at: Date.now().toString(),
             }
 
             const u = newUser()
-            u.node_id = arg.node_id  || "None"
+            u.node_id = arg.node_id
             u.username = arg.body.username || "Missing!"
 
             mockMap.set("user:"+u.id, u)
@@ -376,7 +376,7 @@ function newUser() {
         created_at: Date.now().toString(),
         id: generateUUID(),
         isOffline: false,
-        node_id: "None",
+        node_id: "",
         network: "warpnet",
         username: "Missing!",
         website: "https://warp-net.github.io/",

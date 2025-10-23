@@ -45,7 +45,6 @@
 //   async loginUser(form) {
 //     let id = await client.sendMessage({
 //       path: PRIVATE_POST_LOGIN,
-//       node_id: "None",
 //       body: {
 //         username: form.username,
 //         password: form.password,
