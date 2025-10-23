@@ -288,6 +288,8 @@ export default {
       users: [],
       followers: [],
       followings: [],
+      followingStatus: new Map(),
+      followerStatus: new Map(),
     };
   },
   methods: {
@@ -311,10 +313,10 @@ export default {
       });
     },
     isFollower() {
-      return warpnetService.isFollower(this.profile.id);
+      return this.followerStatus.get(this.profile.id) || false
     },
     isFollowing() {
-      return warpnetService.isFollowing(this.profile.id);
+      return this.followingStatus.get(this.profile.id) || false
     },
     goToFollowing() {
       this.$router.push({
@@ -343,14 +345,18 @@ export default {
         await warpnetService.followUser(this.profile.id);
       } catch (err) {
         console.error(`failed to follow [${this.profile.id}]`, err);
+        return
       }
+      this.followingStatus.set(this.profile.id, true)
     },
     async unfollow() {
       try {
         await warpnetService.unfollowUser(this.profile.id);
       } catch (err) {
         console.error(`failed to unfollow [${this.profile.id}]`, err);
+        return
       }
+      this.followingStatus.set(this.profile.id, false)
     },
     async loadMore() {
       const tweets = await warpnetService.getTweets({userId:this.profile.id, cursorReset:false});
@@ -412,9 +418,17 @@ export default {
     } catch (err) {
       console.error('Failed to load profile:', err);
       this.noUser = true;
-    } finally {
-      this.loading = false;
+      this.loading = false
+      return
     }
+    for (const p of this.users) {
+      const followingStatus = await warpnetService.isFollowing(p.id);
+      this.followingStatus.set(p.id, followingStatus);
+
+      const followerStatus = await warpnetService.isFollower(p.id);
+      this.followerStatus.set(p.id, followerStatus);
+    }
+    this.loading = false;
   },
 };
 </script>

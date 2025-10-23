@@ -72,6 +72,7 @@ export default {
       ownerProfile: undefined,
       profiles: [],
       profilesAvatars: new Map(),
+      followingStatus: new Map(),
     };
   },
   methods: {
@@ -84,13 +85,15 @@ export default {
       });
     },
     isFollowing(profileId) {
-      return warpnetService.isFollowing(profileId)
+      return this.followingStatus.get(profileId) || false
     },
     async follow(profileId) {
       await warpnetService.followUser(profileId);
+      this.followingStatus.set(profileId, true)
     },
     async unfollow(profileId) {
       await warpnetService.unfollowUser(profileId);
+      this.followingStatus.set(profileId, false)
     },
     getAvatar(userId, avatarKey) {
       this.loadAvatar(userId, avatarKey)
@@ -102,7 +105,12 @@ export default {
     },
     async loadMore() {
       const users = await warpnetService.getWhoToFollow(this.profile.id,false)
+      for (const p of users) {
+        const status = await warpnetService.isFollowing(p.id);
+        this.followingStatus.set(p.id, status);
+      }
       this.profiles = [...this.profiles, ...users];
+
     },
    },
   async created() {
@@ -113,6 +121,10 @@ export default {
       this.profile = this.ownerProfile;
     }
     this.profiles = await warpnetService.getWhoToFollow(this.profile.id, true)
+    for (const p of this.profiles) {
+      const status = await warpnetService.isFollowing(p.id);
+      this.followingStatus.set(p.id, status);
+    }
   },
 };
 </script>

@@ -94,28 +94,30 @@ export default {
     return {
       followingLabel: "Following",
       profile: {},
+      followingStatus: new Map(),
     };
   },
   methods: {
-    isFollower() {
-      return warpnetService.isFollower(this.user.id);
-    },
     isFollowing() {
-      return warpnetService.isFollowing(this.user.id);
+      return this.followingStatus.get(this.user.id) || false
     },
     async follow() {
       try {
         await warpnetService.followUser(this.user.id);
       } catch (err) {
         console.error(`failed to follow [${this.user.id}]`, err);
+        return
       }
+      this.followingStatus.set(this.user.id, true);
     },
     async unfollow() {
       try {
         await warpnetService.unfollowUser(this.user.id);
       } catch (err) {
         console.error(`failed to unfollow [${this.user.id}]`, err);
+        return
       }
+      this.followingStatus.set(this.user.id, false);
     },
     async pushToProfilePage(profileId) {
       this.$router.push({
@@ -132,6 +134,9 @@ export default {
     this.profile.background_image = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.background_image_key});
     this.profile.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.avatar_key})
     this.user.avatar = await warpnetService.getImage({userId:this.user.id, key:this.user.avatar_key})
+
+    const status = await warpnetService.isFollowing(this.user.id);
+    this.followingStatus.set(this.user.id, status);
   },
 };
 </script>
