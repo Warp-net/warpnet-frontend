@@ -402,8 +402,8 @@ export const warpnetService = {
         const request = {
             path: PUBLIC_POST_FOLLOW,
             body: {
-                following: profileId,
-                follower: owner.user_id,
+                followingId: profileId,
+                followerId: owner.user_id,
             },
         }
 
@@ -424,8 +424,8 @@ export const warpnetService = {
         const request = {
             path: PUBLIC_POST_UNFOLLOW,
             body: {
-                following: profileId,
-                follower: owner.user_id,
+                followingId: profileId,
+                followerId: owner.user_id,
             },
         }
 

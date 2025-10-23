@@ -210,19 +210,19 @@ function generateResponse(arg) {
 
 
         case PUBLIC_POST_FOLLOW:
-            const followerUser = mockMap.get("user:"+arg.body.follower)
+            const followerUser = mockMap.get("user:"+arg.body.followerId)
             if (!followerUser) return {code:404, message:"User not found"};
             followerUser.followings_count++
-            mockMap.set("user:"+arg.body.follower, followerUser)
+            mockMap.set("user:"+arg.body.followerId, followerUser)
 
             mockMap.set("follow:"+arg.body.following, {});
             return {code: 0, message: "Accepted"};
 
         case PUBLIC_POST_UNFOLLOW:
-            const unfollowerUser = mockMap.get("user:"+arg.body.follower)
+            const unfollowerUser = mockMap.get("user:"+arg.body.followerId)
             if (!unfollowerUser) return {code: 0, message: "Accepted"};
             unfollowerUser.followings_count--
-            mockMap.set("user:"+arg.body.follower, unfollowerUser)
+            mockMap.set("user:"+arg.body.followerId, unfollowerUser)
 
             mockMap.delete("follow:"+arg.body.following)
             return {code: 0, message: "Accepted"};
@@ -234,7 +234,7 @@ function generateResponse(arg) {
                     followersList.push(value)
                 }
             }
-            return {cursor: "end", followers: followersList, following: arg.body.user_id};
+            return {cursor: "end", followers: followersList, followingId: arg.body.user_id};
         case PUBLIC_GET_FOLLOWINGS:
             let followingsList = [] // TODO pretend they're mutual
             for (const [key, value] of mockMap) {
@@ -242,7 +242,7 @@ function generateResponse(arg) {
                     followingsList.push(value)
                 }
             }
-            return {cursor: "end", followings: followingsList, follower: arg.body.user_id};
+            return {cursor: "end", followings: followingsList, followerId: arg.body.user_id};
 
         case PUBLIC_POST_LIKE:
             let likeStats = mockMap.get("stats:"+arg.body.tweet_id)
