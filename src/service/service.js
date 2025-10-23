@@ -211,7 +211,7 @@ export const warpnetService = {
         }
 
         const followResp = await this.sendToNode(request);
-        if (!followResp) {
+        if (!followResp || followResp.users.length === 0) {
             return []
         }
         this.setCursor('whotofollow', followResp.cursor || "")
@@ -839,11 +839,16 @@ export const warpnetService = {
         if (!result) {
             throw new Error(`Unable to send ${request.message_id}`);
         }
-        return result.body;
+        return result.body || {};
     }
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function startRefreshNotifications() {
+    sleep(5000)
     setInterval(() => {
         try {
             const owner = warpnetService.getOwnerProfile

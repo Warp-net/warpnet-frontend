@@ -96,7 +96,7 @@ export default {
       this.$router.push({
         name: "Profile",
         params: {
-          id: this.profile.user_id,
+          id: this.profile.id,
         },
       });
     },
@@ -104,12 +104,12 @@ export default {
       this.$router.push({
         name: "Following",
         params: {
-          id: this.profile.user_id,
+          id: this.profile.id,
         },
       });
     },
     async loadMore() {
-      const followers = warpnetService.getFollowers({userId:this.profile.id, cursorReset: false})
+      const followers = await warpnetService.getFollowers({userId:this.profile.id, cursorReset: false})
       for (const id of followers) {
         const u = await warpnetService.getProfile(id)
         this.profiles.push(u)
@@ -118,24 +118,24 @@ export default {
   },
   async created() {
     console.log("loading component:", this.$options.name);
+    try {
+      const profileId = this.$route.params.id;
+      if (!profileId) {
+        throw new Error('Profile ID is required');
+      }
 
-    if (this.profiles.length > 0) {
+      this.profile = await warpnetService.getProfile(profileId);
+
+      const followers = await warpnetService.getFollowers({userId: profileId, cursorReset: true})
+      for (const id of followers) {
+        const u = await warpnetService.getProfile(id)
+        this.profiles.push(u)
+      }
+    } catch (err) {
+        console.error("loading component:", this.$options.name, err)
+    } finally {
       this.loading = false;
     }
-
-    const profileId = this.$route.params.id;
-    if (!profileId) {
-      throw new Error('Profile ID is required');
-    }
-
-    this.profile = await warpnetService.getProfile(profileId);
-
-    const followers = warpnetService.getFollowers({userId:profileId, cursorReset: true})
-    for (const id of followers) {
-      const u = await warpnetService.getProfile(id)
-      this.profiles.push(u)
-    }
-    this.loading = false;
   },
 };
 </script>

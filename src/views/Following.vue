@@ -98,7 +98,7 @@ export default {
       this.$router.push({
         name: "Profile",
         params: {
-          id: this.profile.user_id,
+          id: this.profile.id,
         },
       });
     },
@@ -106,12 +106,12 @@ export default {
       this.$router.push({
         name: "Followers",
         params: {
-          id: this.profile.user_id,
+          id: this.profile.id,
         },
       });
     },
     async loadMore() {
-      const followings = warpnetService.getFollowings({userId:this.profile.id, cursorReset: false})
+      const followings = await warpnetService.getFollowings({userId:this.profile.id, cursorReset: false})
       for (const id of followings) {
         const u = await warpnetService.getProfile(id)
         this.profiles.push(u)
@@ -120,18 +120,21 @@ export default {
   },
   async created() {
     console.log("loading component:", this.$options.name);
-    if (this.profiles.length > 0) {
+
+    try {
+      const profileId = this.$route.params.id;
+      this.profile = await warpnetService.getProfile(profileId);
+
+      const followings = await warpnetService.getFollowings({userId:profileId, cursorReset: true})
+      for (const id of followings) {
+        const u = await warpnetService.getProfile(id)
+        this.profiles.push(u)
+      }
+    } catch (err) {
+      console.error("loading component:", this.$options.name, err)
+    } finally {
       this.loading = false;
     }
-    const profileId = this.$route.params.id;
-    this.profile = await warpnetService.getProfile(profileId);
-
-    const followings = warpnetService.getFollowings({userId:profileId, cursorReset: true})
-    for (const id of followings) {
-      const u = await warpnetService.getProfile(id)
-      this.profiles.push(u)
-    }
-    this.loading = false;
   },
 };
 </script>
