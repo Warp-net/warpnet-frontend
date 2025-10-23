@@ -38,7 +38,7 @@ import {
     PRIVATE_POST_USER,
     PUBLIC_DELETE_MESSAGE,
     PUBLIC_DELETE_REPLY,
-    PUBLIC_GET_FOLLOWEES,
+    PUBLIC_GET_FOLLOWINGS,
     PUBLIC_GET_FOLLOWERS,
     PUBLIC_GET_IMAGE,
     PUBLIC_GET_REPLIES,
@@ -212,19 +212,19 @@ function generateResponse(arg) {
         case PUBLIC_POST_FOLLOW:
             const followerUser = mockMap.get("user:"+arg.body.follower)
             if (!followerUser) return {code:404, message:"User not found"};
-            followerUser.followees_count++
+            followerUser.followings_count++
             mockMap.set("user:"+arg.body.follower, followerUser)
 
-            mockMap.set("follow:"+arg.body.followee, {});
+            mockMap.set("follow:"+arg.body.following, {});
             return {code: 0, message: "Accepted"};
 
         case PUBLIC_POST_UNFOLLOW:
             const unfollowerUser = mockMap.get("user:"+arg.body.follower)
             if (!unfollowerUser) return {code: 0, message: "Accepted"};
-            unfollowerUser.followees_count--
+            unfollowerUser.followings_count--
             mockMap.set("user:"+arg.body.follower, unfollowerUser)
 
-            mockMap.delete("follow:"+arg.body.followee)
+            mockMap.delete("follow:"+arg.body.following)
             return {code: 0, message: "Accepted"};
 
         case PUBLIC_GET_FOLLOWERS:
@@ -234,15 +234,15 @@ function generateResponse(arg) {
                     followersList.push(value)
                 }
             }
-            return {cursor: "end", followers: followersList, followee: arg.body.user_id};
-        case PUBLIC_GET_FOLLOWEES:
-            let followeesList = [] // TODO pretend they're mutual
+            return {cursor: "end", followers: followersList, following: arg.body.user_id};
+        case PUBLIC_GET_FOLLOWINGS:
+            let followingsList = [] // TODO pretend they're mutual
             for (const [key, value] of mockMap) {
                 if (key.startsWith("follow:")) {
-                    followeesList.push(value)
+                    followingsList.push(value)
                 }
             }
-            return {cursor: "end", followees: followeesList, follower: arg.body.user_id};
+            return {cursor: "end", followings: followingsList, follower: arg.body.user_id};
 
         case PUBLIC_POST_LIKE:
             let likeStats = mockMap.get("stats:"+arg.body.tweet_id)
@@ -383,7 +383,7 @@ function newUser() {
         moderation: {is_ok: true},
         birthdate: "",
         updated_at: "",
-        followees_count: 0,
+        followings_count: 0,
         followers_count: 0,
         latency: 0,
         tweets_count: 0,

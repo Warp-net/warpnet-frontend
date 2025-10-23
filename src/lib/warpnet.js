@@ -7,7 +7,7 @@
 // const PUBLIC_POST_UNLIKE = "/public/post/unlike/0.0.0"
 // const PRIVATE_POST_TWEET = "/private/post/tweet/0.0.0"
 // const PUBLIC_POST_REPLY = "/public/post/reply/0.0.0"
-// const PUBLIC_GET_FOLLOWEES = "/public/get/followees/0.0.0"
+// const PUBLIC_GET_FOLLOWINGS = "/public/get/followings/0.0.0"
 // const PUBLIC_GET_REPLY = "/public/get/reply/0.0.0"
 // const PRIVATE_GET_STATS = "/private/get/admin/stats/0.0.0"
 // const PRIVATE_POST_RESET       = "/private/post/reset/0.0.0"
@@ -262,7 +262,7 @@
 //       node_id: ownerNodeId,
 //       timestamp: new Date().toISOString(),
 //       body: {
-//         followee: profileId,
+//         following: profileId,
 //         follower: ownerUserId,
 //       },
 //     })
@@ -275,7 +275,7 @@
 //       node_id: ownerNodeId,
 //       timestamp: new Date().toISOString(),
 //       body: {
-//         followee: profileId,
+//         following: profileId,
 //         follower: ownerUserId,
 //       },
 //     })
@@ -299,7 +299,7 @@
 //
 //   async getFollowing({ownerNodeId, userId, limit, cursor}) {
 //     let id = await client.sendMessage({
-//       path: PUBLIC_GET_FOLLOWEES,
+//       path: PUBLIC_GET_FOLLOWINGS,
 //       node_id: ownerNodeId,
 //       timestamp: new Date().toISOString(),
 //       body: {

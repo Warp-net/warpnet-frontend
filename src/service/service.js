@@ -34,7 +34,7 @@ export const PRIVATE_GET_NOTIFICATIONS = "/private/get/notifications/0.0.0"
 export const PUBLIC_POST_UNLIKE = "/public/post/unlike/0.0.0"
 export const PRIVATE_POST_TWEET = "/private/post/tweet/0.0.0"
 export const PUBLIC_POST_REPLY = "/public/post/reply/0.0.0"
-export const PUBLIC_GET_FOLLOWEES = "/public/get/followees/0.0.0"
+export const PUBLIC_GET_FOLLOWINGS = "/public/get/followings/0.0.0"
 export const PUBLIC_GET_REPLY = "/public/get/reply/0.0.0"
 export const PRIVATE_GET_STATS = "/private/get/admin/stats/0.0.0"
 export const PUBLIC_DELETE_REPLY = "/public/delete/reply/0.0.0"
@@ -402,7 +402,7 @@ export const warpnetService = {
         const request = {
             path: PUBLIC_POST_FOLLOW,
             body: {
-                followee: profileId,
+                following: profileId,
                 follower: owner.user_id,
             },
         }
@@ -424,7 +424,7 @@ export const warpnetService = {
         const request = {
             path: PUBLIC_POST_UNFOLLOW,
             body: {
-                followee: profileId,
+                following: profileId,
                 follower: owner.user_id,
             },
         }
@@ -462,8 +462,8 @@ export const warpnetService = {
         return followersResp.followers;
     },
 
-    async getFollowees({userId, cursorReset}) {
-        let cursor = this.getCursor('followees')
+    async getFollowings({userId, cursorReset}) {
+        let cursor = this.getCursor('followings')
         if (cursorReset) {
             cursor = ''
         }
@@ -472,7 +472,7 @@ export const warpnetService = {
         }
 
         const request = {
-            path: PUBLIC_GET_FOLLOWEES,
+            path: PUBLIC_GET_FOLLOWINGS,
             body: {
                 user_id: userId,
                 cursor: cursor,
@@ -480,17 +480,17 @@ export const warpnetService = {
             },
         }
 
-        const followeesResp = await this.sendToNode(request);
-        if (!followeesResp) {
+        const followingsResp = await this.sendToNode(request);
+        if (!followingsResp) {
             return []
         }
-        this.setCursor('followees', followeesResp.cursor || 'end')
-        if (!followeesResp.followees || followeesResp.followees.length === 0) {
+        this.setCursor('followings', followingsResp.cursor || 'end')
+        if (!followingsResp.followings || followingsResp.followings.length === 0) {
             return []
         }
-        followeesResp.followees = followeesResp.followees.filter(followee => followee !== userId);
+        followingsResp.followings = followingsResp.followings.filter(following => following !== userId);
 
-        return followeesResp.followees;
+        return followingsResp.followings;
     },
 
     async getTweetStats(tweetId, userId) {

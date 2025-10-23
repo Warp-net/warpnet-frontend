@@ -166,7 +166,7 @@ resulting from the use or misuse of this software.
                 @click="goToFollowing()"
                 class="mr-4 flex flex-row hover:underline"
               >
-                <span class="font-bold">{{ profile.followees_count || 0 }}</span>
+                <span class="font-bold">{{ profile.followings_count || 0 }}</span>
                 <span class="text-dark whitespace-pre"> Following</span>
               </button>
               <button
@@ -407,7 +407,7 @@ export default {
         warpnetService.getUsers({profileId:profileId, cursorReset:true}),
         warpnetService.getTweets({userId:profileId, cursorReset:true}),
         warpnetService.getFollowers({userId:profileId, cursorReset: true}),
-        warpnetService.getFollowees({userId:profileId, cursorReset: true})
+        warpnetService.getFollowings({userId:profileId, cursorReset: true})
       ]);
     } catch (err) {
       console.error('Failed to load profile:', err);
