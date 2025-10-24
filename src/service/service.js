@@ -832,7 +832,7 @@ export const warpnetService = {
         const owner = this.getOwnerProfile()
 
         request.message_id = generateUUID()
-        request.node_id = owner.node_id
+        request.node_id = owner?.node_id || "Blank"
         request.timestamp = new Date().toISOString()
 
         const result = await Call(request);
