@@ -49,7 +49,7 @@ resulting from the use or misuse of this software.
           <div class="flex items-start px-4 py-2 hover:bg-lightest border-b">
             <div class="mr-4">
               <img
-                  :src="getUser(chat.other_user_id)?.avatar || 'default_profile.png'"
+                  :src="getUser(chat.other_user_id)?.avatar || '/default_profile.png'"
                   class="h-12 w-12 rounded-full"
               />
             </div>
@@ -95,7 +95,7 @@ resulting from the use or misuse of this software.
         </button>
         <div class="mr-4">
           <img
-              :src="getUser(active.other_user_id)?.avatar || 'default_profile.png'"
+              :src="getUser(active.other_user_id)?.avatar || '/default_profile.png'"
               class="w-6 h-6 rounded-full"
           />
         </div>
@@ -121,7 +121,7 @@ resulting from the use or misuse of this software.
             <!-- Incoming message -->
             <div v-else class="flex items-start mb-4">
               <img
-                  :src="getUser(active.other_user_id)?.avatar || 'default_profile.png'"
+                  :src="getUser(active.other_user_id)?.avatar || '/default_profile.png'"
                   class="h-8 w-8 rounded-full mr-2"
               />
               <div class="bg-lighter text-black py-2 px-4 rounded-tr-3xl rounded-tl-xl rounded-br-3xl">

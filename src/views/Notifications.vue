@@ -90,7 +90,7 @@ resulting from the use or misuse of this software.
 
                   <a :href="`#/${profile.user_id}`">
                     <img
-                      :src="`${profile.avatar || 'default_profile.png'}`"
+                      :src="`${profile.avatar || '/default_profile.png'}`"
                       class="h-8 w-8 ml-2 rounded-full flex-none"
                     />
                   </a>
@@ -124,7 +124,7 @@ resulting from the use or misuse of this software.
                 <div class="flex flex-row mr-2 md:mr-4 pt-1 text-2xl">
                   <a :href="`#/${profile.user_id}`">
                     <img
-                      :src="`${profile.avatar || 'default_profile.png'}`"
+                      :src="`${profile.avatar || '/default_profile.png'}`"
                       class="h-8 w-8 ml-2 rounded-full flex-none"
                     />
                   </a>

@@ -68,7 +68,7 @@ resulting from the use or misuse of this software.
           <div class="px-3 flex flex-row justify-between">
             <img
               v-if="profile"
-              :src="profile.avatar || 'default_profile.png'"
+              :src="profile.avatar || '/default_profile.png'"
               class="w-24 h-24 md:w-32 md:h-32 rounded-full border-white"
               style="margin-top: -80px; border-width: 6px;"
 
@@ -78,7 +78,7 @@ resulting from the use or misuse of this software.
               <button
                 v-if="
                   profile.avatar === null ||
-                  profile.avatar === 'default_profile.png'
+                  profile.avatar === '/default_profile.png'
                 "
                 @click="setUpProfile()"
                 class="text-xs md:text-base md:ml-auto text-blue font-bold px-4 py-2 rounded-full border border-blue mb-2 hover:bg-lightblue"
@@ -88,7 +88,7 @@ resulting from the use or misuse of this software.
               <button
                 v-if="
                   profile.avatar !== null &&
-                  profile.avatar !== 'default_profile.png'
+                  profile.avatar !== '/default_profile.png'
                 "
                 @click="editProfile()"
                 class="text-xs md:text-base md:ml-auto text-blue font-bold px-4 py-2 rounded-full border border-blue mb-2 hover:bg-lightblue"

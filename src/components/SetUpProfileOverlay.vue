@@ -35,14 +35,14 @@ resulting from the use or misuse of this software.
     >
       <div class="pl-1 pr-4 py-1 h-12">
         <button
-          v-if="newImage === null || newImage === 'default_profile.png'"
+          v-if="newImage === null || newImage === '/default_profile.png'"
           @click="this.$emit('close')"
           class="rounded-full bg-white font-bold text-blue mt-2 p-1 px-3 relative right-0 float-right focus:outline-none hover:bg-lightblue"
         >
           Skip for now
         </button>
         <button
-          v-if="newImage !== null && newImage !== 'default_profile.png'"
+          v-if="newImage !== null && newImage !== '/default_profile.png'"
           @click="finishSetUpProfile"
           class="rounded-full bg-blue font-bold text-white mt-2 p-1 px-4 relative right-0 float-right focus:outline-none hover:bg-darkblue"
         >
@@ -99,7 +99,7 @@ export default {
   props: ["showSetUpProfileModal"],
   data() {
     return {
-      newImage: "default_profile.png",
+      newImage: "/default_profile.png",
       profile: {},
     };
   },

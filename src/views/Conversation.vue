@@ -32,7 +32,7 @@ resulting from the use or misuse of this software.
         </router-link>
         
         <div v-if="chat" class="flex items-center">
-          <img :src="otherUser.avatar || 'default_profile.png'"
+          <img :src="otherUser.avatar || '/default_profile.png'"
                class="w-10 h-10 rounded-full mr-3" />
           <div>
             <p class="font-bold">{{ otherUser.username }}</p>

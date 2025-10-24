@@ -160,7 +160,7 @@ resulting from the use or misuse of this software.
         class="flex items-center w-full hover:bg-lightblue rounded-full"
       >
         <img
-          :src="profile.avatar || 'default_profile.png'"
+          :src="profile.avatar || '/default_profile.png'"
           class="w-10 h-10 rounded-full"
 
         />
@@ -183,7 +183,7 @@ resulting from the use or misuse of this software.
           class="p-3 flex items-center w-full hover:bg-lightest"
         >
           <img
-            :src="profile.avatar || 'default_profile.png'"
+            :src="profile.avatar || '/default_profile.png'"
             class="w-10 h-10 rounded-full"
 
           />

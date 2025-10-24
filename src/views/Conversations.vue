@@ -52,7 +52,7 @@ resulting from the use or misuse of this software.
                   @click="selectChat(chat)">
                   <div class="flex-none mr-2 md:mr-4 pt-1">
                     <a :href="`#/${chat.other_user_id}`">
-                      <img :src="getUser(chat.other_user_id).avatar || 'default_profile.png'"
+                      <img :src="getUser(chat.other_user_id).avatar || '/default_profile.png'"
                            class="flex-none w-12 h-12 rounded-full"  />
                     </a>
                   </div>

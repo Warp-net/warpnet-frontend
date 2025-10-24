@@ -44,7 +44,7 @@ resulting from the use or misuse of this software.
       <div class="px-5 py-3 border-b-8 border-lighter flex">
         <div v-if="profile" class="flex-none mr-4">
           <img
-            :src="profile.avatar || 'default_profile.png'"
+            :src="profile.avatar || '/default_profile.png'"
             class="flex-none w-12 h-12 rounded-full"
 
           />

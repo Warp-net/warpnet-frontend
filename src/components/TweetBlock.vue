@@ -37,7 +37,7 @@ resulting from the use or misuse of this software.
     <div class="flex-none mr-2 md:mr-4 pt-1">
       <a>
         <img
-          :src="`${this.profile.avatar || 'default_profile.png'}`"
+          :src="`${this.profile.avatar || '/default_profile.png'}`"
           class="h-12 w-12 rounded-full flex-none"
         />
       </a>

@@ -26,7 +26,7 @@ resulting from the use or misuse of this software.
     <div class="flex-none">
       <a @click="pushToProfilePage(user.id)">
         <img
-          :src="`${user.avatar || 'default_profile.png'}`"
+          :src="`${user.avatar || '/default_profile.png'}`"
           class="h-12 w-12 rounded-full"
          />
       </a>

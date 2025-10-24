@@ -29,7 +29,7 @@ resulting from the use or misuse of this software.
     <div v-if="profile" v-for="profile in profiles" :key="profile.id" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
       <img 
         @click="pushToProfilePage(profile.id)" 
-        :src="getAvatar(profile.id, profile.avatar_key) || 'default_profile.png'"
+        :src="getAvatar(profile.id, profile.avatar_key) || '/default_profile.png'"
         class="w-12 h-12 rounded-full cursor-pointer"  
         :alt="profile.username"
       />
