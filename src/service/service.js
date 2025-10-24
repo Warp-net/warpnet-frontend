@@ -293,7 +293,11 @@ export const warpnetService = {
             cursor = ''
         }
         if (cursor === endCursor) {
-            return null
+            return {unread_count:0, notifications: []};
+        }
+        const owner = this.getOwnerProfile()
+        if (!owner) {
+            return {unread_count:0, notifications: []};
         }
 
         const request = {
@@ -307,7 +311,7 @@ export const warpnetService = {
 
         const resp = await this.sendToNode(request);
         if (!resp) {
-            return null
+            return {unread_count:0, notifications: []};
         }
         this.setCursor('notifications', resp.cursor || 'end')
         return resp;

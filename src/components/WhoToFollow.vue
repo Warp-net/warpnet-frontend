@@ -115,7 +115,6 @@ export default {
    },
   async created() {
     console.log("loading component:", this.$options.name);
-    console.log("profile:", this.profile);
     this.ownerProfile = warpnetService.getOwnerProfile();
     if (!this.profile) {
       this.profile = this.ownerProfile;

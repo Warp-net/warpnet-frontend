@@ -277,7 +277,7 @@ export default {
   async created() {
     console.log("loading component:", this.$options.name);
     this.profile = warpnetService.getOwnerProfile();
-    console.log("profile", this.profile)
+
     this.profile.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.avatar_key})
 
     const resp = await warpnetService.getNotifications(

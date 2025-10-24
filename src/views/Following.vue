@@ -128,7 +128,11 @@ export default {
       const followings = await warpnetService.getFollowings({userId:profileId, cursorReset: true})
       for (const id of followings) {
         const u = await warpnetService.getProfile(id)
+        if (!u) {
+          continue
+        }
         this.profiles.push(u)
+        this.loading = false;
       }
     } catch (err) {
       console.error("loading component:", this.$options.name, err)

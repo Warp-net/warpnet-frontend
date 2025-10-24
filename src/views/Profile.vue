@@ -399,6 +399,7 @@ export default {
       } else {
         this.disableMastodonMode();
       }
+      this.loading = false;
 
       this.profile.background_image = await warpnetService.getImage(
           {userId:profileId, key:this.profile.background_image_key},
@@ -428,7 +429,6 @@ export default {
       const followerStatus = await warpnetService.isFollower(p.id);
       this.followerStatus.set(p.id, followerStatus);
     }
-    this.loading = false;
   },
 };
 </script>
