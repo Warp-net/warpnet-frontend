@@ -119,23 +119,15 @@ export const warpnetService = {
         if (!resp.identity) {
             throw new Error("Login failed: no identity")
         }
-
-        const qrData = JSON.stringify(resp);
-        resp.identity.token = null // for security reasons
-
         if (!resp.identity.owner) {
             console.error("Login failed: owner identity not received")
             return;
         }
 
-        // type Owner struct {
-        // 	CreatedAt time.Time `json:"created_at"`
-        // 	NodeId    string    `json:"node_id"`
-        // 	UserId    string    `json:"user_id"`
-        // 	Username  string    `json:"username"`
-        // }
-
         warpnetService.setOwnerProfile(resp.identity.owner)
+
+        const qrData = JSON.stringify(resp.identity);
+        resp.identity.token = null // for security reasons
 
         const qrCode = await buildQRCode(qrData)
         warpnetService.setQR(qrCode)
