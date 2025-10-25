@@ -130,6 +130,8 @@ export default {
       });
     },
     async selected(user) {
+      console.log("selected converstions user", JSON.stringify(user))
+
       if (!user || !user.id) {
         console.error("conversations: cannot select absent user", user)
         return;

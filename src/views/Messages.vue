@@ -228,6 +228,8 @@ export default {
       });
     },
     async selected(user) {
+      console.log("selected messages user", JSON.stringify(user))
+
       if (!this.ownerProfile.user_id || !user.id) {
         console.error("messages: no selected user ", this.ownerProfile, user)
         return;

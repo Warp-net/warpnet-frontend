@@ -100,6 +100,7 @@ export default {
       // TODO implement search
     },
     selected(user) {
+      console.log("selected new msg overlay user", JSON.stringify(user))
       this.$emit("selected", user);
     },
   },

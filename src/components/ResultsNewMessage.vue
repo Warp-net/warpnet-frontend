@@ -46,6 +46,7 @@ export default {
   },
   methods: {
     selected(user) {
+      console.log("selected results user", JSON.stringify(user))
       this.$emit("selected", user);
     },
   },
