@@ -229,7 +229,7 @@ export default {
     },
     async selected(user) {
       if (!this.ownerProfile.user_id || !user.id) {
-        console.log("messages: no selected(user)", this.ownerProfile, user)
+        console.error("messages: no selected user ", this.ownerProfile, user)
         return;
       }
       this.showNewMessageModal = false;
@@ -254,7 +254,7 @@ export default {
     },
     async selectChat(chat) {
       if (!chat) {
-        console.warn("no active chat selected")
+        console.warn("no active chat could be selected")
         return
       }
       this.messages = []; // reset messages

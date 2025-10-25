@@ -113,9 +113,12 @@ export default {
     this.users = await warpnetService.getUsers({profileId:this.profileId, cursorReset:true})
     for (const i in this.users) {
       const u = this.users[i]
-      this.users[i].avatar = await warpnetService.getImage({userId:u.id, key:u.avatar_key})
+      const image = await warpnetService.getImage({userId:u.id, key:u.avatar_key})
+      if (image) {
+        this.users[i].avatar
+        this.loading = false;
+      }
     }
-    this.loading = false;
   },
   beforeUnmount() {
     window.removeEventListener("keydown", this.handleEscape);

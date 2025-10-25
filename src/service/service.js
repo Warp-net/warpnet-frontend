@@ -287,7 +287,7 @@ export const warpnetService = {
         return timelineResp.tweets;
     },
 
-    async getNotifications({userId,cursorReset}) {
+    async getNotifications(cursorReset) {
         let cursor = this.getCursor('notifications')
         if (cursorReset) {
             cursor = ''
@@ -305,7 +305,6 @@ export const warpnetService = {
             body: {
                 limit: defaultLimit,
                 cursor: cursor,
-                user_id: userId,
             },
         }
 

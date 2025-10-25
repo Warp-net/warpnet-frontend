@@ -63,7 +63,6 @@ resulting from the use or misuse of this software.
         </div>
       </div>
       <div>
-        <p>{{ user.bio }}</p>
         <p v-if="!user.moderation || user.moderation.is_ok">
           {{ user.bio }}
         </p>

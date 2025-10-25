@@ -118,10 +118,9 @@ export default {
       this.showNewMessageModal = true;
     },
     async selectChat(chat) {
-      if (!chat || chat.id.length === 0) {
+      if (!chat || !chat.id) {
         return
       }
-      console.log('selectChat()')
       this.$router.push({
         name: 'Messages',
         params: {
@@ -131,8 +130,8 @@ export default {
       });
     },
     async selected(user) {
-      console.log('selected()')
-      if (!user || user.id.length === 0) {
+      if (!user || !user.id) {
+        console.error("conversations: cannot select absent user", user)
         return;
       }
       this.showNewMessageModal = false;
@@ -161,7 +160,6 @@ export default {
       const u = await warpnetService.getProfile(userId)
       u.avatar = await warpnetService.getImage({userId:u.id, key:u.avatar_key})
       this.usersMap.set(u.id, u)
-      console.log('usersMap', this.usersMap)
     },
     async loadMore() {
       const chats = await warpnetService.getChats(false);

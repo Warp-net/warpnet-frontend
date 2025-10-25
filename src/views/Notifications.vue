@@ -169,9 +169,7 @@ export default {
   },
   methods: {
     async getNotifications() {
-      const resp = await warpnetService.getNotifications(
-          {userId:this.profileId, cursorReset:true},
-      )
+      const resp = await warpnetService.getNotifications(true)
       if (!resp || !resp.notifications || resp.notifications.length === 0) {
         return [];
       }
