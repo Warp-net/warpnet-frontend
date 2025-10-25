@@ -120,8 +120,7 @@ export const warpnetService = {
             throw new Error("Login failed: no identity")
         }
         if (!resp.identity.owner) {
-            console.error("Login failed: owner identity not received")
-            return;
+            throw new Error("Login failed: no identity")
         }
 
         warpnetService.setOwnerProfile(resp.identity.owner)
@@ -145,8 +144,6 @@ export const warpnetService = {
     },
 
     async getUsers({profileId, cursorReset}) {
-        console.log("getUsers", profileId)
-
         let cursor = this.getCursor('users')
         if (cursorReset) {
             cursor = ''
@@ -834,7 +831,11 @@ export const warpnetService = {
         if (!result) {
             throw new Error(`Unable to send ${request.message_id}`);
         }
-        return result.body || {};
+        if (!result.body) {
+            console.error(`${result.code}: ${result.message}`);
+            return {};
+        }
+        return result.body;
     }
 }
 
