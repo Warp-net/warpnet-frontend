@@ -118,6 +118,8 @@ export default {
       this.showNewMessageModal = true;
     },
     async selectChat(chat) {
+      console.log("select chat", JSON.stringify(chat))
+
       if (!chat || !chat.id) {
         return
       }
@@ -133,7 +135,7 @@ export default {
       console.log("selected converstions user", JSON.stringify(user))
 
       if (!user || !user.id) {
-        console.error("conversations: cannot select absent user", user)
+        console.error("conversations: cannot select absent user", JSON.stringify(user))
         return;
       }
       this.showNewMessageModal = false;
@@ -149,6 +151,9 @@ export default {
       }
       // Create new chat
       const newChat = await warpnetService.createChat(user.id);
+      if (!newChat || !newChat.id) {
+        console.error("conversations: cannot create new chat", JSON.stringify(user))
+      }
       await this.selectChat(newChat);
     },
     getUser(userId) {
