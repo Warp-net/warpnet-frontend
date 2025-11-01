@@ -263,6 +263,7 @@ export default {
   },
   async created() {
     console.log("loading component:", this.$options.name);
+    console.log("loading tweet:", JSON.stringify(this.tweet));
     this.profile = await warpnetService.getProfile(this.tweet.user_id);
 
     if (this.tweet.retweeted_by && this.tweet.retweeted_by !== this.profile.id) {
