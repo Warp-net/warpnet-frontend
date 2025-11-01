@@ -70,9 +70,7 @@ if (process.env.NODE_ENV === 'development') {
         main: {
             App: {
                 Call: (arg1) => {
-                    console.debug(`[MOCK] window.go.main.App.Call(${JSON.stringify(arg1)})`);
                     const body = generateResponse(arg1);
-                    console.debug(`[MOCK] window.go.main.App.Response(${JSON.stringify(body)})`);
                     return Promise.resolve({body:body});
                 }
             }

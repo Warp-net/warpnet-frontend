@@ -844,7 +844,6 @@ function sleep(ms) {
 }
 
 function startRefreshNotifications() {
-    sleep(5000)
     setInterval(() => {
         try {
             const owner = warpnetService.getOwnerProfile

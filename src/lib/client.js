@@ -130,7 +130,6 @@
 //             return;
 //         }
 //
-//         console.debug(`<<< RECEIVED MESSAGE: ${plaintext}`)
 //
 //         let resp = null
 //         try {
@@ -233,7 +232,6 @@
 //
 //         let message = JSON.stringify(data)
 //
-//         console.debug("SENDING MESSAGE >>> :", message)
 //
 //         if (!this.aesKey) {
 //             console.log("Sending message: not authenticated!");
