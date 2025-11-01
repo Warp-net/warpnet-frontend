@@ -59,7 +59,8 @@ resulting from the use or misuse of this software.
           </div>
         </div>
       </div>
-      <p v-if="!tweet.moderation?.is_ok" class="pb-2">
+      <pre>{{ tweet }}</pre>
+      <p v-if="!tweet.moderation || tweet.moderation?.is_ok" class="pb-2">
         {{ tweet.text }} 
       </p>
       <p v-else class="pb-2 bg-red-300">
