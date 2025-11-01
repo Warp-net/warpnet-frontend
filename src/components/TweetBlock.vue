@@ -59,7 +59,6 @@ resulting from the use or misuse of this software.
           </div>
         </div>
       </div>
-      <pre>{{ tweet }}</pre>
       <p v-if="!tweet.moderation || tweet.moderation?.is_ok" class="pb-2">
         {{ tweet.text }} 
       </p>
@@ -274,6 +273,8 @@ export default {
 
     this.tweet.image = await warpnetService.getImage({userId: this.tweet.user_id, key: this.tweet.image_key})
     this.profile.avatar = await warpnetService.getImage({userId: this.profile.id, key: this.profile.avatar_key})
+
+    console.log("final tweet:", JSON.stringify(this.tweet));
 
     await this.loadTweetStats(this.tweet.id, this.tweet.user_id);
   },
