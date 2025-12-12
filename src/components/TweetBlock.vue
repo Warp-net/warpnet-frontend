@@ -52,10 +52,84 @@ resulting from the use or misuse of this software.
         </p>
         <p class="text-sm text-dark ml-2">·</p>
         <p class="text-sm text-dark ml-2">{{ $filters.timeago(tweet.created_at) }}</p>
-        <div>
-          <i @click="showDropdown = !showDropdown" class="fas fa-angle-down text-sm ml-auto text-dark cursor-pointer"></i>
-          <div v-if="showDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-            <a @click="deleteTweet" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Delete tweet</a>
+        <div class="relative ml-auto">
+          <i @click="toggleDropdown" class="fas fa-ellipsis-h text-sm text-dark cursor-pointer hover:text-blue p-2 rounded-full hover:bg-lightblue"></i>
+          <div v-if="showDropdown" class="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-lighter z-50">
+            <button 
+              v-if="isOwnTweet" 
+              @click="pinTweet" 
+              class="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+            >
+              <i class="fas fa-thumbtack mr-3 text-blue w-4"></i>
+              <span>{{ tweet.pinned ? 'Unpin from profile' : 'Pin to profile' }}</span>
+            </button>
+            
+            <button 
+              @click="copyLink" 
+              class="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+            >
+              <i class="fas fa-link mr-3 text-blue w-4"></i>
+              <span>Copy link to Tweet</span>
+            </button>
+            
+            <button 
+              @click="embedTweet" 
+              class="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+            >
+              <i class="fas fa-code mr-3 text-blue w-4"></i>
+              <span>Embed Tweet</span>
+            </button>
+            
+            <div class="border-t border-lighter"></div>
+            
+            <button 
+              v-if="!isOwnTweet"
+              @click="muteConversation" 
+              class="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+            >
+              <i class="fas fa-volume-mute mr-3 text-dark w-4"></i>
+              <span>Mute this conversation</span>
+            </button>
+            
+            <button 
+              v-if="!isOwnTweet"
+              @click="notInterested" 
+              class="w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+            >
+              <i class="fas fa-ban mr-3 text-dark w-4"></i>
+              <span>Not interested in this Tweet</span>
+            </button>
+            
+            <div v-if="!isOwnTweet" class="border-t border-lighter"></div>
+            
+            <button 
+              v-if="!isOwnTweet"
+              @click="blockUser" 
+              class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900 flex items-center"
+            >
+              <i class="fas fa-user-slash mr-3 w-4"></i>
+              <span>Block @{{ tweet.user_id }}</span>
+            </button>
+            
+            <button 
+              v-if="!isOwnTweet"
+              @click="reportTweet" 
+              class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900 flex items-center"
+            >
+              <i class="fas fa-flag mr-3 w-4"></i>
+              <span>Report Tweet</span>
+            </button>
+            
+            <div v-if="isOwnTweet" class="border-t border-lighter"></div>
+            
+            <button 
+              v-if="isOwnTweet"
+              @click="deleteTweet" 
+              class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900 flex items-center rounded-b-lg"
+            >
+              <i class="fas fa-trash mr-3 w-4"></i>
+              <span>Delete Tweet</span>
+            </button>
           </div>
         </div>
       </div>
@@ -139,7 +213,75 @@ export default {
       repliesCount: new Map(),
     };
   },
+  computed: {
+    isOwnTweet() {
+      const ownerProfile = warpnetService.getOwnerProfile();
+      return ownerProfile && this.tweet.user_id === ownerProfile.user_id;
+    }
+  },
   methods: {
+    toggleDropdown() {
+      this.showDropdown = !this.showDropdown;
+    },
+    copyLink() {
+      const tweetUrl = `${window.location.origin}/#/tweet/${this.tweet.user_id}/${this.tweet.id}`;
+      navigator.clipboard.writeText(tweetUrl).then(() => {
+        alert('Link copied to clipboard!');
+        this.showDropdown = false;
+      }).catch(err => {
+        console.error('Failed to copy link:', err);
+        alert('Failed to copy link');
+      });
+    },
+    pinTweet() {
+      // TODO: Implement pin/unpin functionality when backend API is available
+      console.log('Pin tweet:', this.tweet.id);
+      alert(this.tweet.pinned ? 'Tweet unpinned from profile' : 'Tweet pinned to profile');
+      this.showDropdown = false;
+    },
+    embedTweet() {
+      const embedCode = `<blockquote class="warpnet-tweet">
+  <p>${this.tweet.text}</p>
+  <a href="${window.location.origin}/#/tweet/${this.tweet.user_id}/${this.tweet.id}">
+    @${this.tweet.user_id}
+  </a>
+</blockquote>`;
+      navigator.clipboard.writeText(embedCode).then(() => {
+        alert('Embed code copied to clipboard!');
+        this.showDropdown = false;
+      }).catch(err => {
+        console.error('Failed to copy embed code:', err);
+        alert('Failed to copy embed code');
+      });
+    },
+    muteConversation() {
+      // TODO: Implement mute conversation when backend API is available
+      console.log('Mute conversation for tweet:', this.tweet.id);
+      alert('Conversation muted');
+      this.showDropdown = false;
+    },
+    notInterested() {
+      // TODO: Implement "not interested" functionality
+      console.log('Not interested in tweet:', this.tweet.id);
+      alert('Thanks for the feedback. You\'ll see fewer Tweets like this.');
+      this.showDropdown = false;
+    },
+    blockUser() {
+      if (confirm(`Are you sure you want to block @${this.tweet.user_id}?`)) {
+        // TODO: Implement block user when backend API is available
+        console.log('Block user:', this.tweet.user_id);
+        alert(`@${this.tweet.user_id} has been blocked`);
+        this.showDropdown = false;
+      } else {
+        this.showDropdown = false;
+      }
+    },
+    reportTweet() {
+      // TODO: Implement report tweet functionality
+      console.log('Report tweet:', this.tweet.id);
+      alert('Thank you. We\'ll review this Tweet.');
+      this.showDropdown = false;
+    },
     gotoProfile(tweetUserId) {
       this.$router.push({
         name: "Profile",
@@ -259,7 +401,20 @@ export default {
       this.retweetsCount.set(stats.tweet_id, stats.retweets_count);
       this.repliesCount.set(stats.tweet_id, stats.replies_count);
       // this.viewsCount.set(stats.tweet_id, stats.views_count); // TODO
+    },
+    handleClickOutside(event) {
+      const dropdown = this.$el.querySelector('.absolute.right-0.mt-2');
+      const trigger = this.$el.querySelector('.fa-ellipsis-h');
+      if (this.showDropdown && dropdown && !dropdown.contains(event.target) && !trigger.contains(event.target)) {
+        this.showDropdown = false;
+      }
     }
+  },
+  mounted() {
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleClickOutside);
   },
   async created() {
     console.log("loading component:", this.$options.name);

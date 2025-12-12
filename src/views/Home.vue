@@ -87,14 +87,27 @@ resulting from the use or misuse of this software.
             <i class="text-lg text-blue mr-4 far fa-chart-bar cursor-not-allowed"></i>
             <i class="text-lg text-blue mr-4 far fa-smile cursor-not-allowed"></i>
           </div>
-          <button
-            @click="addNewTweet"
-            type="button"
-            class="h-10 px-4 text-white font-semibold bg-blue hover:bg-darkblue rounded-full absolute bottom-0 right-0"
-            :class="tweet.text ? '' : 'opacity-50 cursor-not-allowed'"
-          >
-            Tweet
-          </button>
+          <div class="flex items-center justify-end mt-2">
+            <div 
+              class="mr-3 text-sm font-semibold"
+              :class="{
+                'text-gray-500': characterCount <= 240,
+                'text-yellow-500': characterCount > 240 && characterCount <= 280,
+                'text-red-600': characterCount > 280
+              }"
+            >
+              <span v-if="characterCount > 0">{{ 280 - characterCount }}</span>
+            </div>
+            <button
+              @click="addNewTweet"
+              type="button"
+              class="h-10 px-4 text-white font-semibold bg-blue hover:bg-darkblue rounded-full"
+              :class="!canTweet ? 'opacity-50 cursor-not-allowed' : ''"
+              :disabled="!canTweet"
+            >
+              Tweet
+            </button>
+          </div>
         </div>
       </div>
 
@@ -159,6 +172,14 @@ export default {
       imageAttachment: undefined,
       videoAttachment: undefined,
     };
+  },
+  computed: {
+    characterCount() {
+      return this.tweet.text.length;
+    },
+    canTweet() {
+      return this.tweet.text.trim().length > 0 && this.characterCount <= 280;
+    }
   },
   methods: {
     openFileInput(ref) {
