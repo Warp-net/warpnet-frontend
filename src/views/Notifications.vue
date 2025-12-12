@@ -60,7 +60,7 @@ resulting from the use or misuse of this software.
         <!-- notifications -->
         <div v-if="mode === 'All'">
           <div
-            v-if="getNotifications() === 0"
+            v-if="notifications.length === 0"
             class="flex flex-col items-center justify-center w-full pt-10"
           >
             <div class="w-1/2 flex flex-col items-center justify-center">
@@ -69,38 +69,71 @@ resulting from the use or misuse of this software.
             </div>
           </div>
 
-          <div v-for="notification in getNotifications()" :key="notification.id">
+          <div v-for="notification in notifications" :key="notification.id">
             <div
-              class="w-full p-2 pt-1 pb-1 md:p-4 md:pt-2 md:pb-2 border-b hover:bg-lightest flex"
+              class="w-full p-4 border-b hover:bg-lightest cursor-pointer"
+              @click="goToTweet(notification)"
             >
-              <div class="w-full">
-                <div class="flex flex-row mr-2 md:mr-4 pt-1 text-2xl">
+              <div class="flex flex-row">
+                <div class="flex-shrink-0 mr-3">
                   <i
                     v-if="notification.type === 'reply'"
-                    class="pt-1 fas fa-comment text-blue"
+                    class="fas fa-comment text-blue text-xl"
                   ></i>
                   <i
                     v-if="notification.type === 'like'"
-                    class="pt-1 fas fa-heart text-red-600"
+                    class="fas fa-heart text-red-600 text-xl"
                   ></i>
                   <i
                     v-if="notification.type === 'retweet'"
-                    class="pt-1 fas fa-retweet text-green-500"
+                    class="fas fa-retweet text-green-500 text-xl"
                   ></i>
-
-                  <a :href="`#/${profile.user_id}`">
-                    <img
-                      :src="`${profile.avatar || '/default_profile.png'}`"
-                      class="h-8 w-8 ml-2 rounded-full flex-none"
-                    />
-                  </a>
+                  <i
+                    v-if="notification.type === 'follow'"
+                    class="fas fa-user-plus text-blue text-xl"
+                  ></i>
+                  <i
+                    v-if="notification.type === 'mention'"
+                    class="fas fa-at text-blue text-xl"
+                  ></i>
                 </div>
-                <div class="flex items-center w-full">
-                  <p class="font-sm">{{ profile.username }}</p>
-                  <p class="font-sm">{{ "@" + profile.user_id }}</p>
-                  <p class="text-sm text-dark ml-auto">
-                    {{ $filters.timeago(notification.created_at) }}
-                  </p>
+                <div class="flex-grow">
+                  <div class="flex items-center mb-2">
+                    <img
+                      v-if="notification.actor_avatar"
+                      :src="notification.actor_avatar || '/default_profile.png'"
+                      class="h-8 w-8 rounded-full flex-none mr-2"
+                      @click.stop="goToProfile(notification.actor_id)"
+                    />
+                    <div class="flex-grow">
+                      <p class="font-semibold text-sm">
+                        {{ notification.actor_username || 'Anonymous' }}
+                      </p>
+                    </div>
+                    <p class="text-sm text-dark ml-auto">
+                      {{ $filters.timeago(notification.created_at) }}
+                    </p>
+                  </div>
+                  <div class="ml-10">
+                    <p v-if="notification.type === 'like'" class="text-sm text-dark">
+                      Liked your tweet
+                    </p>
+                    <p v-if="notification.type === 'retweet'" class="text-sm text-dark">
+                      Retweeted your tweet
+                    </p>
+                    <p v-if="notification.type === 'reply'" class="text-sm text-dark">
+                      Replied to your tweet
+                    </p>
+                    <p v-if="notification.type === 'follow'" class="text-sm text-dark">
+                      Followed you
+                    </p>
+                    <p v-if="notification.type === 'mention'" class="text-sm text-dark">
+                      Mentioned you in a tweet
+                    </p>
+                    <p v-if="notification.tweet_text" class="mt-2 text-sm text-gray-700 dark:text-gray-300 truncate">
+                      {{ notification.tweet_text }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -108,33 +141,46 @@ resulting from the use or misuse of this software.
         </div>
         <div v-if="mode === 'Mentions'">
           <div
-            v-if="getNotifications() === 0"
+            v-if="mentionNotifications.length === 0"
             class="flex flex-col items-center justify-center w-full pt-10"
           >
             <div class="w-1/2 flex flex-col items-center justify-center">
-              <p class="font-bold text-lg">No notifications yet</p>
+              <p class="font-bold text-lg">No mentions yet</p>
               <p class="text-sm text-dark">Wait until some get shown here.</p>
             </div>
           </div>
-          <div v-for="notification in getNotifications()" :key="notification.id">
-            <div v-if="notification.type === 'mention'"
-              class="w-full p-2 pt-1 pb-1 md:p-4 md:pt-2 md:pb-2 border-b hover:bg-lightest flex"
+          <div v-for="notification in mentionNotifications" :key="notification.id">
+            <div 
+              class="w-full p-4 border-b hover:bg-lightest cursor-pointer"
+              @click="goToTweet(notification)"
             >
-              <div class="w-full">
-                <div class="flex flex-row mr-2 md:mr-4 pt-1 text-2xl">
-                  <a :href="`#/${profile.user_id}`">
-                    <img
-                      :src="`${profile.avatar || '/default_profile.png'}`"
-                      class="h-8 w-8 ml-2 rounded-full flex-none"
-                    />
-                  </a>
+              <div class="flex flex-row">
+                <div class="flex-shrink-0 mr-3">
+                  <i class="fas fa-at text-blue text-xl"></i>
                 </div>
-                <div class="flex items-center w-full">
-                  <p class="font-sm">{{ profile.username }}</p>
-                  <p class="font-sm">{{ "@" + profile.user_id }}</p>
-                  <p class="text-sm text-dark ml-auto">
-                    {{ $filters.timeago(notification.created_at) }}
-                  </p>
+                <div class="flex-grow">
+                  <div class="flex items-center mb-2">
+                    <img
+                      v-if="notification.actor_avatar"
+                      :src="notification.actor_avatar || '/default_profile.png'"
+                      class="h-8 w-8 rounded-full flex-none mr-2"
+                      @click.stop="goToProfile(notification.actor_id)"
+                    />
+                    <div class="flex-grow">
+                      <p class="font-semibold text-sm">
+                        {{ notification.actor_username || 'Anonymous' }}
+                      </p>
+                    </div>
+                    <p class="text-sm text-dark ml-auto">
+                      {{ $filters.timeago(notification.created_at) }}
+                    </p>
+                  </div>
+                  <div class="ml-10">
+                    <p class="text-sm text-dark mb-1">Mentioned you</p>
+                    <p v-if="notification.tweet_text" class="text-sm text-gray-700 dark:text-gray-300">
+                      {{ notification.tweet_text }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -149,32 +195,73 @@ resulting from the use or misuse of this software.
 </template>
 
 <script>
-import SideNav from "../components/SideNav.vue";
-import DefaultRightBar from "../components/DefaultRightBar.vue";
+import {defineAsyncComponent} from "vue";
 import {warpnetService} from "@/service/service";
 
 export default {
   name: "Notifications",
   components: {
-    SideNav,
-    DefaultRightBar,
+    SideNav: defineAsyncComponent(() => import("../components/SideNav.vue")),
+    DefaultRightBar: defineAsyncComponent(() => import("../components/DefaultRightBar.vue")),
   },
   data() {
     return {
       loading: false,
       notifications: [],
-      profileId: this.$route.params.id,
+      profile: {},
       mode: this.$route.query.m || "All",
     };
   },
+  computed: {
+    mentionNotifications() {
+      return this.notifications.filter(n => n.type === 'mention');
+    }
+  },
   methods: {
-    async getNotifications() {
-      const resp = await warpnetService.getNotifications(true)
+    async loadNotifications() {
+      const resp = await warpnetService.getNotifications(true);
       if (!resp || !resp.notifications || resp.notifications.length === 0) {
-        return [];
+        this.notifications = [];
+        return;
       }
 
-      return resp.notifications;
+      // Enrich notifications with actor profile data
+      this.notifications = await Promise.all(
+        resp.notifications.map(async (notification) => {
+          if (notification.actor_id) {
+            try {
+              const actorProfile = await warpnetService.getProfile(notification.actor_id);
+              if (actorProfile) {
+                notification.actor_username = actorProfile.username;
+                notification.actor_avatar = await warpnetService.getImage({
+                  userId: notification.actor_id, 
+                  key: actorProfile.avatar_key
+                });
+              }
+            } catch (err) {
+              console.error('Failed to load actor profile:', err);
+            }
+          }
+          return notification;
+        })
+      );
+    },
+    goToProfile(userId) {
+      if (userId) {
+        this.$router.push({
+          name: "Profile",
+          params: { id: userId },
+        });
+      }
+    },
+    goToTweet(notification) {
+      // Navigate to the related tweet if available
+      if (notification.tweet_id && notification.tweet_user_id) {
+        this.$router.push({
+          name: "Profile",
+          params: { id: notification.tweet_user_id },
+        });
+      }
     },
     gotoHome() {
       this.$router.push({
@@ -193,14 +280,10 @@ export default {
     console.log("loading component:", this.$options.name);
     try {
       this.loading = true;
-      const profileId = this.$route.params.id;
-      if (!profileId) {
-        this.noUser = true;
-        this.loading = false;
-      }
+      this.profile = warpnetService.getOwnerProfile();
+      await this.loadNotifications();
     } catch (err) {
       console.error('Failed to load notifications:', err);
-      this.noUser = true;
     } finally {
       this.loading = false;
     }
