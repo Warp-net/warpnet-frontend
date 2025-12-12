@@ -188,22 +188,30 @@ resulting from the use or misuse of this software.
             class="flex flex-row justify-evenly mt-2"
           >
             <button
-              class="flex-grow text-dark font-bold border-b-2 border-blue p-1 md:px-2 md:py-4 hover:bg-lightblue"
+              @click="changeTab('tweets')"
+              class="flex-grow text-dark font-bold border-b-2 p-1 md:px-2 md:py-4 hover:bg-lightblue"
+              :class="activeTab === 'tweets' ? 'border-blue' : 'border-transparent'"
             >
               Tweets
             </button>
             <button
-              class="cursor-not-allowed flex-grow text-dark font-bold border-b-2 p-1 md:px-2 md:py-4 hover:bg-lightblue"
+              @click="changeTab('replies')"
+              class="flex-grow text-dark font-bold border-b-2 p-1 md:px-2 md:py-4 hover:bg-lightblue"
+              :class="activeTab === 'replies' ? 'border-blue' : 'border-transparent'"
             >
               Tweets & replies
             </button>
             <button
-              class="cursor-not-allowed flex-grow text-dark font-bold border-b-2 p-1 md:px-2 md:py-4 hover:bg-lightblue"
+              @click="changeTab('media')"
+              class="flex-grow text-dark font-bold border-b-2 p-1 md:px-2 md:py-4 hover:bg-lightblue"
+              :class="activeTab === 'media' ? 'border-blue' : 'border-transparent'"
             >
               Media
             </button>
             <button
-              class="cursor-not-allowed flex-grow text-dark font-bold border-b-2 p-1 md:px-2 md:py-4 hover:bg-lightblue"
+              @click="changeTab('likes')"
+              class="flex-grow text-dark font-bold border-b-2 p-1 md:px-2 md:py-4 hover:bg-lightblue"
+              :class="activeTab === 'likes' ? 'border-blue' : 'border-transparent'"
             >
               Likes
             </button>
@@ -213,27 +221,31 @@ resulting from the use or misuse of this software.
         <!-- tweets -->
         <Loader :loading="loading" />
         <div
-          v-if="!noUser && !loading && tweets.length === 0"
+          v-if="!noUser && !loading && displayedTweets.length === 0"
           class="flex flex-col items-center justify-center w-full pt-10"
         >
           <p class="font-bold text-lg">
-            <span>{{ isSelf ? "You" : `${profile.username || "User"}` }}</span> haven't
-            tweeted yet
+            <span v-if="activeTab === 'tweets'">{{ isSelf ? "You" : `${profile.username || "User"}` }} haven't tweeted yet</span>
+            <span v-else-if="activeTab === 'replies'">{{ isSelf ? "You haven't" : `${profile.username || "User"} hasn't` }} replied yet</span>
+            <span v-else-if="activeTab === 'media'">{{ isSelf ? "You haven't" : `${profile.username || "User"} hasn't` }} posted media yet</span>
+            <span v-else-if="activeTab === 'likes'">{{ isSelf ? "You haven't" : `${profile.username || "User"} hasn't` }} liked any tweets yet</span>
           </p>
           <p class="text-sm text-dark">
             When
-            <span>{{ isSelf ? "you post" : `${profile.username || "user"} posts` }}</span>
-            a tweet, it'll show up here.
+            <span v-if="activeTab === 'tweets'">{{ isSelf ? "you post" : `${profile.username || "user"} posts` }} a tweet, it'll show up here.</span>
+            <span v-else-if="activeTab === 'replies'">{{ isSelf ? "you reply to" : `${profile.username || "user"} replies to` }} a tweet, it'll show up here.</span>
+            <span v-else-if="activeTab === 'media'">{{ isSelf ? "you post" : `${profile.username || "user"} posts` }} media, it'll show up here.</span>
+            <span v-else-if="activeTab === 'likes'">{{ isSelf ? "you like" : `${profile.username || "user"} likes` }} a tweet, it'll show up here.</span>
           </p>
           <button
-            v-if="isSelf"
+            v-if="isSelf && activeTab === 'tweets'"
             class="text-white bg-blue rounded-full font-semibold mt-4 px-4 py-2 hover:bg-darkblue"
           >
             <p class="hidden lg:block">Tweet now</p>
             <i class="fas fa-plus lg:hidden"></i>
           </button>
         </div>
-        <Tweets v-if="!noUser" :tweets="tweets" />
+        <Tweets v-if="!noUser" :tweets="displayedTweets" />
       </div>
       <div
         class="hidden md:block w-1/3 z-0 h-full border-l border-lighter px-6 py-2 overflow-y-scroll no-scrollbar relative"
@@ -285,14 +297,42 @@ export default {
       ownerProfile: {},
       profile: {},
       tweets: [],
+      replies: [],
+      mediaTweets: [],
+      likedTweets: [],
       users: [],
       followers: [],
       followings: [],
       followingStatus: new Map(),
       followerStatus: new Map(),
+      activeTab: 'tweets',
     };
   },
+  computed: {
+    displayedTweets() {
+      switch (this.activeTab) {
+        case 'tweets':
+          return this.tweets.filter(t => !t.parent_id || t.parent_id === '');
+        case 'replies':
+          return this.tweets;
+        case 'media':
+          return this.tweets.filter(t => t.image_key || t.video_key);
+        case 'likes':
+          return this.likedTweets;
+        default:
+          return this.tweets;
+      }
+    }
+  },
   methods: {
+    changeTab(tab) {
+      this.activeTab = tab;
+      // TODO: Load specific data for likes tab if backend API is available
+      if (tab === 'likes' && this.likedTweets.length === 0) {
+        // Would call API to get liked tweets here
+        console.log('Loading liked tweets...');
+      }
+    },
     isMySelf(profileId) {
       return profileId === this.ownerProfile.user_id;
     },
