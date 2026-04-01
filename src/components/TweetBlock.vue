@@ -142,6 +142,18 @@ export default {
     };
   },
   methods: {
+    async refreshInteractionState() {
+      const owner = warpnetService.getOwnerProfile();
+      if (!owner) {
+        this.liked = false;
+        this.retweeted = false;
+        return;
+      }
+
+      this.liked = await warpnetService.hasLiker(this.tweet.id, owner.user_id);
+      this.retweeted = this.tweet.retweeted_by === owner.user_id
+        || await warpnetService.hasRetweeter(this.tweet.id, owner.user_id);
+    },
     gotoProfile(tweetUserId) {
       this.$router.push({
         name: "Profile",
@@ -196,15 +208,17 @@ export default {
         username: this.tweet.username,
         text: this.tweet.text,
       }
-      const alreadyRetweeted = await warpnetService.hasRetweeter(this.tweet.id, owner.user_id)
+      const alreadyRetweeted = this.retweeted
       try {
         if (!alreadyRetweeted) {
           await warpnetService.retweetTweet(retweetObject);
           await warpnetService.setRetweeter(this.tweet.id, owner.user_id, owner)
+          this.tweet.retweeted_by = owner.user_id;
           this.retweeted = true;
         } else {
           await warpnetService.unretweetTweet(this.tweet.id);
           await warpnetService.deleteRetweeter(this.tweet.id, owner.user_id)
+          this.tweet.retweeted_by = null;
           this.retweeted = false;
         }
       } catch (err) {
@@ -219,7 +233,7 @@ export default {
       const owner = warpnetService.getOwnerProfile();
       if (!owner) return;
       let likesNum = 0
-      const alreadyLiked = await warpnetService.hasLiker(this.tweet.id, owner.user_id)
+      const alreadyLiked = this.liked
       try {
         if (!alreadyLiked) {
           likesNum = await warpnetService.likeTweet(this.tweet.id, this.tweet.user_id)
@@ -276,11 +290,7 @@ export default {
 
     await this.loadTweetStats(this.tweet.id, this.tweet.user_id);
 
-    const owner = warpnetService.getOwnerProfile();
-    if (owner) {
-      this.liked = await warpnetService.hasLiker(this.tweet.id, owner.user_id);
-      this.retweeted = await warpnetService.hasRetweeter(this.tweet.id, owner.user_id);
-    }
+    await this.refreshInteractionState();
   },
 };
 </script>

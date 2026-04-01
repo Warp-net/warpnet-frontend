@@ -231,6 +231,7 @@ export default {
       newNotifications: 0,
       qrModalOpen: false,
       qrCode: "",
+      unsubscribeNotifications: null,
     };
   },
   mounted() {
@@ -280,9 +281,19 @@ export default {
 
     this.profile.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.avatar_key})
 
+    this.unsubscribeNotifications = warpnetService.subscribeNotifications((resp) => {
+      this.newNotifications = resp.unread_count || 0;
+    });
+
     const resp = await warpnetService.getNotifications(true)
     if (resp) {
       this.newNotifications = resp.unread_count;
+    }
+  },
+  beforeUnmount() {
+    if (this.unsubscribeNotifications) {
+      this.unsubscribeNotifications();
+      this.unsubscribeNotifications = null;
     }
   },
 };
