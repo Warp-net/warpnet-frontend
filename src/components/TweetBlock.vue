@@ -188,21 +188,23 @@ export default {
       this.showReplyOverlay = true;
     },
     async retweet() {
+      const owner = warpnetService.getOwnerProfile();
+      if (!owner) return;
       const retweetObject = {
         tweetId: this.tweet.id,
         userId: this.tweet.user_id,
         username: this.tweet.username,
         text: this.tweet.text,
       }
-      const alreadyRetweeted = await warpnetService.hasRetweeter(this.tweet.id, this.profile.id)
+      const alreadyRetweeted = await warpnetService.hasRetweeter(this.tweet.id, owner.user_id)
       try {
         if (!alreadyRetweeted) {
           await warpnetService.retweetTweet(retweetObject);
-          await warpnetService.setRetweeter(this.tweet.id, this.profile.id, this.profile)
+          await warpnetService.setRetweeter(this.tweet.id, owner.user_id, owner)
           this.retweeted = true;
         } else {
           await warpnetService.unretweetTweet(this.tweet.id);
-          await warpnetService.deleteRetweeter(this.tweet.id, this.profile.id)
+          await warpnetService.deleteRetweeter(this.tweet.id, owner.user_id)
           this.retweeted = false;
         }
       } catch (err) {
@@ -214,8 +216,10 @@ export default {
       if (this.tweet.network !== "warpnet") {
         return
       }
+      const owner = warpnetService.getOwnerProfile();
+      if (!owner) return;
       let likesNum = 0
-      const alreadyLiked = await warpnetService.hasLiker(this.tweet.id, this.profile.id)
+      const alreadyLiked = await warpnetService.hasLiker(this.tweet.id, owner.user_id)
       try {
         if (!alreadyLiked) {
           likesNum = await warpnetService.likeTweet(this.tweet.id, this.tweet.user_id)
@@ -228,10 +232,10 @@ export default {
         return;
       }
       if (!alreadyLiked) {
-        await warpnetService.setLiker(this.tweet.id, this.profile.id, this.profile)
+        await warpnetService.setLiker(this.tweet.id, owner.user_id, owner)
         this.liked = true;
       } else {
-        await warpnetService.deleteLiker(this.tweet.id, this.profile.id)
+        await warpnetService.deleteLiker(this.tweet.id, owner.user_id)
         this.liked = false;
       }
 
