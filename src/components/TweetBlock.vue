@@ -89,7 +89,7 @@ resulting from the use or misuse of this software.
           >
             <i
               :class="
-                `fas fa-retweet ${tweet.retweeted_by ? 'text-green-500' : ''}`
+                `fas fa-retweet ${retweeted ? 'text-green-500' : ''}`
               "
             ></i>
           </button>
@@ -100,7 +100,7 @@ resulting from the use or misuse of this software.
             @click="like()"
             class="mr-2 rounded-full hover:bg-lighter"
           >
-            <i :class="`fas fa-heart ${getLikesCount(tweet.id) > 0 ? 'text-red-600' : ''}`"></i>
+            <i :class="`fas fa-heart ${liked ? 'text-red-600' : ''}`"></i>
           </button>
           <p v-if="getLikesCount(tweet.id) > 0">{{ getLikesCount(tweet.id) }}</p>
         </div>
@@ -134,6 +134,8 @@ export default {
       showReplyOverlay: false,
       showDropdown: false,
       label: "You Retweeted",
+      liked: false,
+      retweeted: false,
       likesCount: new Map(),
       retweetsCount: new Map(),
       repliesCount: new Map(),
@@ -186,7 +188,6 @@ export default {
       this.showReplyOverlay = true;
     },
     async retweet() {
-      let retweetsNum = 0
       const retweetObject = {
         tweetId: this.tweet.id,
         userId: this.tweet.user_id,
@@ -195,28 +196,19 @@ export default {
       }
       const alreadyRetweeted = await warpnetService.hasRetweeter(this.tweet.id, this.profile.id)
       try {
-        if (!alreadyRetweeted || this.tweet.retweeted_by === '') {
-          retweetsNum = await warpnetService.retweetTweet(retweetObject).catch((err) => {
-            console.error(`failed to retweet [${this.tweet.id}]`, err);
-          });
+        if (!alreadyRetweeted) {
+          await warpnetService.retweetTweet(retweetObject);
+          await warpnetService.setRetweeter(this.tweet.id, this.profile.id, this.profile)
+          this.retweeted = true;
         } else {
-          retweetsNum = await warpnetService.unretweetTweet(this.tweet.id).catch((err) => {
-            console.error(`failed to unretweet [${this.tweet.id}]`, err);
-          });
+          await warpnetService.unretweetTweet(this.tweet.id);
+          await warpnetService.deleteRetweeter(this.tweet.id, this.profile.id)
+          this.retweeted = false;
         }
-      }catch (err) {
+      } catch (err) {
         console.error(`failed to retweet/unretweet tweet [${this.tweet.id}]`, err);
-        await this.loadTweetStats(this.tweet.id, this.tweet.user_id);
-        return;
       }
-
-      if (!alreadyRetweeted) {
-        await warpnetService.setRetweeter(this.tweet.id, this.profile.id, this.profile)
-      } else {
-        await warpnetService.deleteRetweeter(this.tweet.id, this.profile.id)
-      }
-
-      this.retweetsCount.set(this.tweet.id, retweetsNum)
+      await this.loadTweetStats(this.tweet.id, this.tweet.user_id);
     },
     async like() {
       if (this.tweet.network !== "warpnet") {
@@ -237,8 +229,10 @@ export default {
       }
       if (!alreadyLiked) {
         await warpnetService.setLiker(this.tweet.id, this.profile.id, this.profile)
+        this.liked = true;
       } else {
         await warpnetService.deleteLiker(this.tweet.id, this.profile.id)
+        this.liked = false;
       }
 
       this.likesCount.set(this.tweet.id, likesNum);
@@ -277,6 +271,12 @@ export default {
     console.log("final tweet:", JSON.stringify(this.tweet));
 
     await this.loadTweetStats(this.tweet.id, this.tweet.user_id);
+
+    const owner = warpnetService.getOwnerProfile();
+    if (owner) {
+      this.liked = await warpnetService.hasLiker(this.tweet.id, owner.user_id);
+      this.retweeted = await warpnetService.hasRetweeter(this.tweet.id, owner.user_id);
+    }
   },
 };
 </script>

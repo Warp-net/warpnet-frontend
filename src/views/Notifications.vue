@@ -17,7 +17,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-WarpNet is provided “as is” without warranty of any kind, either expressed or implied.
+WarpNet is provided "as is" without warranty of any kind, either expressed or implied.
 Use at your own risk. The maintainers shall not be liable for any damages or data loss
 resulting from the use or misuse of this software.
 -->
@@ -60,7 +60,7 @@ resulting from the use or misuse of this software.
         <!-- notifications -->
         <div v-if="mode === 'All'">
           <div
-            v-if="getNotifications() === 0"
+            v-if="notifications.length === 0"
             class="flex flex-col items-center justify-center w-full pt-10"
           >
             <div class="w-1/2 flex flex-col items-center justify-center">
@@ -69,7 +69,7 @@ resulting from the use or misuse of this software.
             </div>
           </div>
 
-          <div v-for="notification in getNotifications()" :key="notification.id">
+          <div v-for="notification in notifications" :key="notification.id">
             <div
               class="w-full p-2 pt-1 pb-1 md:p-4 md:pt-2 md:pb-2 border-b hover:bg-lightest flex"
             >
@@ -88,16 +88,15 @@ resulting from the use or misuse of this software.
                     class="pt-1 fas fa-retweet text-green-500"
                   ></i>
 
-                  <a :href="`#/${profile.user_id}`">
+                  <a :href="`#/${notification.user_id}`">
                     <img
-                      :src="`${profile.avatar || '/default_profile.png'}`"
+                      :src="'/default_profile.png'"
                       class="h-8 w-8 ml-2 rounded-full flex-none"
                     />
                   </a>
                 </div>
                 <div class="flex items-center w-full">
-                  <p class="font-sm">{{ profile.username }}</p>
-                  <p class="font-sm">{{ "@" + profile.user_id }}</p>
+                  <p class="font-sm">{{ notification.text }}</p>
                   <p class="text-sm text-dark ml-auto">
                     {{ $filters.timeago(notification.created_at) }}
                   </p>
@@ -108,30 +107,29 @@ resulting from the use or misuse of this software.
         </div>
         <div v-if="mode === 'Mentions'">
           <div
-            v-if="getNotifications() === 0"
+            v-if="mentions.length === 0"
             class="flex flex-col items-center justify-center w-full pt-10"
           >
             <div class="w-1/2 flex flex-col items-center justify-center">
-              <p class="font-bold text-lg">No notifications yet</p>
+              <p class="font-bold text-lg">No mentions yet</p>
               <p class="text-sm text-dark">Wait until some get shown here.</p>
             </div>
           </div>
-          <div v-for="notification in getNotifications()" :key="notification.id">
-            <div v-if="notification.type === 'mention'"
+          <div v-for="notification in mentions" :key="notification.id">
+            <div
               class="w-full p-2 pt-1 pb-1 md:p-4 md:pt-2 md:pb-2 border-b hover:bg-lightest flex"
             >
               <div class="w-full">
                 <div class="flex flex-row mr-2 md:mr-4 pt-1 text-2xl">
-                  <a :href="`#/${profile.user_id}`">
+                  <a :href="`#/${notification.user_id}`">
                     <img
-                      :src="`${profile.avatar || '/default_profile.png'}`"
+                      :src="'/default_profile.png'"
                       class="h-8 w-8 ml-2 rounded-full flex-none"
                     />
                   </a>
                 </div>
                 <div class="flex items-center w-full">
-                  <p class="font-sm">{{ profile.username }}</p>
-                  <p class="font-sm">{{ "@" + profile.user_id }}</p>
+                  <p class="font-sm">{{ notification.text }}</p>
                   <p class="text-sm text-dark ml-auto">
                     {{ $filters.timeago(notification.created_at) }}
                   </p>
@@ -163,19 +161,15 @@ export default {
     return {
       loading: false,
       notifications: [],
-      profileId: this.$route.params.id,
       mode: this.$route.query.m || "All",
     };
   },
-  methods: {
-    async getNotifications() {
-      const resp = await warpnetService.getNotifications(true)
-      if (!resp || !resp.notifications || resp.notifications.length === 0) {
-        return [];
-      }
-
-      return resp.notifications;
+  computed: {
+    mentions() {
+      return this.notifications.filter(n => n.type === 'mention');
     },
+  },
+  methods: {
     gotoHome() {
       this.$router.push({
         name: "Home",
@@ -193,14 +187,12 @@ export default {
     console.log("loading component:", this.$options.name);
     try {
       this.loading = true;
-      const profileId = this.$route.params.id;
-      if (!profileId) {
-        this.noUser = true;
-        this.loading = false;
+      const resp = await warpnetService.getNotifications(true);
+      if (resp && resp.notifications) {
+        this.notifications = resp.notifications;
       }
     } catch (err) {
       console.error('Failed to load notifications:', err);
-      this.noUser = true;
     } finally {
       this.loading = false;
     }

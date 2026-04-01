@@ -104,9 +104,7 @@ export default {
   methods: {
     async loadChat() {
       try {
-        this.chat = await warpnetService.getChat({
-          chatId: this.chatId
-        });
+        this.chat = await warpnetService.getChat(this.chatId);
       } catch (error) {
         console.error('Error loading chat:', error);
       }

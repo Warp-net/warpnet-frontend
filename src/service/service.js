@@ -130,6 +130,8 @@ export const warpnetService = {
 
         const qrCode = await buildQRCode(qrData)
         warpnetService.setQR(qrCode)
+
+        startRefreshNotifications()
     },
 
     async getProfile(userId) {
@@ -843,15 +845,17 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function startRefreshNotifications() {
-    setInterval(() => {
+let notificationInterval = null;
+
+export function startRefreshNotifications() {
+    if (notificationInterval) return;
+    notificationInterval = setInterval(() => {
         try {
-            const owner = warpnetService.getOwnerProfile
-            warpnetService.getNotifications({userId: owner.user_id, cursorReset: false}).then();
+            const owner = warpnetService.getOwnerProfile();
+            if (!owner) return;
+            warpnetService.getNotifications(false).then();
         } catch (err) {
-            console.error(`failed to get notifications [${this.user.id}]`, err);
+            console.error('failed to refresh notifications', err);
         }
     }, 2000);
 }
-
-startRefreshNotifications();

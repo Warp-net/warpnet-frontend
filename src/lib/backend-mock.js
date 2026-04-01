@@ -185,9 +185,9 @@ function generateResponse(arg) {
             return {key: imageKey};
 
         case PUBLIC_GET_IMAGE:
-            const gotImg =  {image: mockMap.get("image:"+arg.body.key)};
+            const gotImg = mockMap.get("image:"+arg.body.key);
             if (!gotImg) return {code:404, message:"Image not found"};
-            return gotImg;
+            return {file: gotImg};
 
         case PUBLIC_GET_WHOTOFOLLOW:
             const allUsers = [];
@@ -232,7 +232,7 @@ function generateResponse(arg) {
                     followersList.push(value)
                 }
             }
-            return {cursor: "end", followers: followersList, followingId: arg.body.user_id};
+            return {cursor: "end", followers: followersList, following_id: arg.body.user_id};
         case PUBLIC_GET_FOLLOWINGS:
             let followingsList = [] // TODO pretend they're mutual
             for (const [key, value] of mockMap) {
@@ -240,7 +240,7 @@ function generateResponse(arg) {
                     followingsList.push(value)
                 }
             }
-            return {cursor: "end", followings: followingsList, followerId: arg.body.user_id};
+            return {cursor: "end", followings: followingsList, follower_id: arg.body.user_id};
 
         case PUBLIC_POST_LIKE:
             let likeStats = mockMap.get("stats:"+arg.body.tweet_id)
@@ -255,14 +255,19 @@ function generateResponse(arg) {
             return {count: unlikeStats.likes_count};
 
         case PUBLIC_POST_RETWEET:
-            let retweetStats = mockMap.get("stats:"+arg.body.tweet_id)
-            retweetStats.retweets_count++
-            mockMap.set("stats:"+arg.body.tweet_id, retweetStats)
+            const rtId = arg.body.id || arg.body.tweet_id
+            let retweetStats = mockMap.get("stats:"+rtId)
+            if (retweetStats) {
+                retweetStats.retweets_count++
+                mockMap.set("stats:"+rtId, retweetStats)
+            }
 
-            const retweetedTweet = mockMap.get("tweet:"+arg.body.tweet_id)
-            retweetedTweet.retweeted_by = arg.body.retweeted_by
-            mockMap.set("tweet:"+retweetedTweet.id, retweetedTweet)
-            return retweetedTweet // TODO add to timeline and tweets
+            const retweetedTweet = mockMap.get("tweet:"+rtId)
+            if (retweetedTweet) {
+                retweetedTweet.retweeted_by = arg.body.retweeted_by
+                mockMap.set("tweet:"+retweetedTweet.id, retweetedTweet)
+            }
+            return retweetedTweet || arg.body
 
         case PUBLIC_POST_UNRETWEET:
             let unretweetStats = mockMap.get("stats:"+arg.body.tweet_id)
@@ -292,7 +297,7 @@ function generateResponse(arg) {
             const replies = [];
             for (const [key, value] of mockMap) {
                 if (key.startsWith("reply:") && value.parent_id === arg.body.parent_id && value.root_id === arg.body.root_id)
-                    replies.push(value);
+                    replies.push({reply: value, children: []});
             }
             return {cursor: "end", replies: replies};
 
@@ -316,8 +321,17 @@ function generateResponse(arg) {
 
         case PUBLIC_POST_CHAT:
             const chatId = generateUUID();
-            mockMap.set("chat:"+chatId, {id: chatId, messages: []});
-            return {id: chatId};
+            const newChat = {
+                id: chatId,
+                owner_id: arg.body.owner_id,
+                other_user_id: arg.body.other_user_id,
+                last_message: "",
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                messages: [],
+            };
+            mockMap.set("chat:"+chatId, newChat);
+            return newChat;
 
         case PRIVATE_GET_CHATS:
             const chats = [];
@@ -333,12 +347,19 @@ function generateResponse(arg) {
 
         case PRIVATE_GET_MESSAGES:
             const chat = mockMap.get("chat:"+arg.body.chat_id);
-            return chat ? {messages: chat.messages} : {messages: []};
+            return chat
+                ? {chat_id: arg.body.chat_id, cursor: "end", messages: chat.messages}
+                : {chat_id: arg.body.chat_id, cursor: "end", messages: []};
 
         case PUBLIC_POST_MESSAGE:
             const msgId = generateUUID();
             const message = {
-                id: msgId, chat_id: arg.body.chat_id, text: arg.body.text, created_at: new Date().toISOString(),
+                id: msgId,
+                chat_id: arg.body.chat_id,
+                sender_id: arg.body.sender_id,
+                receiver_id: arg.body.receiver_id,
+                text: arg.body.text,
+                created_at: new Date().toISOString(),
             };
             const targetChat = mockMap.get("chat:"+arg.body.chat_id);
             if (targetChat) targetChat.messages.push(message);
@@ -359,7 +380,7 @@ function generateResponse(arg) {
             return {code:0,message:"Accepted"};
 
         case PRIVATE_GET_NOTIFICATIONS:
-            return {notifications: []};
+            return {cursor: "end", unread_count: 0, notifications: []};
 
         default:
             return {code:0,message:"Accepted"};
