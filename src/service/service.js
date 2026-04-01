@@ -850,12 +850,10 @@ let notificationInterval = null;
 export function startRefreshNotifications() {
     if (notificationInterval) return;
     notificationInterval = setInterval(() => {
-        try {
-            const owner = warpnetService.getOwnerProfile();
-            if (!owner) return;
-            warpnetService.getNotifications(false).then();
-        } catch (err) {
+        const owner = warpnetService.getOwnerProfile();
+        if (!owner) return;
+        warpnetService.getNotifications(true).catch(err => {
             console.error('failed to refresh notifications', err);
-        }
+        });
     }, 2000);
 }
