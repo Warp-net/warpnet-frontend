@@ -152,10 +152,11 @@ export default {
     const repliesRequest = {
       rootId: this.tweet.root_id || this.tweet.id,
       parentId: this.tweet.id,
+      cursorReset: true,
     }
-    let replies = await warpnetService.getReplies(repliesRequest, true);
+    let replies = await warpnetService.getReplies(repliesRequest);
     for (const node of replies || []) {
-      this.replies.push(node.reply);
+      this.replies.push(node.reply || node);
     }
   },
 };

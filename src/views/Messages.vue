@@ -280,10 +280,10 @@ export default {
     },
     async loadMore() {
       if (!this.active) return;
-      const messagesResp = await warpnetService.getDirectMessages(
-          {chatId:this.active.chat.id, cursorReset:false},
+      const olderMessages = await warpnetService.getDirectMessages(
+          {chatId: this.active.id, cursorReset: false},
       )
-      this.messages = [...this.messages, ...messagesResp.messages];
+      this.messages = [...this.messages, ...olderMessages];
     },
   },
   async created() {

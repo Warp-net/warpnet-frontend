@@ -65,6 +65,8 @@ export const PUBLIC_POST_IS_FOLLOWING  = "/public/post/isfollowing/0.0.0"
 export const PUBLIC_POST_IS_FOLLOWER   = "/public/post/isfollower/0.0.0"
 
 const stateMap = new Map();
+const notificationSubscribers = new Set();
+let latestNotifications = { unread_count: 0, notifications: [] };
 const defaultLimit = 20
 const endCursor = "end"
 
@@ -99,6 +101,34 @@ export const warpnetService = {
         return stateMap.get(key)
     },
 
+    clearOwnerProfile() {
+        const key = `owner`;
+        stateMap.delete(key)
+
+        // Reset notifications-related state to avoid leaking data between sessions.
+        // Safely clear latestNotifications if it exists.
+        if (typeof latestNotifications !== "undefined") {
+            latestNotifications = null;
+        }
+
+        // Safely clear notificationSubscribers if it exists.
+        if (typeof notificationSubscribers !== "undefined") {
+            if (typeof notificationSubscribers.clear === "function") {
+                // Supports Set, Map, or any object with a clear() method.
+                notificationSubscribers.clear();
+            } else if (Array.isArray(notificationSubscribers)) {
+                // Fallback for array-based subscriber lists.
+                notificationSubscribers.length = 0;
+            }
+        }
+
+        // Reset the notifications cursor so subsequent sessions start fresh.
+        if (typeof this.setCursor === "function") {
+            this.setCursor(PRIVATE_GET_NOTIFICATIONS, "");
+        }
+        stopRefreshNotifications()
+    },
+
     async signInUser(form) {
         let request = {
             path: PRIVATE_POST_LOGIN,
@@ -130,6 +160,8 @@ export const warpnetService = {
 
         const qrCode = await buildQRCode(qrData)
         warpnetService.setQR(qrCode)
+
+        startRefreshNotifications()
     },
 
     async getProfile(userId) {
@@ -310,7 +342,22 @@ export const warpnetService = {
             return {unread_count:0, notifications: []};
         }
         this.setCursor('notifications', resp.cursor || 'end')
+        latestNotifications = {
+            unread_count: resp.unread_count || 0,
+            notifications: resp.notifications || [],
+        };
+        for (const cb of notificationSubscribers) {
+            cb(latestNotifications);
+        }
         return resp;
+    },
+
+    subscribeNotifications(callback) {
+        notificationSubscribers.add(callback);
+        callback(latestNotifications);
+        return () => {
+            notificationSubscribers.delete(callback);
+        };
     },
 
     async getTweets({userId,cursorReset}) {
@@ -618,11 +665,15 @@ export const warpnetService = {
     async setLiker(tweetId, profileId, profileObj) {
         const cacheKey = `liker::${tweetId}::${profileId}`; // order matters
         stateMap.set(cacheKey, profileObj)
+        localStorage.setItem(cacheKey, "1")
     },
 
     async hasLiker(tweetId, profileId) {
         const cacheKey = `liker::${tweetId}::${profileId}`; // order matters
-        return stateMap.has(cacheKey)
+        if (stateMap.has(cacheKey)) {
+            return true
+        }
+        return localStorage.getItem(cacheKey) === "1"
     },
 
     async getLiker(tweetId, profileId) {
@@ -633,6 +684,7 @@ export const warpnetService = {
     async deleteLiker(tweetId, profileId) {
         const cacheKey = `liker::${tweetId}::${profileId}`; // order matters
         stateMap.delete(cacheKey)
+        localStorage.removeItem(cacheKey)
     },
 
     async retweetTweet({tweetId, userId, username, text}) {
@@ -671,11 +723,15 @@ export const warpnetService = {
     async setRetweeter(tweetId, profileId, profileObj) {
         const cacheKey = `retweeter::${tweetId}::${profileId}`; // order matters
         stateMap.set(cacheKey, profileObj)
+        localStorage.setItem(cacheKey, "1")
     },
 
     async hasRetweeter(tweetId, profileId) {
         const cacheKey = `retweeter::${tweetId}::${profileId}`; // order matters
-        return stateMap.has(cacheKey)
+        if (stateMap.has(cacheKey)) {
+            return true
+        }
+        return localStorage.getItem(cacheKey) === "1"
     },
 
     async getRetweeter(tweetId, profileId) {
@@ -686,6 +742,7 @@ export const warpnetService = {
     async deleteRetweeter(tweetId, profileId) {
         const cacheKey = `retweeter::${tweetId}::${profileId}`; // order matters
         stateMap.delete(cacheKey)
+        localStorage.removeItem(cacheKey)
     },
 
     async createChat(otherUserId) {
@@ -843,15 +900,32 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function startRefreshNotifications() {
-    setInterval(() => {
+let notificationInterval = null;
+let notificationRefreshInFlight = false;
+
+export function startRefreshNotifications() {
+    if (notificationInterval) return;
+    notificationInterval = setInterval(async () => {
+        const owner = warpnetService.getOwnerProfile();
+        if (!owner) {
+            stopRefreshNotifications();
+            return;
+        }
+        if (notificationRefreshInFlight) return;
+        notificationRefreshInFlight = true;
         try {
-            const owner = warpnetService.getOwnerProfile
-            warpnetService.getNotifications({userId: owner.user_id, cursorReset: false}).then();
+            await warpnetService.getNotifications(true);
         } catch (err) {
-            console.error(`failed to get notifications [${this.user.id}]`, err);
+            console.error('failed to refresh notifications', err);
+        } finally {
+            notificationRefreshInFlight = false;
         }
     }, 2000);
 }
 
-startRefreshNotifications();
+export function stopRefreshNotifications() {
+    if (!notificationInterval) return;
+    clearInterval(notificationInterval);
+    notificationInterval = null;
+    notificationRefreshInFlight = false;
+}

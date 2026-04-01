@@ -116,10 +116,10 @@ export default {
       const u = this.users[i]
       const image = await warpnetService.getImage({userId:u.id, key:u.avatar_key})
       if (image) {
-        this.users[i].avatar
-        this.loading = false;
+        this.users[i].avatar = image;
       }
     }
+    this.loading = false;
   },
   beforeUnmount() {
     window.removeEventListener("keydown", this.handleEscape);
