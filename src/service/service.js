@@ -801,6 +801,17 @@ export const warpnetService = {
         return chatsResp.chats;
     },
 
+    async deleteChat(chatId) {
+        const request = {
+            path: PRIVATE_DELETE_CHAT,
+            body: {
+                chat_id: chatId,
+            },
+        }
+
+        return await this.sendToNode(request);
+    },
+
     async sendDirectMessage({chatId, receiverId, text}) {
         const owner = this.getOwnerProfile();
         const request = {

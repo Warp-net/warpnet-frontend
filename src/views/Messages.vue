@@ -54,7 +54,7 @@ resulting from the use or misuse of this software.
             <div class="mr-4">
               <img
                   :src="getUser(chat.other_user_id)?.avatar || '/default_profile.png'"
-                  class="h-12 w-12 rounded-full"
+                  class="h-12 w-12 rounded-full object-cover bg-transparent"
               />
             </div>
             <div class="w-full truncate">
@@ -100,22 +100,21 @@ resulting from the use or misuse of this software.
         <div class="mr-4">
           <img
               :src="getUser(active.other_user_id)?.avatar || '/default_profile.png'"
-              class="w-6 h-6 rounded-full"
+              class="w-6 h-6 rounded-full object-cover bg-transparent"
           />
         </div>
         <div class="flex flex-col">
           <h1 class="font-bold">{{ getUser(active.other_user_id)?.username }}</h1>
           <p class="text-xs text-dark">@{{ active.other_user_id }}</p>
         </div>
-        <button type="button" class="ml-auto rounded-full w-9 h-9 flex items-center justify-center hover:bg-lightblue flat-btn" aria-label="Chat info">
-          <i class="fas fa-info-circle text-xl text-blue" aria-hidden="true"></i>
+        <button type="button" @click="deleteCurrentChat" class="ml-auto rounded-full w-9 h-9 flex items-center justify-center hover:bg-red-100 flat-btn" aria-label="Delete chat">
+          <i class="fas fa-trash text-xl text-red-500" aria-hidden="true"></i>
         </button>
       </div>
 
       <!-- Messages -->
       <div class="flex-1 overflow-y-scroll px-5 pt-5 no-scrollbar" v-scroll:top="loadMore">
-        <div class="flex flex-col-reverse">
-          <div ref="scrollToMe"></div>
+        <div class="flex flex-col">
           <div v-for="message in messages" :key="message.id">
             <!-- Own message -->
             <div v-if="message.sender_id === ownerProfile.user_id" class="flex justify-end mb-4">
@@ -128,7 +127,7 @@ resulting from the use or misuse of this software.
             <div v-else class="flex items-start mb-4">
               <img
                   :src="getUser(active.other_user_id)?.avatar || '/default_profile.png'"
-                  class="h-8 w-8 rounded-full mr-2"
+                  class="h-8 w-8 rounded-full mr-2 object-cover bg-transparent"
               />
               <div class="bg-lighter text-black py-2 px-4 rounded-tr-3xl rounded-tl-xl rounded-br-3xl">
                 {{ message.text }}
@@ -136,6 +135,7 @@ resulting from the use or misuse of this software.
               <p class="text-xs text-dark ml-2">{{ $filters.time(message.created_at) }}</p>
             </div>
           </div>
+          <div ref="scrollToMe"></div>
         </div>
       </div>
 
@@ -210,12 +210,19 @@ export default {
       if (!this.active.other_user_id || this.text.length === 0) return;
       this.disabled = true; // disable message input temporarily
 
+      if (!this.active.id) {
+        const chat = await warpnetService.createChat(this.active.other_user_id);
+        if (chat && chat.id) {
+          this.active.id = chat.id;
+        }
+      }
+
       const message = await warpnetService.sendDirectMessage({
         chatId: this.active.id,
         receiverId: this.active.other_user_id,
         text: this.text,
       })
-      this.messages = [message, ...this.messages]
+      this.messages = [...this.messages, message]
       this.text = "";
       this.disabled = false;
       await this.$nextTick(() => {
@@ -274,6 +281,17 @@ export default {
       );
       this.scrollToEnd();
     },
+    async deleteCurrentChat() {
+      if (!this.active || !this.active.id) return;
+      try {
+        await warpnetService.deleteChat(this.active.id);
+        this.chats = this.chats.filter(c => c.id !== this.active.id);
+        this.active = undefined;
+        this.messages = [];
+      } catch (err) {
+        console.error('Failed to delete chat:', err);
+      }
+    },
     deselectAll() {
       this.active = undefined;
     },
@@ -290,7 +308,7 @@ export default {
       const olderMessages = await warpnetService.getDirectMessages(
           {chatId: this.active.id, cursorReset: false},
       )
-      this.messages = [...this.messages, ...olderMessages];
+      this.messages = [...olderMessages, ...this.messages];
     },
   },
   async created() {

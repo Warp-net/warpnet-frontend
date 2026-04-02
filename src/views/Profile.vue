@@ -23,11 +23,10 @@ resulting from the use or misuse of this software.
 -->
 <template>
   <div id="app" class="flex container h-screen w-full">
-    <div class="flex container h-screen w-full">
       <SideNav />
 
       <div
-        class="w-full md:w-2/3 lg:w-1/2 h-full overflow-y-scroll no-scrollbar"
+        class="w-full h-full overflow-y-scroll no-scrollbar"
         v-scroll:bottom="loadMore"
       >
         <div class="px-5 py-3 border-b border-lighter flex items-center">
@@ -69,9 +68,8 @@ resulting from the use or misuse of this software.
             <img
               v-if="profile"
               :src="profile.avatar || '/default_profile.png'"
-              class="w-24 h-24 md:w-32 md:h-32 rounded-full border-white"
+              class="w-24 h-24 md:w-32 md:h-32 rounded-full border-white object-cover bg-transparent"
               style="margin-top: -80px; border-width: 6px;"
-
             />
 
             <div v-if="isMySelf(profile.id) && profile">
@@ -142,7 +140,7 @@ resulting from the use or misuse of this software.
                 class="text-sm font-medium bg-gray-100 py-1 px-1 mx-2 rounded text-gray-500 align-middle"
               >Follows you</span>
             </p>
-            <p class="my-2">{{ profile.bio || '' }}</p>
+            <p class="my-2" v-linkify>{{ profile.bio || '' }}</p>
             <div class="flex flex-col md:flex-row mt-1 mb-2">
               <div v-if="profile.website" class="flex flex-row mr-4">
                 <i
@@ -237,13 +235,9 @@ resulting from the use or misuse of this software.
         </div>
         <Tweets v-if="!noUser" :tweets="tweets" />
       </div>
-      <div
-        class="hidden md:block w-1/3 z-0 h-full border-l border-lighter px-6 py-2 overflow-y-scroll no-scrollbar relative"
-      >
-        <DefaultRightBar
-            :profile="profile"
-        />
-      </div>
+      <DefaultRightBar
+          :profile="profile"
+      />
 
       <SetUpProfileOverlay
         v-if="showSetUpProfileModal"
@@ -254,9 +248,8 @@ resulting from the use or misuse of this software.
       <EditProfileOverlay
         v-if="showEditProfileModal"
         :showEditProfileModal="showEditProfileModal"
-        @close="showEditProfileModal = false"
+        @close="onEditProfileClosed"
       />
-    </div>
   </div>
 </template>
 
@@ -341,6 +334,17 @@ export default {
     },
     editProfile() {
       this.showEditProfileModal = true;
+    },
+    async onEditProfileClosed() {
+      this.showEditProfileModal = false;
+      const profileId = this.$route.params.id;
+      this.profile = await warpnetService.getProfile(profileId);
+      this.profile.background_image = await warpnetService.getImage(
+          {userId: profileId, key: this.profile.background_image_key},
+      );
+      this.profile.avatar = await warpnetService.getImage(
+          {userId: profileId, key: this.profile.avatar_key},
+      );
     },
     async follow() {
       try {

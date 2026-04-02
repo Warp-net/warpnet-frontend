@@ -194,8 +194,7 @@ resulting from the use or misuse of this software.
       >
         <img
           :src="profile.avatar || '/default_profile.png'"
-          class="w-10 h-10 rounded-full"
-
+          class="w-10 h-10 rounded-full object-cover bg-transparent"
         />
         <div class="hidden xl:block ml-4 truncate">
           <div class="text-left text-sm font-bold leading-tight truncate">
@@ -217,8 +216,7 @@ resulting from the use or misuse of this software.
         >
           <img
             :src="profile.avatar || '/default_profile.png'"
-            class="w-10 h-10 rounded-full"
-
+            class="w-10 h-10 rounded-full object-cover bg-transparent"
           />
           <div class="ml-4">
             <p class="text-left text-sm font-bold leading-tight">
@@ -241,6 +239,12 @@ resulting from the use or misuse of this software.
           class="w-full text-left hover:bg-lightest border-t border-lighter p-3 text-sm"
         >
           Sign in by QR-code
+        </button>
+        <button
+          @click="logout"
+          class="w-full text-left hover:bg-lightest border-t border-lighter p-3 text-sm text-red-600"
+        >
+          Log out @{{ profile.user_id }}
         </button>
       </div>
     </div>
@@ -306,6 +310,11 @@ export default {
     },
     async closeQR() {
       this.qrModalOpen = false
+    },
+    logout() {
+      this.dropdown = false;
+      warpnetService.clearOwnerProfile();
+      this.$router.push({ name: "Root" });
     },
   },
   async created() {

@@ -48,8 +48,7 @@ resulting from the use or misuse of this software.
         <div v-if="profile" class="flex-none mr-4">
           <img
             :src="profile.avatar || '/default_profile.png'"
-            class="flex-none w-12 h-12 rounded-full"
-
+            class="flex-none w-12 h-12 rounded-full object-cover bg-transparent"
           />
         </div>
         <div class="w-full relative">
@@ -208,13 +207,17 @@ export default {
         this.tweet.image_key = await warpnetService.uploadImage(this.imageAttachment)
       }
 
-      await warpnetService.createTweet({text: this.tweet.text, imageKey: this.tweet.image_key});
+      const newTweet = await warpnetService.createTweet({text: this.tweet.text, imageKey: this.tweet.image_key});
 
       this.tweet.text = "";
       this.tweet.image_key = "";
       this.imageAttachment = undefined;
 
-      this.timeline = await warpnetService.getMyTimeline(true);
+      if (newTweet && newTweet.id) {
+        this.timeline.unshift(newTweet);
+      } else {
+        this.timeline = await warpnetService.getMyTimeline(true);
+      }
     },
     async loadMore() {
       const timeline = await warpnetService.getMyTimeline(false);

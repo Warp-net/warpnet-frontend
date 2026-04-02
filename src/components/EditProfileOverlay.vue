@@ -232,6 +232,7 @@ export default {
       p.background_image_key = await warpnetService.uploadImage(this.background_image)
 
       this.profile = await warpnetService.editMyProfile(p);
+      warpnetService.setOwnerProfile(this.profile);
 
       this.background_image = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.background_image_key});
       this.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.avatar_key})

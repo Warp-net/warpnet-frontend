@@ -23,10 +23,9 @@ resulting from the use or misuse of this software.
 -->
 <template>
   <div id="app" class="flex container h-screen w-full">
-    <div class="flex container h-full w-full">
       <SideNav />
 
-      <div class="w-full md:w-1/2 h-full overflow-y-scroll no-scrollbar">
+      <div class="w-full h-full overflow-y-scroll no-scrollbar">
         <div class="px-5 py-3 border-lighter flex items-center justify-between">
           <button
               @click="gotoHome()"
@@ -87,6 +86,10 @@ resulting from the use or misuse of this software.
                     v-if="notification.type === 'retweet'"
                     class="pt-1 fas fa-retweet text-green-500"
                   ></i>
+                  <i
+                    v-if="notification.type === 'follow'"
+                    class="pt-1 fas fa-user-plus text-blue"
+                  ></i>
 
                   <a :href="`#/${notification.user_id}`">
                     <img
@@ -141,8 +144,7 @@ resulting from the use or misuse of this software.
       </div>
 
       <!-- default right bar -->
-      <DefaultRightBar />
-    </div>
+      <DefaultRightBar :profile="ownerProfile" />
   </div>
 </template>
 
@@ -161,6 +163,7 @@ export default {
     return {
       loading: false,
       notifications: [],
+      ownerProfile: {},
       mode: this.$route.query.m || "All",
     };
   },
@@ -187,6 +190,7 @@ export default {
     console.log("loading component:", this.$options.name);
     try {
       this.loading = true;
+      this.ownerProfile = warpnetService.getOwnerProfile();
       const resp = await warpnetService.getNotifications(true);
       if (resp && resp.notifications) {
         this.notifications = resp.notifications;
