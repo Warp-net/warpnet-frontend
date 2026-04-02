@@ -23,22 +23,26 @@ resulting from the use or misuse of this software.
 -->
 <template>
     <div class="w-full bg-lightblue border-b-2 border-dark mt-20 mb-10 p-2 input_field">
-      <p class="text-dark text-center">Username</p>
+      <label for="login-username" class="text-dark text-center block">Username</label>
       <input
+          id="login-username"
           v-model="username"
           class="w-full bg-lightblue text-lg text-center"
           type="text"
           ref="username"
+          autocomplete="username"
           @keydown.enter="$refs.password.focus()"
       />
     </div>
     <div class="w-full bg-lightblue border-b-2 border-dark mt-10 mb-10 p-2 input_field">
-      <p class="text-dark text-center">Password</p>
+      <label for="login-password" class="text-dark text-center block">Password</label>
       <input
+          id="login-password"
           v-model="password"
           class="w-full bg-lightblue text-lg text-center"
           type="password"
           ref="password"
+          autocomplete="current-password"
           @keydown.enter="signIn"
       />
     </div>
@@ -54,10 +58,11 @@ resulting from the use or misuse of this software.
         <ProgressBar/>
       </div>
     </div>
-    <div v-if="showErrorModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div class="bg-white rounded-xl p-6 w-80 shadow-lg text-center">
-        <p class="text-lg font-bold bg-blue mb-4">{{ errorMessage }}</p>
-      </div>
+    <div v-if="showErrorModal" class="mt-4 p-3 rounded-lg bg-red-50 border border-red-200 text-center" role="alert">
+      <p class="text-red-700 text-sm font-medium">{{ errorMessage }}</p>
+      <button type="button" @click="showErrorModal = false" class="mt-2 text-xs text-red-500 hover:text-red-700 underline flat-btn">
+        Dismiss
+      </button>
     </div>
   </template>
   
@@ -84,16 +89,16 @@ export default {
   methods: {
     async signIn() {
       this.isLoading = true;
+      this.showErrorModal = false;
       try {
         await warpnetService.signInUser({username: this.username, password: this.password});
+        this.$router.push({ name: "Home" });
       } catch (error) {
-        alert(error)
         console.log("error signing in", error);
         this.errorMessage = error?.message || "Unknown error during sign-in.";
         this.showErrorModal = true;
       } finally {
         this.isLoading = false;
-        this.$router.push({ name: "Home" });
       }
     },
   },

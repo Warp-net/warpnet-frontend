@@ -105,9 +105,11 @@ resulting from the use or misuse of this software.
               </button>
               <button
                 v-if="isFollower()"
+                @click="sendMessage()"
                 class="text-xs md:text-base md:ml-auto mr-1 md:mr-3 text-blue font-bold px-3 py-1 md:px-3 md:py-2 rounded-full border border-blue mb-2 hover:bg-lightblue"
+                aria-label="Send message"
               >
-                <i @click="sendMessage()" class="fas fa-envelope"></i>
+                <i class="fas fa-envelope" aria-hidden="true"></i>
               </button>
               <button
                 v-if="!isFollowing()"

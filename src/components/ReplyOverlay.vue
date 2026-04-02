@@ -34,13 +34,20 @@ resulting from the use or misuse of this software.
     <div
       class="modal-main bg-white mx-auto rounded-lg z-0 overflow-y-auto"
       style="width:40%"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Reply to tweet"
     >
       <div class="pl-1 pr-4 py-1 h-16 border-b-2 border-lightblue">
         <div class="flex flex-row mt-1 ml-4">
-          <i
+          <button
+            type="button"
             @click="this.$emit('close')"
-            class="fas fa-times text-blue text-2xl mb-8 mr-6 rounded-full bg-white p-2 px-3 hover:bg-lightblue cursor-pointer"
-          ></i>
+            class="rounded-full bg-white p-2 px-3 hover:bg-lightblue flex items-center justify-center"
+            aria-label="Close reply"
+          >
+            <i class="fas fa-times text-blue text-2xl" aria-hidden="true"></i>
+          </button>
         </div>
       </div>
 
@@ -87,7 +94,9 @@ resulting from the use or misuse of this software.
 
           <div class="w-full mb-2">
             <form @submit.prevent="sendReply" class="w-full relative">
+              <label for="reply-textarea" class="sr-only">Tweet your reply</label>
               <textarea
+                id="reply-textarea"
                 v-model="text"
                 placeholder="Tweet your reply"
                 class="w-full focus:outline-none mt-3 pb-3"

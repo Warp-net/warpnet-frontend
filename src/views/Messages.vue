@@ -30,8 +30,12 @@ resulting from the use or misuse of this software.
     <div class="hidden md:flex flex-col w-1/3 h-full overflow-y-scroll border-r border-lighter">
       <div class="px-5 py-3 border-b border-lighter flex items-center">
         <h1 class="text-xl font-bold flex-1">Chats</h1>
-        <i class="fas fa-cog text-xl text-blue cursor-pointer"></i>
-        <i @click="newMessage()" class="fas fa-plus-circle ml-3 text-xl text-blue cursor-pointer"></i>
+        <button type="button" disabled class="rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed flat-btn" aria-label="Chat settings (coming soon)" title="Coming soon">
+          <i class="fas fa-cog text-xl text-blue" aria-hidden="true"></i>
+        </button>
+        <button type="button" @click="newMessage()" class="rounded-full w-9 h-9 flex items-center justify-center hover:bg-lightblue ml-1" aria-label="New message">
+          <i class="fas fa-plus-circle text-xl text-blue" aria-hidden="true"></i>
+        </button>
       </div>
 
       <Loader :loading="loading" />
@@ -103,7 +107,9 @@ resulting from the use or misuse of this software.
           <h1 class="font-bold">{{ getUser(active.other_user_id)?.username }}</h1>
           <p class="text-xs text-dark">@{{ active.other_user_id }}</p>
         </div>
-        <i class="fas fa-info-circle ml-auto text-xl text-blue cursor-pointer"></i>
+        <button type="button" class="ml-auto rounded-full w-9 h-9 flex items-center justify-center hover:bg-lightblue flat-btn" aria-label="Chat info">
+          <i class="fas fa-info-circle text-xl text-blue" aria-hidden="true"></i>
+        </button>
       </div>
 
       <!-- Messages -->
@@ -146,10 +152,11 @@ resulting from the use or misuse of this software.
         <button
             @click="sendMessage"
             :disabled="disabled || !text.length"
-            class="ml-4 w-8 h-8 rounded-full focus:outline-none"
-            :class="text.length === 0 ? 'opacity-50 cursor-default' : 'hover:bg-lightblue'"
+            class="ml-4 w-9 h-9 rounded-full flex items-center justify-center"
+            :class="disabled || !text.length ? 'opacity-50 cursor-default' : 'hover:bg-lightblue'"
+            aria-label="Send message"
         >
-          <i class="fas fa-arrow-right text-blue text-xl"></i>
+          <i class="fas fa-arrow-right text-blue text-xl" aria-hidden="true"></i>
         </button>
       </div>
     </div>

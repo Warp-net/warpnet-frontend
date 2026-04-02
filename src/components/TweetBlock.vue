@@ -35,27 +35,30 @@ resulting from the use or misuse of this software.
       class="w-full p-2 pt-1 pb-1 md:p-4 md:pt-2 md:pb-2 border-b hover:bg-lightest flex"
   >
     <div class="flex-none mr-2 md:mr-4 pt-1">
-      <a>
+      <button type="button" @click="gotoProfile(tweet.user_id)" class="flat-btn" aria-label="View profile">
         <img
           :src="`${this.profile.avatar || '/default_profile.png'}`"
           class="h-12 w-12 rounded-full flex-none"
+          :alt="`${tweet.username || 'User'} avatar`"
         />
-      </a>
+      </button>
     </div>
     <div class="w-full">
       <div class="flex items-center w-full">
-        <a @click="gotoProfile(tweet.user_id)">
-          <p class="font-semibold" >{{ tweet.username || 'Anonymous' }}</p>
-        </a>
+        <button type="button" @click="gotoProfile(tweet.user_id)" class="font-semibold hover:underline flat-btn">
+          {{ tweet.username || 'Anonymous' }}
+        </button>
         <p class="hidden md:block text-sm text-dark ml-2">
           @{{ tweet.user_id }}
         </p>
         <p class="text-sm text-dark ml-2">·</p>
         <p class="text-sm text-dark ml-2">{{ $filters.timeago(tweet.created_at) }}</p>
-        <div>
-          <i @click="showDropdown = !showDropdown" class="fas fa-angle-down text-sm ml-auto text-dark cursor-pointer"></i>
-          <div v-if="showDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-            <a @click="deleteTweet" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Delete tweet</a>
+        <div class="relative ml-auto">
+          <button type="button" @click="showDropdown = !showDropdown" class="rounded-full w-7 h-7 flex items-center justify-center hover:bg-lighter flat-btn" aria-label="Tweet options" :aria-expanded="showDropdown">
+            <i class="fas fa-angle-down text-sm text-dark" aria-hidden="true"></i>
+          </button>
+          <div v-if="showDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+            <button type="button" @click="deleteTweet" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flat-btn">Delete tweet</button>
           </div>
         </div>
       </div>
@@ -72,25 +75,31 @@ resulting from the use or misuse of this software.
             class="rounded-lg max-w-full border border-lighter"
         />
       </div>
-      <div class="flex w-full">
+      <div class="flex w-full mt-1">
         <div class="flex items-center text-sm text-dark w-1/4">
           <button
             @click="replyToTweet"
-            class="mr-2 rounded-full hover:bg-lighter"
+            type="button"
+            class="mr-2 rounded-full w-9 h-9 flex items-center justify-center hover:bg-lighter hover:text-blue transition-colors"
+            aria-label="Reply"
+            title="Reply"
           >
-            <i class="far fa-comment"></i>
+            <i class="far fa-comment" aria-hidden="true"></i>
           </button>
           <p v-if="getRepliesCount(tweet.id) > 0">{{ getRepliesCount(tweet.id) || '?' }}</p>
         </div>
         <div class="flex items-center text-sm text-dark w-1/4">
           <button
             @click="retweet()"
-            class="mr-2 rounded-full hover:bg-lighter"
+            type="button"
+            class="mr-2 rounded-full w-9 h-9 flex items-center justify-center hover:bg-green-100 transition-colors"
+            :aria-label="retweeted ? 'Undo retweet' : 'Retweet'"
+            :title="retweeted ? 'Undo retweet' : 'Retweet'"
           >
             <i
-              :class="
-                `fas fa-retweet ${retweeted ? 'text-green-500' : ''}`
-              "
+              class="fas fa-retweet"
+              :class="retweeted ? 'text-green-500' : ''"
+              aria-hidden="true"
             ></i>
           </button>
           <p v-if="getRetweetsCount(tweet.id) > 0">{{ getRetweetsCount(tweet.id) || '?'}}</p>
@@ -98,14 +107,19 @@ resulting from the use or misuse of this software.
         <div class="flex items-center text-sm text-dark w-1/4">
           <button
             @click="like()"
-            class="mr-2 rounded-full hover:bg-lighter"
+            type="button"
+            class="mr-2 rounded-full w-9 h-9 flex items-center justify-center hover:bg-red-100 transition-colors"
+            :aria-label="liked ? 'Unlike' : 'Like'"
+            :title="liked ? 'Unlike' : 'Like'"
           >
-            <i :class="`fas fa-heart ${liked ? 'text-red-600' : ''}`"></i>
+            <i class="fas fa-heart" :class="liked ? 'text-red-600' : ''" aria-hidden="true"></i>
           </button>
           <p v-if="getLikesCount(tweet.id) > 0">{{ getLikesCount(tweet.id) }}</p>
         </div>
         <div class="flex items-center text-sm text-dark w-1/4">
-          <i class="fas fa-share-square mr-3 cursor-not-allowed"></i>
+          <button type="button" disabled class="rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed flat-btn" aria-label="Share (coming soon)" title="Coming soon">
+            <i class="fas fa-share-square" aria-hidden="true"></i>
+          </button>
         </div>
       </div>
     </div>

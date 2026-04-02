@@ -32,6 +32,9 @@ resulting from the use or misuse of this software.
     <div
       class="modal-main bg-white mx-auto rounded-lg z-50 overflow-y-auto"
       style="height:80%; width:40%"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Set up profile picture"
     >
       <div class="pl-1 pr-4 py-1 h-12">
         <button
@@ -69,8 +72,10 @@ resulting from the use or misuse of this software.
               @click="openFileInput"
               class="absolute hover:bg-gray-800 p-3 rounded-full"
               style="left: 50%; top: 50%; transform: translate(-50%, -50%)"
+              type="button"
+              aria-label="Upload profile picture"
             >
-              <i class="text-2xl fas fa-camera text-white"></i>
+              <i class="text-2xl fas fa-camera text-white" aria-hidden="true"></i>
               <input
                 @change="fileChange"
                 ref="fileInput"
@@ -112,7 +117,7 @@ export default {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => this.newImage = reader.result;
-      reader.onerror = (error) => alert(error);
+      reader.onerror = (error) => console.error("Error reading file:", error);
     },
     async finishSetUpProfile() {
       const p = {
