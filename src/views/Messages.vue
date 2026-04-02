@@ -214,6 +214,10 @@ export default {
         const chat = await warpnetService.createChat(this.active.other_user_id);
         if (chat && chat.id) {
           this.active.id = chat.id;
+        } else {
+          console.error('Failed to create chat');
+          this.disabled = false;
+          return;
         }
       }
 
@@ -222,7 +226,9 @@ export default {
         receiverId: this.active.other_user_id,
         text: this.text,
       })
-      this.messages = [...this.messages, message]
+      if (message && message.id) {
+        this.messages = [...this.messages, message]
+      }
       this.text = "";
       this.disabled = false;
       await this.$nextTick(() => {

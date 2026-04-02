@@ -140,7 +140,7 @@ resulting from the use or misuse of this software.
                 class="text-sm font-medium bg-gray-100 py-1 px-1 mx-2 rounded text-gray-500 align-middle"
               >Follows you</span>
             </p>
-            <p class="my-2" v-linkify>{{ profile.bio || '' }}</p>
+            <p :key="profile.bio || ''" class="my-2" v-linkify>{{ profile.bio || '' }}</p>
             <div class="flex flex-col md:flex-row mt-1 mb-2">
               <div v-if="profile.website" class="flex flex-row mr-4">
                 <i
@@ -338,13 +338,20 @@ export default {
     async onEditProfileClosed() {
       this.showEditProfileModal = false;
       const profileId = this.$route.params.id;
-      this.profile = await warpnetService.getProfile(profileId);
-      this.profile.background_image = await warpnetService.getImage(
-          {userId: profileId, key: this.profile.background_image_key},
-      );
-      this.profile.avatar = await warpnetService.getImage(
-          {userId: profileId, key: this.profile.avatar_key},
-      );
+      const previousProfile = this.profile;
+      try {
+        const profile = await warpnetService.getProfile(profileId);
+        profile.background_image = await warpnetService.getImage(
+            {userId: profileId, key: profile.background_image_key},
+        );
+        profile.avatar = await warpnetService.getImage(
+            {userId: profileId, key: profile.avatar_key},
+        );
+        this.profile = profile;
+      } catch (err) {
+        this.profile = previousProfile;
+        console.error(`failed to refresh profile [${profileId}] after edit`, err);
+      }
     },
     async follow() {
       try {
