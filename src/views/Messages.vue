@@ -208,32 +208,46 @@ export default {
     },
     async sendMessage() {
       if (!this.active.other_user_id || this.text.length === 0) return;
-      this.disabled = true; // disable message input temporarily
+      this.disabled = true;
 
-      if (!this.active.id) {
-        const chat = await warpnetService.createChat(this.active.other_user_id);
-        if (chat && chat.id) {
-          this.active.id = chat.id;
-        } else {
-          console.error('Failed to create chat');
-          this.disabled = false;
-          return;
+      try {
+        if (!this.active.id) {
+          const chat = await warpnetService.createChat(this.active.other_user_id);
+          if (chat && chat.id) {
+            await this.loadChatUser(chat.owner_id);
+            await this.loadChatUser(chat.other_user_id);
+
+            this.active = { ...this.active, ...chat };
+
+            const existingIndex = this.chats.findIndex((c) => c.id === chat.id);
+            if (existingIndex === -1) {
+              this.chats = [...this.chats, chat];
+            } else {
+              this.chats.splice(existingIndex, 1, { ...this.chats[existingIndex], ...chat });
+            }
+          } else {
+            console.error('Failed to create chat');
+            return;
+          }
         }
-      }
 
-      const message = await warpnetService.sendDirectMessage({
-        chatId: this.active.id,
-        receiverId: this.active.other_user_id,
-        text: this.text,
-      })
-      if (message && message.id) {
-        this.messages = [...this.messages, message]
+        const message = await warpnetService.sendDirectMessage({
+          chatId: this.active.id,
+          receiverId: this.active.other_user_id,
+          text: this.text,
+        });
+        if (message && message.id) {
+          this.messages = [...this.messages, message];
+        }
+        this.text = "";
+        await this.$nextTick(() => {
+          this.scrollToEnd();
+        });
+      } catch (err) {
+        console.error('Failed to send message:', err);
+      } finally {
+        this.disabled = false;
       }
-      this.text = "";
-      this.disabled = false;
-      await this.$nextTick(() => {
-        this.scrollToEnd();
-      });
     },
     scrollToEnd() {
       this.$nextTick(() => {
