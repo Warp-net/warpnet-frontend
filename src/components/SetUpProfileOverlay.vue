@@ -91,6 +91,7 @@ resulting from the use or misuse of this software.
             />
           </div>
         </div>
+        <p v-if="fileError" class="mt-4 text-red-600 text-sm text-center" role="alert">{{ fileError }}</p>
       </div>
     </div>
   </div>
@@ -106,6 +107,7 @@ export default {
     return {
       newImage: "/default_profile.png",
       profile: {},
+      fileError: "",
     };
   },
   methods: {
@@ -117,7 +119,10 @@ export default {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => this.newImage = reader.result;
-      reader.onerror = (error) => console.error("Error reading file:", error);
+      reader.onerror = (error) => {
+        console.error("Error reading file:", error);
+        this.fileError = "Failed to load image. Please try a different file.";
+      };
     },
     async finishSetUpProfile() {
       const p = {

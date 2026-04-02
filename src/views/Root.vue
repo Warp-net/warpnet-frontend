@@ -299,7 +299,7 @@ export default {
         this.isLoading = false;
       }
     },
-    async setStep(step) {
+    setStep(step) {
       this.signUpError = "";
       this.showModal = step || ""
     },

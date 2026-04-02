@@ -163,6 +163,7 @@ resulting from the use or misuse of this software.
               placeholder="Add your birth date"
             />
           </div>
+          <p v-if="fileError" class="mt-2 px-3 text-red-600 text-sm" role="alert">{{ fileError }}</p>
         </div>
       </div>
     </div>
@@ -195,6 +196,7 @@ export default {
   data() {
     return {
       profile: {},
+      fileError: "",
       username: undefined,
       background_image: undefined,
       avatar: undefined,
@@ -217,7 +219,10 @@ export default {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => this[prop] = reader.result;
-      reader.onerror = (error) => console.error("Error reading file:", error);
+      reader.onerror = (error) => {
+        console.error("Error reading file:", error);
+        this.fileError = "Failed to read image. Please try a different file.";
+      };
     },
     async saveProfile() {
       const p = {
