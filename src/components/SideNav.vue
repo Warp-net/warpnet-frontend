@@ -194,8 +194,7 @@ resulting from the use or misuse of this software.
       >
         <img
           :src="profile.avatar || '/default_profile.png'"
-          class="w-10 h-10 rounded-full"
-
+          class="w-10 h-10 rounded-full object-cover bg-transparent"
         />
         <div class="hidden xl:block ml-4 truncate">
           <div class="text-left text-sm font-bold leading-tight truncate">
@@ -217,8 +216,7 @@ resulting from the use or misuse of this software.
         >
           <img
             :src="profile.avatar || '/default_profile.png'"
-            class="w-10 h-10 rounded-full"
-
+            class="w-10 h-10 rounded-full object-cover bg-transparent"
           />
           <div class="ml-4">
             <p class="text-left text-sm font-bold leading-tight">

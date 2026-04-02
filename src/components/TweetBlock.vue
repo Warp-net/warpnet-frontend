@@ -22,7 +22,8 @@ Use at your own risk. The maintainers shall not be liable for any damages or dat
 resulting from the use or misuse of this software.
 -->
 <template>
-  <div v-if="tweet.retweeted_by && tweet.retweeted_by !== ''">
+  <div v-if="deleted" class="hidden"></div>
+  <div v-if="!deleted && tweet.retweeted_by && tweet.retweeted_by !== ''">
     <!-- Retweet header -->
     <div class="pt-4 pl-4 flex flex-row">
       <div class="w-12 mr-4 flex justify-end">
@@ -32,13 +33,14 @@ resulting from the use or misuse of this software.
     </div>
   </div>
   <div
+      v-if="!deleted"
       class="w-full p-2 pt-1 pb-1 md:p-4 md:pt-2 md:pb-2 border-b hover:bg-lightest flex"
   >
     <div class="flex-none mr-2 md:mr-4 pt-1">
       <button type="button" @click="gotoProfile(tweet.user_id)" class="flat-btn" aria-label="View profile">
         <img
-          :src="`${this.profile.avatar || '/default_profile.png'}`"
-          class="h-12 w-12 rounded-full flex-none"
+          :src="profile.avatar || '/default_profile.png'"
+          class="h-12 w-12 rounded-full flex-none object-cover bg-transparent"
           :alt="`${tweet.username || 'User'} avatar`"
         />
       </button>
@@ -53,12 +55,12 @@ resulting from the use or misuse of this software.
         </p>
         <p class="text-sm text-dark ml-2">·</p>
         <p class="text-sm text-dark ml-2">{{ $filters.timeago(tweet.created_at) }}</p>
-        <div class="relative ml-auto">
+        <div v-if="isOwner" class="relative ml-auto">
           <button type="button" @click="showDropdown = !showDropdown" class="rounded-full w-7 h-7 flex items-center justify-center hover:bg-lighter flat-btn" aria-label="Tweet options" :aria-expanded="showDropdown">
             <i class="fas fa-angle-down text-sm text-dark" aria-hidden="true"></i>
           </button>
           <div v-if="showDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-            <button type="button" @click="deleteTweet" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flat-btn">Delete tweet</button>
+            <button type="button" @click="deleteTweet" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 flat-btn">Delete tweet</button>
           </div>
         </div>
       </div>
@@ -147,6 +149,8 @@ export default {
       profile: {},
       showReplyOverlay: false,
       showDropdown: false,
+      deleted: false,
+      isOwner: false,
       label: "You Retweeted",
       liked: false,
       retweeted: false,
@@ -194,20 +198,23 @@ export default {
       this.showReplyOverlay = true;
     },
     async deleteTweet() {
-      if (!this.tweet.parent_id || this.tweet.parent_id === '') {
-        const deleteObject = {
-          userId: this.tweet.user_id,
-          tweetId: this.tweet.id,
+      this.showDropdown = false;
+      try {
+        if (!this.tweet.parent_id || this.tweet.parent_id === '') {
+          await warpnetService.deleteTweet({
+            userId: this.tweet.user_id,
+            tweetId: this.tweet.id,
+          });
+        } else {
+          await warpnetService.deleteReply({
+            userId: this.tweet.user_id,
+            rootId: this.tweet.root_id,
+            replyId: this.tweet.id,
+          });
         }
-        await warpnetService.deleteTweet(deleteObject);
-        this.gotoProfile(this.profile.id);
-      } else {
-        const deleteObject = {
-          userId: this.profile.id,
-          rootId: this.tweet.root_id,
-          replyId: this.tweet.id,
-        }
-        await warpnetService.deleteReply(deleteObject);
+        this.deleted = true;
+      } catch (err) {
+        console.error('Failed to delete tweet:', err);
       }
     },
     replyToTweet() {
@@ -241,7 +248,7 @@ export default {
       await this.loadTweetStats(this.tweet.id, this.tweet.user_id);
     },
     async like() {
-      if (this.tweet.network !== "warpnet") {
+      if (this.tweet.network && this.tweet.network !== "warpnet") {
         return
       }
       const owner = warpnetService.getOwnerProfile();
@@ -301,6 +308,9 @@ export default {
     this.profile.avatar = await warpnetService.getImage({userId: this.profile.id, key: this.profile.avatar_key})
 
     console.log("final tweet:", JSON.stringify(this.tweet));
+
+    const owner = warpnetService.getOwnerProfile();
+    this.isOwner = owner && owner.user_id === this.tweet.user_id;
 
     await this.loadTweetStats(this.tweet.id, this.tweet.user_id);
 

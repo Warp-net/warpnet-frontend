@@ -30,7 +30,7 @@ resulting from the use or misuse of this software.
       <img 
         @click="pushToProfilePage(profile.id)" 
         :src="getAvatar(profile.id, profile.avatar_key) || '/default_profile.png'"
-        class="w-12 h-12 rounded-full cursor-pointer"  
+        class="w-12 h-12 rounded-full cursor-pointer object-cover bg-transparent"
         :alt="profile.username"
       />
       <div class="hidden lg:block ml-4">
@@ -104,7 +104,9 @@ export default {
       this.profilesAvatars.set(userId, img)
     },
     async loadMore() {
-      const users = await warpnetService.getWhoToFollow(this.profile.id,false)
+      const effectiveProfile = this.profile || this.ownerProfile;
+      const profileId = effectiveProfile?.id || effectiveProfile?.user_id;
+      const users = await warpnetService.getWhoToFollow(profileId, false)
       for (const p of users) {
         const status = await warpnetService.isFollowing(p.id);
         this.followingStatus.set(p.id, status);
@@ -116,10 +118,9 @@ export default {
   async created() {
     console.log("loading component:", this.$options.name);
     this.ownerProfile = warpnetService.getOwnerProfile();
-    if (!this.profile) {
-      this.profile = this.ownerProfile;
-    }
-    this.profiles = await warpnetService.getWhoToFollow(this.profile.id, true)
+    const effectiveProfile = this.profile || this.ownerProfile;
+    const profileId = effectiveProfile?.id || effectiveProfile?.user_id;
+    this.profiles = await warpnetService.getWhoToFollow(profileId, true)
     for (const p of this.profiles) {
       const status = await warpnetService.isFollowing(p.id);
       this.followingStatus.set(p.id, status);
