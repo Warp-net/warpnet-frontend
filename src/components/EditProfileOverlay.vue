@@ -33,6 +33,9 @@ resulting from the use or misuse of this software.
     <div
       class="modal-main bg-white mx-auto rounded-lg z-50 overflow-y-auto no-scrollbar"
       style="height:85%; width:40%"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Edit profile"
     >
       <div class="pl-1 pr-4 py-1 h-16 border-b-2 border-lightblue">
         <button
@@ -41,11 +44,15 @@ resulting from the use or misuse of this software.
         >
           Save
         </button>
-        <div class="flex flex-row mt-1 ml-4">
-          <i
+        <div class="flex flex-row mt-1 ml-4 items-center">
+          <button
+            type="button"
             @click="this.$emit('close')"
-            class="fas fa-times text-blue text-2xl mb-8 mr-6 rounded-full bg-white p-2 px-3 hover:bg-lightblue cursor-pointer"
-          ></i>
+            class="rounded-full bg-white p-2 px-3 hover:bg-lightblue mr-6 flex items-center justify-center"
+            aria-label="Close"
+          >
+            <i class="fas fa-times text-blue text-2xl" aria-hidden="true"></i>
+          </button>
           <p class="text-xl pt-1 font-bold">Edit profile</p>
         </div>
       </div>
@@ -61,8 +68,10 @@ resulting from the use or misuse of this software.
             @click="openFileInput('backgroundFileInput')"
             class="absolute hover:bg-gray-800 p-3 rounded-full"
             style="margin-left: 45%; margin-top: 80px"
+            type="button"
+            aria-label="Change background image"
           >
-            <i class="text-2xl fas fa-camera text-white"></i>
+            <i class="text-2xl fas fa-camera text-white" aria-hidden="true"></i>
             <input
               @change="fileChange('backgroundFileInput', 'background_image')"
               ref="backgroundFileInput"
@@ -93,8 +102,10 @@ resulting from the use or misuse of this software.
             <button
               @click="openFileInput('imageUrlFileInput')"
               class="absolute hover:bg-gray-800 p-3 rounded-full ml-10 mt-10"
+              type="button"
+              aria-label="Change profile picture"
             >
-              <i class="text-2xl fas fa-camera text-white"></i>
+              <i class="text-2xl fas fa-camera text-white" aria-hidden="true"></i>
               <input
                 @change="fileChange('imageUrlFileInput', 'avatar')"
                 ref="imageUrlFileInput"
@@ -206,7 +217,7 @@ export default {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => this[prop] = reader.result;
-      reader.onerror = (error) => alert(error);
+      reader.onerror = (error) => console.error("Error reading file:", error);
     },
     async saveProfile() {
       const p = {

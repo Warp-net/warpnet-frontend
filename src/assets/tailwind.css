@@ -31,9 +31,36 @@ body {
   height: 100%;
 }
 
-button:focus,
-input:focus {
+/* Preserve clean look for mouse users, but show focus ring for keyboard nav */
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible) {
   outline: none;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #C5007F;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.dark button:focus-visible,
+.dark input:focus-visible,
+.dark textarea:focus-visible,
+.dark a:focus-visible,
+.dark [role="button"]:focus-visible {
+  outline-color: #f4d5e1;
+}
+
+.mastodon button:focus-visible,
+.mastodon input:focus-visible,
+.mastodon textarea:focus-visible,
+.mastodon a:focus-visible,
+.mastodon [role="button"]:focus-visible {
+  outline-color: #c156f5;
 }
 
 .modal-main {
@@ -42,6 +69,19 @@ input:focus {
 
 textarea {
   resize: none;
+}
+
+/* Screen-reader only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 input[type="search"]::-webkit-search-cancel-button {
@@ -68,6 +108,108 @@ a {
 
 a:hover {
   text-decoration: underline;
+}
+
+/* === Volumetric UI: depth for buttons, avatars, cards === */
+button:not(.flat-btn) {
+  transition: all 0.15s ease;
+}
+
+/* Primary filled buttons (bg-blue) get a subtle shadow and press effect */
+button.bg-blue,
+button.bg-darkblue {
+  box-shadow: 0 2px 6px rgba(197, 0, 127, 0.3), 0 1px 2px rgba(0,0,0,0.1);
+}
+button.bg-blue:hover,
+button.bg-darkblue:hover {
+  box-shadow: 0 4px 12px rgba(197, 0, 127, 0.4), 0 2px 4px rgba(0,0,0,0.12);
+  transform: translateY(-1px);
+}
+button.bg-blue:active,
+button.bg-darkblue:active {
+  box-shadow: 0 1px 3px rgba(197, 0, 127, 0.25);
+  transform: translateY(0);
+}
+
+/* Outlined / secondary buttons get a subtle lift on hover */
+button.border-blue {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+button.border-blue:hover {
+  box-shadow: 0 3px 8px rgba(197, 0, 127, 0.15);
+  transform: translateY(-1px);
+}
+
+/* Avatars get a subtle ring + shadow for depth */
+img.rounded-full {
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  border: 2px solid rgba(255,255,255,0.8);
+}
+
+.dark img.rounded-full {
+  border-color: rgba(54, 1, 36, 0.6);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* Icon action buttons (reply, like, retweet) get larger hit area + hover circle */
+button.rounded-full > i.fas,
+button.rounded-full > i.far,
+button.rounded-full > i.fa {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  min-height: 2rem;
+}
+
+/* Toast notification container */
+.toast-container {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  animation: toast-in 0.3s ease forwards;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 24rem;
+}
+.toast-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+.toast-success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.dark .toast-error {
+  background: #450a0a;
+  color: #fca5a5;
+  border-color: #7f1d1d;
+}
+.dark .toast-success {
+  background: #052e16;
+  color: #86efac;
+  border-color: #166534;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(1rem); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @layer base {

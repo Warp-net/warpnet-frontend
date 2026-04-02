@@ -142,7 +142,6 @@ export const warpnetService = {
             throw new Error("Login failed: no response")
         }
         if (resp.code) {
-            alert(resp.message)
             throw new Error(resp.message)
         }
 

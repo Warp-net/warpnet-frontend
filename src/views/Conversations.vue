@@ -30,8 +30,12 @@ resulting from the use or misuse of this software.
       <div class="w-full sm:w-1/3 md:w-1/2 lg:w-1/2 h-full overflow-y-scroll no-scrollbar hidden md:block">
         <div class="px-5 py-3 border-b border-lighter flex">
           <h1 class="text-xl font-bold flex-1">Chats</h1>
-          <i class="fas fa-cog text-xl text-blue cursor-pointer"></i>
-          <i @click="newMessage()" class="fas fa-plus-circle ml-3 text-xl text-blue cursor-pointer"></i>
+          <button type="button" disabled class="rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed flat-btn" aria-label="Chat settings (coming soon)" title="Coming soon">
+            <i class="fas fa-cog text-xl text-blue" aria-hidden="true"></i>
+          </button>
+          <button type="button" @click="newMessage()" class="rounded-full w-9 h-9 flex items-center justify-center hover:bg-lightblue ml-1" aria-label="New message">
+            <i class="fas fa-plus-circle text-xl text-blue" aria-hidden="true"></i>
+          </button>
         </div>
 
         <!-- chats -->

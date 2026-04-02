@@ -82,13 +82,8 @@ resulting from the use or misuse of this software.
             <button
               @click="setSignUpStep('step2')"
               class="rounded-full bg-blue font-bold text-white mt-2 p-1 pl-3 pr-3 relative right-0 float-right hover:bg-darkblue"
-              :class="
-                `${
-                  !username
-                    ? 'opacity-50 cursor-not-allowed'
-                    : ''
-                }`
-              "
+              :class="!username ? 'opacity-50 cursor-not-allowed' : ''"
+              :disabled="!username"
             >
               Next
             </button>
@@ -100,12 +95,15 @@ resulting from the use or misuse of this software.
             <div class="flex justify-between items-center pb-8">
               <p class="text-2xl font-bold">Create your account</p>
             </div>
+            <p class="text-sm text-dark mb-4">Step 1 of 4</p>
             <div class="w-full bg-lightblue border-b-2 border-dark mb-8 p-2">
-              <p class="text-dark">Username</p>
+              <label for="signup-username" class="text-dark">Username</label>
               <input
+                id="signup-username"
                 v-model="username"
                 class="w-full bg-lightblue text-lg"
                 type="text"
+                autocomplete="username"
               />
             </div>
           </div>
@@ -131,9 +129,10 @@ resulting from the use or misuse of this software.
             ></i>
           </div>
           <div class="pt-5 px-8">
-            <div class="flex justify-between items-center pb-8">
+            <div class="flex justify-between items-center pb-4">
               <p class="text-2xl font-bold">Important information</p>
             </div>
+            <p class="text-sm text-dark mb-4">Step 2 of 4</p>
 
             <div class="mt-5 mb-8">
               <p class="font-bold text-xl mb-1">User Responsibility</p>
@@ -187,16 +186,19 @@ resulting from the use or misuse of this software.
             ></i>
           </div>
           <div class="pt-5 px-8">
-            <div class="flex justify-between items-center pb-4">
+            <div class="flex justify-between items-center pb-2">
               <p class="text-2xl font-bold">You'll need a password</p>
             </div>
+            <p class="text-sm text-dark mb-4">Step 3 of 4</p>
 
             <div class="w-full bg-lightblue border-b-2 border-dark p-2">
-              <p class="leading-tight text-dark">Password</p>
+              <label for="signup-password" class="leading-tight text-dark">Password</label>
               <input
+                id="signup-password"
                 v-model="password"
                 class="w-full bg-lightblue text-lg"
                 :type="`${revealPassword ? 'text' : 'password'}`"
+                autocomplete="new-password"
               />
             </div>
 
@@ -217,8 +219,8 @@ resulting from the use or misuse of this software.
             >
               <i class="fas fa-arrow-left text-blue"></i>
             </button>
-            <p class="flex items-start ml-12 p-2 text-xl font-extrabold">
-              Step 4 of 5
+            <p class="flex items-start ml-12 p-2 text-sm text-dark">
+              Step 4 of 4
             </p>
           </div>
           <div class="pt-5 px-8">
@@ -241,6 +243,9 @@ resulting from the use or misuse of this software.
             <div v-else class="w-full rounded-full mt-4 py-3">
               <ProgressBar/>
             </div>
+            <p v-if="signUpError" class="mt-3 text-red-600 text-sm text-center font-medium" role="alert">
+              {{ signUpError }}
+            </p>
           </div>
         </div>
       </div>
@@ -269,6 +274,7 @@ export default {
       userResponsibility: false,
       futureAds: false,
       localStorageLoss: false,
+      signUpError: "",
     };
   },
   mounted() {
@@ -284,12 +290,12 @@ export default {
           password: this.password,
         });
         await this.setStep("step5");
+        this.$router.push({ name: "Home" });
       } catch (error) {
-        alert(error);
         console.error("error signing up:", error);
+        this.signUpError = error?.message || "Sign-up failed. Please try again.";
       } finally {
         this.isLoading = false;
-        this.$router.push({ name: "Home" });
       }
     },
     async setStep(step) {

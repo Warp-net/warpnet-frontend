@@ -37,9 +37,12 @@ resulting from the use or misuse of this software.
         <h1 class="text-xl font-bold">Home</h1>
         <button
             @click="toggleInfo"
-            class="fas fa-info-circle text-xl text-blue cursor-pointer hover:bg-lighter"
-            aria-hidden="true"
-        />
+            class="text-xl text-blue cursor-pointer hover:bg-lighter rounded-full w-9 h-9 flex items-center justify-center"
+            aria-label="Show node info"
+            type="button"
+        >
+          <i class="fas fa-info-circle" aria-hidden="true"></i>
+        </button>
       </div>
       <div class="px-5 py-3 border-b-8 border-lighter flex">
         <div v-if="profile" class="flex-none mr-4">
@@ -50,7 +53,9 @@ resulting from the use or misuse of this software.
           />
         </div>
         <div class="w-full relative">
+          <label for="compose-tweet" class="sr-only">Compose a tweet</label>
           <textarea
+            id="compose-tweet"
             v-model="tweet.text"
             placeholder="What's happening?"
             class="w-full focus:outline-none mt-3 pb-3"
@@ -73,8 +78,11 @@ resulting from the use or misuse of this software.
           <div>
             <button
                 @click="openFileInput('imageUrlFileInput')"
-                class="text-lg text-blue mr-4 far fa-image"
+                class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center hover:bg-lightblue"
+                type="button"
+                aria-label="Attach image"
             >
+              <i class="far fa-image" aria-hidden="true"></i>
               <input
                   @change="fileChange('imageUrlFileInput')"
                   ref="imageUrlFileInput"
@@ -83,15 +91,22 @@ resulting from the use or misuse of this software.
                   class="hidden"
               />
             </button>
-            <i class="text-lg text-blue mr-4 fas fa-film cursor-not-allowed"></i>
-            <i class="text-lg text-blue mr-4 far fa-chart-bar cursor-not-allowed"></i>
-            <i class="text-lg text-blue mr-4 far fa-smile cursor-not-allowed"></i>
+            <button type="button" disabled class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed" aria-label="Attach video (coming soon)" title="Coming soon">
+              <i class="fas fa-film" aria-hidden="true"></i>
+            </button>
+            <button type="button" disabled class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed" aria-label="Add poll (coming soon)" title="Coming soon">
+              <i class="far fa-chart-bar" aria-hidden="true"></i>
+            </button>
+            <button type="button" disabled class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed" aria-label="Add emoji (coming soon)" title="Coming soon">
+              <i class="far fa-smile" aria-hidden="true"></i>
+            </button>
           </div>
           <button
             @click="addNewTweet"
             type="button"
             class="h-10 px-4 text-white font-semibold bg-blue hover:bg-darkblue rounded-full absolute bottom-0 right-0"
             :class="tweet.text ? '' : 'opacity-50 cursor-not-allowed'"
+            :disabled="!tweet.text"
           >
             Tweet
           </button>
@@ -123,6 +138,13 @@ resulting from the use or misuse of this software.
         :content="infoContent"
         :position="infoPosition"
     />
+    <!-- Toast notifications -->
+    <div v-if="toastMessage" class="toast-container">
+      <div :class="['toast', toastType === 'error' ? 'toast-error' : 'toast-success']" role="alert">
+        <i :class="toastType === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-check-circle'" aria-hidden="true"></i>
+        {{ toastMessage }}
+      </div>
+    </div>
     <!-- default right bar -->
     <DefaultRightBar
         :profile="profile"
@@ -158,6 +180,8 @@ export default {
       infoPosition: { top: '0px', left: '0px' },
       imageAttachment: undefined,
       videoAttachment: undefined,
+      toastMessage: '',
+      toastType: 'error',
     };
   },
   methods: {
@@ -171,7 +195,7 @@ export default {
       reader.onload = () => this.imageAttachment = reader.result;
       reader.onerror = (error) => {
         console.error("Error reading file", error);
-        alert('Error reading file');
+        this.showToast('Error reading file. Please try again.', 'error');
       };
     },
     async removeImageAttachment() {
@@ -213,6 +237,11 @@ export default {
     },
     async getInfo() {
       return await warpnetService.getNodeInfo();
+    },
+    showToast(message, type = 'error') {
+      this.toastMessage = message;
+      this.toastType = type;
+      setTimeout(() => { this.toastMessage = ''; }, 4000);
     },
   },
   async created() {

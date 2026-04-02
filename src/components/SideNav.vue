@@ -30,8 +30,32 @@ resulting from the use or misuse of this software.
     />
   </div>
 
-  <div
+  <!-- Mobile bottom tab bar (visible below sm:360px) -->
+  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-lighter flex justify-around items-center py-2 sm:hidden" role="navigation" aria-label="Mobile navigation">
+    <button @click="open('Home')" :class="$route.name === 'Home' ? 'text-blue' : 'text-dark'" class="flex flex-col items-center p-2 flat-btn" aria-label="Home">
+      <i class="fa fa-home text-xl"></i>
+      <span class="text-xs mt-0.5">Home</span>
+    </button>
+    <button @click="open('Notifications')" :class="$route.name === 'Notifications' ? 'text-blue' : 'text-dark'" class="flex flex-col items-center p-2 relative flat-btn" aria-label="Notifications">
+      <i class="fa-bell text-xl" :class="$route.name === 'Notifications' ? 'fas' : 'far'"></i>
+      <span v-if="newNotifications > 0" class="absolute -top-0.5 right-0 inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold bg-blue text-white">{{ newNotifications }}</span>
+      <span class="text-xs mt-0.5">Alerts</span>
+    </button>
+    <button @click="open('Chats')" :class="$route.name === 'Chats' || $route.name === 'Messages' ? 'text-blue' : 'text-dark'" class="flex flex-col items-center p-2 relative flat-btn" aria-label="Messages">
+      <i class="fa-envelope text-xl" :class="$route.name === 'Chats' || $route.name === 'Messages' ? 'fas' : 'far'"></i>
+      <span v-if="newMessages > 0" class="absolute -top-0.5 right-0 inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold bg-blue text-white">{{ newMessages }}</span>
+      <span class="text-xs mt-0.5">Chats</span>
+    </button>
+    <button @click="open('Profile')" :class="$route.name === 'Profile' ? 'text-blue' : 'text-dark'" class="flex flex-col items-center p-2 flat-btn" aria-label="Profile">
+      <i class="fa-user text-xl" :class="$route.name === 'Profile' ? 'fas' : 'far'"></i>
+      <span class="text-xs mt-0.5">Profile</span>
+    </button>
+  </nav>
+
+  <nav
     class="w-1/6 md:w-1/12 xl:w-1/6 border-r border-lighter lg:px-6 py-2 flex-col justify-between hidden sm:flex"
+    role="navigation"
+    aria-label="Main navigation"
   >
     <div>
       <button
@@ -41,7 +65,8 @@ resulting from the use or misuse of this software.
       <div>
         <button
           @click="open('Home')"
-          class="focus:outline-none hover:text-blue flex items-center px-4 py-2 hover:bg-transparent md:hover:bg-lightblue rounded-full mr-auto mb-1"
+          class="hover:text-blue flex items-center px-4 py-2 hover:bg-transparent md:hover:bg-lightblue rounded-full mr-auto mb-1"
+          aria-label="Home"
         >
           <i
             class="fa fa-home"
@@ -63,7 +88,8 @@ resulting from the use or misuse of this software.
 <!--        </button>-->
         <button
           @click="open('Notifications')"
-          class="cursor-not-allowed relative focus:outline-none hover:text-blue flex items-center px-4 py-2 hover:bg-transparent md:hover:bg-lightblue rounded-full mr-auto mb-1"
+          class="relative hover:text-blue flex items-center px-4 py-2 hover:bg-transparent md:hover:bg-lightblue rounded-full mr-auto mb-1"
+          aria-label="Notifications"
         >
           <i
             class="fa-bell"
@@ -88,7 +114,8 @@ resulting from the use or misuse of this software.
         </button>
         <button
           @click="open('Chats')"
-          class="focus:outline-none hover:text-blue flex items-center px-4 py-2 hover:bg-transparent md:hover:bg-lightblue rounded-full mr-auto mb-1"
+          class="hover:text-blue flex items-center px-4 py-2 hover:bg-transparent md:hover:bg-lightblue rounded-full mr-auto mb-1"
+          aria-label="Messages"
         >
           <i
             class="fa-envelope"
@@ -110,7 +137,10 @@ resulting from the use or misuse of this software.
           </p>
         </button>
         <button
-          class="cursor-not-allowed focus:outline-none hover:text-blue flex items-center px-4 py-2 hover:bg-transparent md:hover:bg-lightblue rounded-full mr-auto mb-1"
+          disabled
+          class="hover:text-blue flex items-center px-4 py-2 hover:bg-transparent md:hover:bg-lightblue rounded-full mr-auto mb-1 opacity-50 cursor-not-allowed"
+          aria-label="Bookmarks (coming soon)"
+          title="Coming soon"
         >
           <i class="text-xl far fa-bookmark" aria-hidden="true"></i>
           <p class="text-lg ml-4 text-left hidden xl:block">Bookmarks</p>
@@ -123,7 +153,8 @@ resulting from the use or misuse of this software.
 <!--        </button>-->
         <button
           @click="open('Profile')"
-          class="focus:outline-none hover:text-blue flex items-center px-4 py-2 hover:bg-transparent md:hover:bg-lightblue rounded-full mr-auto mb-1"
+          class="hover:text-blue flex items-center px-4 py-2 hover:bg-transparent md:hover:bg-lightblue rounded-full mr-auto mb-1"
+          aria-label="Profile"
         >
           <i
             class="fa-user"
@@ -138,8 +169,10 @@ resulting from the use or misuse of this software.
           </p>
         </button>
         <button
-          @click=""
-          class="cursor-not-allowed focus:outline-none hover:text-blue flex items-center px-4 py-2 hover:bg-transparent md:hover:bg-lightblue rounded-full mr-auto mb-1"
+          disabled
+          class="hover:text-blue flex items-center px-4 py-2 hover:bg-transparent md:hover:bg-lightblue rounded-full mr-auto mb-1 opacity-50 cursor-not-allowed"
+          aria-label="Settings (coming soon)"
+          title="Coming soon"
         >
           <i class="text-xl fas fa-cog" aria-hidden="true"></i>
           <p class="text-lg ml-4 text-left hidden xl:block">Settings</p>
@@ -211,7 +244,7 @@ resulting from the use or misuse of this software.
         </button>
       </div>
     </div>
-  </div>
+  </nav>
 </template>
 
 <script>
