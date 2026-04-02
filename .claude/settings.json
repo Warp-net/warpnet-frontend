@@ -3,7 +3,9 @@
   "permissions": {
     "deny": [
       "Read(./dist/**)",
-      "Read(./node_modules/**)"
+      "Edit(./dist/**)",
+      "Read(./node_modules/**)",
+      "Edit(./node_modules/**)"
     ]
   }
 }
