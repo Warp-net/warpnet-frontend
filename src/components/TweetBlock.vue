@@ -57,8 +57,8 @@ resulting from the use or misuse of this software.
           <button type="button" @click="showDropdown = !showDropdown" class="rounded-full w-7 h-7 flex items-center justify-center hover:bg-lighter flat-btn" aria-label="Tweet options" :aria-expanded="showDropdown">
             <i class="fas fa-angle-down text-sm text-dark" aria-hidden="true"></i>
           </button>
-          <div v-if="showDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10" role="menu">
-            <button type="button" @click="deleteTweet" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flat-btn" role="menuitem">Delete tweet</button>
+          <div v-if="showDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+            <button type="button" @click="deleteTweet" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flat-btn">Delete tweet</button>
           </div>
         </div>
       </div>

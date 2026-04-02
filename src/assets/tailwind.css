@@ -140,15 +140,17 @@ button.border-blue:hover {
   transform: translateY(-1px);
 }
 
-/* Avatars get a subtle ring + shadow for depth */
-img.rounded-full {
-  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-  border: 2px solid rgba(255,255,255,0.8);
-}
+/* Avatars: depth styles in @layer components so utility classes can override */
+@layer components {
+  img.rounded-full {
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    border: 2px solid rgba(255,255,255,0.8);
+  }
 
-.dark img.rounded-full {
-  border-color: rgba(54, 1, 36, 0.6);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  .dark img.rounded-full {
+    border-color: rgba(54, 1, 36, 0.6);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
 }
 
 /* Icon action buttons (reply, like, retweet) get larger hit area + hover circle */
