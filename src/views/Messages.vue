@@ -153,7 +153,7 @@ resulting from the use or misuse of this software.
             @click="sendMessage"
             :disabled="disabled || !text.length"
             class="ml-4 w-9 h-9 rounded-full flex items-center justify-center"
-            :class="text.length === 0 ? 'opacity-50 cursor-default' : 'hover:bg-lightblue'"
+            :class="disabled || !text.length ? 'opacity-50 cursor-default' : 'hover:bg-lightblue'"
             aria-label="Send message"
         >
           <i class="fas fa-arrow-right text-blue text-xl" aria-hidden="true"></i>

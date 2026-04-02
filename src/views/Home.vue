@@ -182,6 +182,7 @@ export default {
       videoAttachment: undefined,
       toastMessage: '',
       toastType: 'error',
+      toastTimeoutId: null,
     };
   },
   methods: {
@@ -227,7 +228,7 @@ export default {
 
       this.infoContent = await this.getInfo();
 
-      const rect = event.target.getBoundingClientRect();
+      const rect = event.currentTarget.getBoundingClientRect();
       this.infoPosition = {
         top: `${rect.bottom + window.scrollY}px`,
         left: `${rect.left + window.scrollX}px`,
@@ -239,9 +240,13 @@ export default {
       return await warpnetService.getNodeInfo();
     },
     showToast(message, type = 'error') {
+      if (this.toastTimeoutId) clearTimeout(this.toastTimeoutId);
       this.toastMessage = message;
       this.toastType = type;
-      setTimeout(() => { this.toastMessage = ''; }, 4000);
+      this.toastTimeoutId = setTimeout(() => {
+        this.toastMessage = '';
+        this.toastTimeoutId = null;
+      }, 4000);
     },
   },
   async created() {
@@ -258,6 +263,12 @@ export default {
 
     this.timeline = await warpnetService.getMyTimeline(true);
     this.loading = false;
+  },
+  beforeUnmount() {
+    if (this.toastTimeoutId) {
+      clearTimeout(this.toastTimeoutId);
+      this.toastTimeoutId = null;
+    }
   },
 };
 </script>

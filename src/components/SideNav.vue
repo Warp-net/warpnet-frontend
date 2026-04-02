@@ -30,24 +30,24 @@ resulting from the use or misuse of this software.
     />
   </div>
 
-  <!-- Mobile bottom tab bar (visible below sm:360px) -->
+  <!-- Mobile bottom tab bar (visible below sm breakpoint, <360px per tailwind.config.js) -->
   <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-lighter flex justify-around items-center py-2 sm:hidden" role="navigation" aria-label="Mobile navigation">
     <button @click="open('Home')" :class="$route.name === 'Home' ? 'text-blue' : 'text-dark'" class="flex flex-col items-center p-2 flat-btn" aria-label="Home">
-      <i class="fa fa-home text-xl"></i>
+      <i class="fa fa-home text-xl" aria-hidden="true"></i>
       <span class="text-xs mt-0.5">Home</span>
     </button>
     <button @click="open('Notifications')" :class="$route.name === 'Notifications' ? 'text-blue' : 'text-dark'" class="flex flex-col items-center p-2 relative flat-btn" aria-label="Notifications">
-      <i class="fa-bell text-xl" :class="$route.name === 'Notifications' ? 'fas' : 'far'"></i>
+      <i class="fa-bell text-xl" :class="$route.name === 'Notifications' ? 'fas' : 'far'" aria-hidden="true"></i>
       <span v-if="newNotifications > 0" class="absolute -top-0.5 right-0 inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold bg-blue text-white">{{ newNotifications }}</span>
       <span class="text-xs mt-0.5">Alerts</span>
     </button>
     <button @click="open('Chats')" :class="$route.name === 'Chats' || $route.name === 'Messages' ? 'text-blue' : 'text-dark'" class="flex flex-col items-center p-2 relative flat-btn" aria-label="Messages">
-      <i class="fa-envelope text-xl" :class="$route.name === 'Chats' || $route.name === 'Messages' ? 'fas' : 'far'"></i>
+      <i class="fa-envelope text-xl" :class="$route.name === 'Chats' || $route.name === 'Messages' ? 'fas' : 'far'" aria-hidden="true"></i>
       <span v-if="newMessages > 0" class="absolute -top-0.5 right-0 inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold bg-blue text-white">{{ newMessages }}</span>
       <span class="text-xs mt-0.5">Chats</span>
     </button>
     <button @click="open('Profile')" :class="$route.name === 'Profile' ? 'text-blue' : 'text-dark'" class="flex flex-col items-center p-2 flat-btn" aria-label="Profile">
-      <i class="fa-user text-xl" :class="$route.name === 'Profile' ? 'fas' : 'far'"></i>
+      <i class="fa-user text-xl" :class="$route.name === 'Profile' ? 'fas' : 'far'" aria-hidden="true"></i>
       <span class="text-xs mt-0.5">Profile</span>
     </button>
   </nav>

@@ -285,11 +285,12 @@ export default {
     async signMeUp() {
       try {
         this.isLoading = true;
+        this.signUpError = "";
         await warpnetService.signInUser({
           username: this.username,
           password: this.password,
         });
-        await this.setStep("step5");
+        this.setStep("");
         this.$router.push({ name: "Home" });
       } catch (error) {
         console.error("error signing up:", error);
@@ -299,6 +300,7 @@ export default {
       }
     },
     async setStep(step) {
+      this.signUpError = "";
       this.showModal = step || ""
     },
     setSignUpStep(step) {
