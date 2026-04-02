@@ -240,12 +240,6 @@ resulting from the use or misuse of this software.
         >
           Sign in by QR-code
         </button>
-        <button
-          @click="logout"
-          class="w-full text-left hover:bg-lightest border-t border-lighter p-3 text-sm text-red-600"
-        >
-          Log out @{{ profile.user_id }}
-        </button>
       </div>
     </div>
   </nav>
@@ -310,11 +304,6 @@ export default {
     },
     async closeQR() {
       this.qrModalOpen = false
-    },
-    logout() {
-      this.dropdown = false;
-      warpnetService.clearOwnerProfile();
-      this.$router.push({ name: "Root" });
     },
   },
   async created() {
