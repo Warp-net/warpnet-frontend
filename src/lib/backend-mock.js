@@ -208,6 +208,9 @@ function generateResponse(arg) {
 
 
         case PUBLIC_POST_FOLLOW:
+            const followKey = "follow:"+arg.body.followerId+":"+arg.body.followingId;
+            if (mockMap.has(followKey)) return {code: 0, message: "Already following"};
+
             const followerUser = mockMap.get("user:"+arg.body.followerId)
             if (!followerUser) return {code:404, message:"User not found"};
             followerUser.followings_count++
@@ -219,22 +222,26 @@ function generateResponse(arg) {
                 mockMap.set("user:"+arg.body.followingId, followedUser)
             }
 
-            mockMap.set("follow:"+arg.body.followingId, {});
+            mockMap.set(followKey, {});
             return {code: 0, message: "Accepted"};
 
         case PUBLIC_POST_UNFOLLOW:
+            const unfollowKey = "follow:"+arg.body.followerId+":"+arg.body.followingId;
+            if (!mockMap.has(unfollowKey)) return {code: 0, message: "Not following"};
+
             const unfollowerUser = mockMap.get("user:"+arg.body.followerId)
-            if (!unfollowerUser) return {code: 0, message: "Accepted"};
-            unfollowerUser.followings_count--
-            mockMap.set("user:"+arg.body.followerId, unfollowerUser)
+            if (unfollowerUser) {
+                unfollowerUser.followings_count = Math.max(0, unfollowerUser.followings_count - 1)
+                mockMap.set("user:"+arg.body.followerId, unfollowerUser)
+            }
 
             const unfollowedUser = mockMap.get("user:"+arg.body.followingId)
             if (unfollowedUser) {
-                unfollowedUser.followers_count--
+                unfollowedUser.followers_count = Math.max(0, unfollowedUser.followers_count - 1)
                 mockMap.set("user:"+arg.body.followingId, unfollowedUser)
             }
 
-            mockMap.delete("follow:"+arg.body.followingId)
+            mockMap.delete(unfollowKey)
             return {code: 0, message: "Accepted"};
 
         case PUBLIC_GET_FOLLOWERS:

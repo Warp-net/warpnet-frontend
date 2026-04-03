@@ -246,7 +246,6 @@ export default {
       } catch (err) {
         console.error(`failed to retweet/unretweet tweet [${this.tweet.id}]`, err);
       }
-      await this.loadTweetStats(this.tweet.id, this.tweet.user_id);
       window.location.reload();
     },
     async like() {

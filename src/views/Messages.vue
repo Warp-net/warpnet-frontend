@@ -259,6 +259,7 @@ export default {
             }
           } else {
             console.error('Failed to create chat');
+            this.disabled = false;
             return;
           }
         }
