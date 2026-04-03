@@ -288,16 +288,24 @@ export default {
         });
       }
     },
-    openTweetCompose() {
-      if (this.$route.name === 'Home') {
-        const el = document.getElementById('compose-tweet');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
-          el.focus();
-        }
-      } else {
-        this.$router.push({ name: 'Home' });
+    async focusTweetCompose(retries = 10) {
+      await this.$nextTick();
+      const el = document.getElementById('compose-tweet');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+        el.focus();
+        return;
       }
+      if (retries > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return this.focusTweetCompose(retries - 1);
+      }
+    },
+    async openTweetCompose() {
+      if (this.$route.name !== 'Home') {
+        await this.$router.push({ name: 'Home' });
+      }
+      await this.focusTweetCompose();
     },
     toggleDarkMode() {
       const html = document.documentElement;

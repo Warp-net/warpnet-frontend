@@ -202,6 +202,9 @@ export default {
     },
     async removeImageAttachment() {
       this.imageAttachment = undefined
+      if (this.$refs.imageUrlFileInput) {
+        this.$refs.imageUrlFileInput.value = '';
+      }
     },
     async addNewTweet() {
       if (!this.tweet.text) return;

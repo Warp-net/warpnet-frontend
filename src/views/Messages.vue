@@ -229,6 +229,9 @@ export default {
     },
     removeImageAttachment() {
       this.imageAttachment = undefined;
+      if (this.$refs.messageImageInput) {
+        this.$refs.messageImageInput.value = '';
+      }
     },
     gotoHome() {
       this.$router.push({
