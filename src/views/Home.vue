@@ -51,7 +51,7 @@ resulting from the use or misuse of this software.
             class="flex-none w-12 h-12 rounded-full object-cover bg-transparent"
           />
         </div>
-        <div class="w-full relative">
+        <div class="w-full">
           <label for="compose-tweet" class="sr-only">Compose a tweet</label>
           <textarea
             id="compose-tweet"
@@ -59,7 +59,7 @@ resulting from the use or misuse of this software.
             placeholder="What's happening?"
             class="w-full focus:outline-none mt-3 pb-3"
           ></textarea>
-          <div v-if="imageAttachment" class="relative mt-4 inline-block">
+          <div v-if="imageAttachment" class="relative mt-2 mb-2 inline-block">
             <img
                 :src="imageAttachment"
                 alt="Image preview"
@@ -74,41 +74,43 @@ resulting from the use or misuse of this software.
               <i class="fas fa-times text-red-600 hover:text-white"></i>
             </button>
           </div>
-          <div>
+          <div class="flex items-center justify-between border-t border-lighter pt-2">
+            <div class="flex items-center">
+              <button
+                  @click="openFileInput('imageUrlFileInput')"
+                  class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center hover:bg-lightblue"
+                  type="button"
+                  aria-label="Attach image"
+              >
+                <i class="far fa-image" aria-hidden="true"></i>
+                <input
+                    @change="fileChange('imageUrlFileInput')"
+                    ref="imageUrlFileInput"
+                    accept="image/*"
+                    type="file"
+                    class="hidden"
+                />
+              </button>
+              <button type="button" disabled class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed" aria-label="Attach video (coming soon)" title="Coming soon">
+                <i class="fas fa-film" aria-hidden="true"></i>
+              </button>
+              <button type="button" disabled class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed" aria-label="Add poll (coming soon)" title="Coming soon">
+                <i class="far fa-chart-bar" aria-hidden="true"></i>
+              </button>
+              <button type="button" disabled class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed" aria-label="Add emoji (coming soon)" title="Coming soon">
+                <i class="far fa-smile" aria-hidden="true"></i>
+              </button>
+            </div>
             <button
-                @click="openFileInput('imageUrlFileInput')"
-                class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center hover:bg-lightblue"
-                type="button"
-                aria-label="Attach image"
+              @click="addNewTweet"
+              type="button"
+              class="h-10 px-4 text-white font-semibold bg-blue hover:bg-darkblue rounded-full"
+              :class="tweet.text ? '' : 'opacity-50 cursor-not-allowed'"
+              :disabled="!tweet.text"
             >
-              <i class="far fa-image" aria-hidden="true"></i>
-              <input
-                  @change="fileChange('imageUrlFileInput')"
-                  ref="imageUrlFileInput"
-                  accept="image/*"
-                  type="file"
-                  class="hidden"
-              />
-            </button>
-            <button type="button" disabled class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed" aria-label="Attach video (coming soon)" title="Coming soon">
-              <i class="fas fa-film" aria-hidden="true"></i>
-            </button>
-            <button type="button" disabled class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed" aria-label="Add poll (coming soon)" title="Coming soon">
-              <i class="far fa-chart-bar" aria-hidden="true"></i>
-            </button>
-            <button type="button" disabled class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed" aria-label="Add emoji (coming soon)" title="Coming soon">
-              <i class="far fa-smile" aria-hidden="true"></i>
+              Tweet
             </button>
           </div>
-          <button
-            @click="addNewTweet"
-            type="button"
-            class="h-10 px-4 text-white font-semibold bg-blue hover:bg-darkblue rounded-full absolute bottom-0 right-0"
-            :class="tweet.text ? '' : 'opacity-50 cursor-not-allowed'"
-            :disabled="!tweet.text"
-          >
-            Tweet
-          </button>
         </div>
       </div>
 
@@ -213,11 +215,7 @@ export default {
       this.tweet.image_key = "";
       this.imageAttachment = undefined;
 
-      if (newTweet && newTweet.id) {
-        this.timeline.unshift(newTweet);
-      } else {
-        this.timeline = await warpnetService.getMyTimeline(true);
-      }
+      window.location.reload();
     },
     async loadMore() {
       const timeline = await warpnetService.getMyTimeline(false);

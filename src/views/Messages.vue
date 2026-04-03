@@ -119,7 +119,8 @@ resulting from the use or misuse of this software.
             <!-- Own message -->
             <div v-if="message.sender_id === ownerProfile.user_id" class="flex justify-end mb-4">
               <div class="bg-blue text-white py-2 px-4 rounded-tl-3xl rounded-bl-3xl rounded-tr-xl">
-                {{ message.text }}
+                <p v-if="message.text">{{ message.text }}</p>
+                <img v-if="message.image" :src="message.image" alt="Attachment" class="max-w-xs rounded-lg mt-1" />
               </div>
               <p class="text-xs text-dark ml-2">{{ $filters.time(message.created_at) }}</p>
             </div>
@@ -130,7 +131,8 @@ resulting from the use or misuse of this software.
                   class="h-8 w-8 rounded-full mr-2 object-cover bg-transparent"
               />
               <div class="bg-lighter text-black py-2 px-4 rounded-tr-3xl rounded-tl-xl rounded-br-3xl">
-                {{ message.text }}
+                <p v-if="message.text">{{ message.text }}</p>
+                <img v-if="message.image" :src="message.image" alt="Attachment" class="max-w-xs rounded-lg mt-1" />
               </div>
               <p class="text-xs text-dark ml-2">{{ $filters.time(message.created_at) }}</p>
             </div>
@@ -140,24 +142,36 @@ resulting from the use or misuse of this software.
       </div>
 
       <!-- Input -->
-      <div class="px-5 py-3 border-t border-lighter flex items-center bg-white">
-        <input
-            v-model="text"
-            type="search"
-            class="flex-1 px-4 py-2 rounded-full bg-lighter focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue text-sm"
-            placeholder="Start a new message"
-            @keyup.enter="sendMessage"
-            :disabled="disabled"
-        />
-        <button
-            @click="sendMessage"
-            :disabled="disabled || !text.length"
-            class="ml-4 w-9 h-9 rounded-full flex items-center justify-center"
-            :class="disabled || !text.length ? 'opacity-50 cursor-default' : 'hover:bg-lightblue'"
-            aria-label="Send message"
-        >
-          <i class="fas fa-arrow-right text-blue text-xl" aria-hidden="true"></i>
-        </button>
+      <div class="px-5 py-3 border-t border-lighter bg-white">
+        <div v-if="imageAttachment" class="relative inline-block mb-2">
+          <img :src="imageAttachment" alt="Image preview" class="w-24 h-24 object-cover rounded border border-lighter" />
+          <button @click="removeImageAttachment" type="button" class="absolute top-0 right-0 mt-1 mr-1 bg-white bg-opacity-75 rounded-full p-1 hover:bg-red-500" title="Remove image">
+            <i class="fas fa-times text-red-600 hover:text-white text-xs"></i>
+          </button>
+        </div>
+        <div class="flex items-center">
+          <button @click="openFileInput()" type="button" class="mr-2 rounded-full w-9 h-9 flex items-center justify-center hover:bg-lightblue" aria-label="Attach image">
+            <i class="far fa-image text-blue text-lg" aria-hidden="true"></i>
+            <input ref="messageImageInput" @change="fileChange()" accept="image/*" type="file" class="hidden" />
+          </button>
+          <input
+              v-model="text"
+              type="search"
+              class="flex-1 px-4 py-2 rounded-full bg-lighter focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue text-sm"
+              placeholder="Start a new message"
+              @keyup.enter="sendMessage"
+              :disabled="disabled"
+          />
+          <button
+              @click="sendMessage"
+              :disabled="disabled || (!text.length && !imageAttachment)"
+              class="ml-4 w-9 h-9 rounded-full flex items-center justify-center"
+              :class="disabled || (!text.length && !imageAttachment) ? 'opacity-50 cursor-default' : 'hover:bg-lightblue'"
+              aria-label="Send message"
+          >
+            <i class="fas fa-arrow-right text-blue text-xl" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -193,6 +207,7 @@ export default {
       ownerProfile: undefined,
       active: undefined,
       text: '',
+      imageAttachment: undefined,
       usersMap: new Map(),
       otherUser: undefined,
     };
@@ -201,13 +216,27 @@ export default {
     newMessage() {
       this.showNewMessageModal = true;
     },
+    openFileInput() {
+      this.$refs.messageImageInput.click();
+    },
+    fileChange() {
+      const file = this.$refs.messageImageInput.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => this.imageAttachment = reader.result;
+      reader.onerror = (error) => console.error("Error reading file", error);
+    },
+    removeImageAttachment() {
+      this.imageAttachment = undefined;
+    },
     gotoHome() {
       this.$router.push({
         name: "Home",
       });
     },
     async sendMessage() {
-      if (!this.active.other_user_id || this.text.length === 0) return;
+      if (!this.active.other_user_id || (this.text.length === 0 && !this.imageAttachment)) return;
       this.disabled = true;
 
       try {
@@ -231,15 +260,25 @@ export default {
           }
         }
 
+        let imageKey = "";
+        if (this.imageAttachment) {
+          imageKey = await warpnetService.uploadImage(this.imageAttachment);
+        }
+
         const message = await warpnetService.sendDirectMessage({
           chatId: this.active.id,
           receiverId: this.active.other_user_id,
           text: this.text,
+          imageKey: imageKey,
         });
         if (message && message.id) {
+          if (message.image_key) {
+            message.image = await warpnetService.getImage({userId: this.ownerProfile.user_id, key: message.image_key});
+          }
           this.messages = [...this.messages, message];
         }
         this.text = "";
+        this.imageAttachment = undefined;
         await this.$nextTick(() => {
           this.scrollToEnd();
         });
@@ -299,6 +338,12 @@ export default {
       this.messages = await warpnetService.getDirectMessages(
           {chatId: chat.id, cursorReset: true},
       );
+      for (const msg of this.messages) {
+        if (msg.image_key) {
+          msg.image = await warpnetService.getImage({userId: msg.sender_id, key: msg.image_key});
+        }
+      }
+      this.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       this.scrollToEnd();
     },
     async deleteCurrentChat() {
@@ -328,7 +373,13 @@ export default {
       const olderMessages = await warpnetService.getDirectMessages(
           {chatId: this.active.id, cursorReset: false},
       )
+      for (const msg of olderMessages) {
+        if (msg.image_key) {
+          msg.image = await warpnetService.getImage({userId: msg.sender_id, key: msg.image_key});
+        }
+      }
       this.messages = [...olderMessages, ...this.messages];
+      this.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     },
   },
   async created() {
