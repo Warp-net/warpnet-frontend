@@ -83,14 +83,14 @@ resulting from the use or misuse of this software.
                   aria-label="Attach image"
               >
                 <i class="far fa-image" aria-hidden="true"></i>
-                <input
-                    @change="fileChange('imageUrlFileInput')"
-                    ref="imageUrlFileInput"
-                    accept="image/*"
-                    type="file"
-                    class="hidden"
-                />
               </button>
+              <input
+                  @change="fileChange('imageUrlFileInput')"
+                  ref="imageUrlFileInput"
+                  accept="image/*"
+                  type="file"
+                  class="hidden"
+              />
               <button type="button" disabled class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed" aria-label="Attach video (coming soon)" title="Coming soon">
                 <i class="fas fa-film" aria-hidden="true"></i>
               </button>

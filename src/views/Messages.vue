@@ -152,8 +152,8 @@ resulting from the use or misuse of this software.
         <div class="flex items-center">
           <button @click="openFileInput()" type="button" class="mr-2 rounded-full w-9 h-9 flex items-center justify-center hover:bg-lightblue" aria-label="Attach image">
             <i class="far fa-image text-blue text-lg" aria-hidden="true"></i>
-            <input ref="messageImageInput" @change="fileChange()" accept="image/*" type="file" class="hidden" />
           </button>
+          <input ref="messageImageInput" @change="fileChange()" accept="image/*" type="file" class="hidden" />
           <input
               v-model="text"
               type="search"
@@ -336,11 +336,11 @@ export default {
       this.messages = await warpnetService.getDirectMessages(
           {chatId: chat.id, cursorReset: true},
       );
-      for (const msg of this.messages) {
+      await Promise.all(this.messages.map(async (msg) => {
         if (msg.image_key) {
           msg.image = await warpnetService.getImage({userId: msg.sender_id, key: msg.image_key});
         }
-      }
+      }));
       this.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
       this.scrollToEnd();
     },
@@ -369,11 +369,11 @@ export default {
       const olderMessages = await warpnetService.getDirectMessages(
           {chatId: this.active.id, cursorReset: false},
       )
-      for (const msg of olderMessages) {
+      await Promise.all(olderMessages.map(async (msg) => {
         if (msg.image_key) {
           msg.image = await warpnetService.getImage({userId: msg.sender_id, key: msg.image_key});
         }
-      }
+      }));
       this.messages = [...olderMessages, ...this.messages];
       this.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     },

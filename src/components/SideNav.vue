@@ -296,7 +296,7 @@ export default {
           el.focus();
         }
       } else {
-        this.$router.push({ name: 'Home', params: { id: this.profile.user_id } });
+        this.$router.push({ name: 'Home' });
       }
     },
     toggleDarkMode() {
