@@ -101,34 +101,6 @@ export const warpnetService = {
         return stateMap.get(key)
     },
 
-    clearOwnerProfile() {
-        const key = `owner`;
-        stateMap.delete(key)
-
-        // Reset notifications-related state to avoid leaking data between sessions.
-        // Safely clear latestNotifications if it exists.
-        if (typeof latestNotifications !== "undefined") {
-            latestNotifications = null;
-        }
-
-        // Safely clear notificationSubscribers if it exists.
-        if (typeof notificationSubscribers !== "undefined") {
-            if (typeof notificationSubscribers.clear === "function") {
-                // Supports Set, Map, or any object with a clear() method.
-                notificationSubscribers.clear();
-            } else if (Array.isArray(notificationSubscribers)) {
-                // Fallback for array-based subscriber lists.
-                notificationSubscribers.length = 0;
-            }
-        }
-
-        // Reset the notifications cursor so subsequent sessions start fresh.
-        if (typeof this.setCursor === "function") {
-            this.setCursor(PRIVATE_GET_NOTIFICATIONS, "");
-        }
-        stopRefreshNotifications()
-    },
-
     async signInUser(form) {
         let request = {
             path: PRIVATE_POST_LOGIN,
@@ -828,7 +800,7 @@ export const warpnetService = {
                 receiver_id: receiverId,
                 chat_id: chatId,
                 text: text,
-                image_key: imageKey || "",
+                // image_key: imageKey || "",
             },
         }
 
@@ -912,10 +884,6 @@ export const warpnetService = {
         }
         return result.body;
     }
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 let notificationInterval = null;
