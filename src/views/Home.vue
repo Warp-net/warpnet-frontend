@@ -230,9 +230,9 @@ export default {
         return;
       }
 
+      const rect = event.currentTarget.getBoundingClientRect();
       this.infoContent = await this.getInfo();
 
-      const rect = event.currentTarget.getBoundingClientRect();
       this.infoPosition = {
         top: `${rect.bottom + window.scrollY}px`,
         left: `${rect.left + window.scrollX}px`,

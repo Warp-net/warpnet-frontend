@@ -288,17 +288,16 @@ export default {
         });
       }
     },
-    async focusTweetCompose(retries = 10) {
-      await this.$nextTick();
-      const el = document.getElementById('compose-tweet');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-        el.focus();
-        return;
-      }
-      if (retries > 0) {
+    async focusTweetCompose() {
+      for (let i = 0; i < 10; i++) {
+        await this.$nextTick();
+        const el = document.getElementById('compose-tweet');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+          el.focus();
+          return;
+        }
         await new Promise((resolve) => setTimeout(resolve, 50));
-        return this.focusTweetCompose(retries - 1);
       }
     },
     async openTweetCompose() {

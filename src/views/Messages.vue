@@ -274,18 +274,9 @@ export default {
           text: this.text,
           imageKey: imageKey,
         });
-        if (message && message.id) {
-          if (message.image_key) {
-            message.image = await warpnetService.getImage({userId: this.ownerProfile.user_id, key: message.image_key});
-          }
-          this.messages = [...this.messages, message];
-        }
-        this.text = "";
-        this.imageAttachment = undefined;
         window.location.reload();
       } catch (err) {
         console.error('Failed to send message:', err);
-      } finally {
         this.disabled = false;
       }
     },
