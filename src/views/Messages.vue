@@ -279,9 +279,7 @@ export default {
         }
         this.text = "";
         this.imageAttachment = undefined;
-        await this.$nextTick(() => {
-          this.scrollToEnd();
-        });
+        window.location.reload();
       } catch (err) {
         console.error('Failed to send message:', err);
       } finally {
@@ -350,9 +348,7 @@ export default {
       if (!this.active || !this.active.id) return;
       try {
         await warpnetService.deleteChat(this.active.id);
-        this.chats = this.chats.filter(c => c.id !== this.active.id);
-        this.active = undefined;
-        this.messages = [];
+        window.location.reload();
       } catch (err) {
         console.error('Failed to delete chat:', err);
       }
