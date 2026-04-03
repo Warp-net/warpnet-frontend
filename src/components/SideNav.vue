@@ -291,7 +291,7 @@ export default {
     async openTweetCompose() {
       await this.$router.push({
         name: 'Home',
-        query: { compose: '1' },
+        query: { compose: Date.now().toString() },
       });
     },
     toggleDarkMode() {

@@ -188,6 +188,15 @@ export default {
     };
   },
   methods: {
+    focusCompose() {
+      this.$nextTick(() => {
+        const el = this.$refs.composeTweet;
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+          el.focus();
+        }
+      });
+    },
     openFileInput(ref) {
       this.$refs[ref].click();
     },
@@ -269,15 +278,16 @@ export default {
     this.timeline = await warpnetService.getMyTimeline(true);
     this.loading = false;
 
-    if (this.$route.query.compose === '1') {
-      this.$nextTick(() => {
-        const el = this.$refs.composeTweet || document.getElementById('compose-tweet');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
-          el.focus();
-        }
-      });
+    if (this.$route.query.compose) {
+      this.focusCompose();
     }
+  },
+  watch: {
+    '$route.query.compose'(val) {
+      if (val) {
+        this.focusCompose();
+      }
+    },
   },
   beforeUnmount() {
     if (this.toastTimeoutId) {
