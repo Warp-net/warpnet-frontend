@@ -197,8 +197,9 @@ function generateResponse(arg) {
                     if (id === arg.body.user_id) {
                         continue
                     }
-                    const followed = mockMap.get("follow:"+id)
-                    if (followed) {
+                    // Check if already followed using composite key
+                    const isFollowed = mockMap.has("follow:"+arg.body.user_id+":"+id)
+                    if (isFollowed) {
                         continue
                     }
                     allUsers.push(value);
@@ -222,7 +223,10 @@ function generateResponse(arg) {
                 mockMap.set("user:"+arg.body.followingId, followedUser)
             }
 
-            mockMap.set(followKey, {});
+            mockMap.set(followKey, {
+                followerId: arg.body.followerId,
+                followingId: arg.body.followingId
+            });
             return {code: 0, message: "Accepted"};
 
         case PUBLIC_POST_UNFOLLOW:
@@ -247,16 +251,16 @@ function generateResponse(arg) {
         case PUBLIC_GET_FOLLOWERS:
             let followersList = []
             for (const [key, value] of mockMap) {
-                if (key.startsWith("follow:")) {
-                    followersList.push(value)
+                if (key.startsWith("follow:") && value.followingId === arg.body.user_id) {
+                    followersList.push(value.followerId)
                 }
             }
             return {cursor: "end", followers: followersList, following_id: arg.body.user_id};
         case PUBLIC_GET_FOLLOWINGS:
-            let followingsList = [] // TODO pretend they're mutual
+            let followingsList = []
             for (const [key, value] of mockMap) {
-                if (key.startsWith("follow:")) {
-                    followingsList.push(value)
+                if (key.startsWith("follow:") && value.followerId === arg.body.user_id) {
+                    followingsList.push(value.followingId)
                 }
             }
             return {cursor: "end", followings: followingsList, follower_id: arg.body.user_id};

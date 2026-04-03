@@ -288,23 +288,11 @@ export default {
         });
       }
     },
-    async focusTweetCompose() {
-      for (let i = 0; i < 10; i++) {
-        await this.$nextTick();
-        const el = document.getElementById('compose-tweet');
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth' });
-          el.focus();
-          return;
-        }
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      }
-    },
     async openTweetCompose() {
-      if (this.$route.name !== 'Home') {
-        await this.$router.push({ name: 'Home' });
-      }
-      await this.focusTweetCompose();
+      await this.$router.push({
+        name: 'Home',
+        query: { compose: '1' },
+      });
     },
     toggleDarkMode() {
       const html = document.documentElement;

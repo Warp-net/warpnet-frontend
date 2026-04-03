@@ -55,6 +55,7 @@ resulting from the use or misuse of this software.
           <label for="compose-tweet" class="sr-only">Compose a tweet</label>
           <textarea
             id="compose-tweet"
+            ref="composeTweet"
             v-model="tweet.text"
             placeholder="What's happening?"
             class="w-full focus:outline-none mt-3 pb-3"
@@ -267,6 +268,16 @@ export default {
 
     this.timeline = await warpnetService.getMyTimeline(true);
     this.loading = false;
+
+    if (this.$route.query.compose === '1') {
+      this.$nextTick(() => {
+        const el = this.$refs.composeTweet || document.getElementById('compose-tweet');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+          el.focus();
+        }
+      });
+    }
   },
   beforeUnmount() {
     if (this.toastTimeoutId) {
