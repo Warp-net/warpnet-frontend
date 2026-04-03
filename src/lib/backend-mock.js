@@ -213,7 +213,13 @@ function generateResponse(arg) {
             followerUser.followings_count++
             mockMap.set("user:"+arg.body.followerId, followerUser)
 
-            mockMap.set("follow:"+arg.body.following, {});
+            const followedUser = mockMap.get("user:"+arg.body.followingId)
+            if (followedUser) {
+                followedUser.followers_count++
+                mockMap.set("user:"+arg.body.followingId, followedUser)
+            }
+
+            mockMap.set("follow:"+arg.body.followingId, {});
             return {code: 0, message: "Accepted"};
 
         case PUBLIC_POST_UNFOLLOW:
@@ -222,7 +228,13 @@ function generateResponse(arg) {
             unfollowerUser.followings_count--
             mockMap.set("user:"+arg.body.followerId, unfollowerUser)
 
-            mockMap.delete("follow:"+arg.body.following)
+            const unfollowedUser = mockMap.get("user:"+arg.body.followingId)
+            if (unfollowedUser) {
+                unfollowedUser.followers_count--
+                mockMap.set("user:"+arg.body.followingId, unfollowedUser)
+            }
+
+            mockMap.delete("follow:"+arg.body.followingId)
             return {code: 0, message: "Accepted"};
 
         case PUBLIC_GET_FOLLOWERS:
@@ -315,8 +327,10 @@ function generateResponse(arg) {
             return {code:0,message:"Accepted"};
 
         case PRIVATE_DELETE_TWEET:
-            mockMap.get("stats:"+arg.body.tweet_id) // delete from timeline
+            mockMap.delete("stats:"+arg.body.tweet_id);
             mockMap.delete("tweet:"+arg.body.tweet_id);
+            const tl = mockMap.get("timeline") || [];
+            mockMap.set("timeline", tl.filter(tw => tw.id !== arg.body.tweet_id));
             return {code:0, message:"Accepted"};
 
         case PUBLIC_POST_CHAT:
@@ -359,6 +373,7 @@ function generateResponse(arg) {
                 sender_id: arg.body.sender_id,
                 receiver_id: arg.body.receiver_id,
                 text: arg.body.text,
+                image_key: arg.body.image_key || "",
                 created_at: new Date().toISOString(),
             };
             const targetChat = mockMap.get("chat:"+arg.body.chat_id);

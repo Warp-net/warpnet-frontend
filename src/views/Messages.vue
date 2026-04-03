@@ -145,8 +145,8 @@ resulting from the use or misuse of this software.
       <div class="px-5 py-3 border-t border-lighter bg-white">
         <div v-if="imageAttachment" class="relative inline-block mb-2">
           <img :src="imageAttachment" alt="Image preview" class="w-24 h-24 object-cover rounded border border-lighter" />
-          <button @click="removeImageAttachment" type="button" class="absolute top-0 right-0 mt-1 mr-1 bg-white bg-opacity-75 rounded-full p-1 hover:bg-red-500" title="Remove image">
-            <i class="fas fa-times text-red-600 hover:text-white text-xs"></i>
+          <button @click="removeImageAttachment" type="button" class="absolute top-0 right-0 mt-1 mr-1 bg-white bg-opacity-75 rounded-full p-1 hover:bg-red-500 group" title="Remove image" aria-label="Remove image">
+            <i class="fas fa-times text-red-600 group-hover:text-white text-xs" aria-hidden="true"></i>
           </button>
         </div>
         <div class="flex items-center">
@@ -268,7 +268,7 @@ export default {
           imageKey = await warpnetService.uploadImage(this.imageAttachment);
         }
 
-        const message = await warpnetService.sendDirectMessage({
+        await warpnetService.sendDirectMessage({
           chatId: this.active.id,
           receiverId: this.active.other_user_id,
           text: this.text,
