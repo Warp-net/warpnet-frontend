@@ -197,8 +197,9 @@ function generateResponse(arg) {
                     if (id === arg.body.user_id) {
                         continue
                     }
-                    const followed = mockMap.get("follow:"+id)
-                    if (followed) {
+                    // Check if already followed using composite key
+                    const isFollowed = mockMap.has("follow:"+arg.body.user_id+":"+id)
+                    if (isFollowed) {
                         continue
                     }
                     allUsers.push(value);
@@ -208,36 +209,58 @@ function generateResponse(arg) {
 
 
         case PUBLIC_POST_FOLLOW:
+            const followKey = "follow:"+arg.body.followerId+":"+arg.body.followingId;
+            if (mockMap.has(followKey)) return {code: 0, message: "Already following"};
+
             const followerUser = mockMap.get("user:"+arg.body.followerId)
             if (!followerUser) return {code:404, message:"User not found"};
             followerUser.followings_count++
             mockMap.set("user:"+arg.body.followerId, followerUser)
 
-            mockMap.set("follow:"+arg.body.following, {});
+            const followedUser = mockMap.get("user:"+arg.body.followingId)
+            if (followedUser) {
+                followedUser.followers_count++
+                mockMap.set("user:"+arg.body.followingId, followedUser)
+            }
+
+            mockMap.set(followKey, {
+                followerId: arg.body.followerId,
+                followingId: arg.body.followingId
+            });
             return {code: 0, message: "Accepted"};
 
         case PUBLIC_POST_UNFOLLOW:
-            const unfollowerUser = mockMap.get("user:"+arg.body.followerId)
-            if (!unfollowerUser) return {code: 0, message: "Accepted"};
-            unfollowerUser.followings_count--
-            mockMap.set("user:"+arg.body.followerId, unfollowerUser)
+            const unfollowKey = "follow:"+arg.body.followerId+":"+arg.body.followingId;
+            if (!mockMap.has(unfollowKey)) return {code: 0, message: "Not following"};
 
-            mockMap.delete("follow:"+arg.body.following)
+            const unfollowerUser = mockMap.get("user:"+arg.body.followerId)
+            if (unfollowerUser) {
+                unfollowerUser.followings_count = Math.max(0, unfollowerUser.followings_count - 1)
+                mockMap.set("user:"+arg.body.followerId, unfollowerUser)
+            }
+
+            const unfollowedUser = mockMap.get("user:"+arg.body.followingId)
+            if (unfollowedUser) {
+                unfollowedUser.followers_count = Math.max(0, unfollowedUser.followers_count - 1)
+                mockMap.set("user:"+arg.body.followingId, unfollowedUser)
+            }
+
+            mockMap.delete(unfollowKey)
             return {code: 0, message: "Accepted"};
 
         case PUBLIC_GET_FOLLOWERS:
             let followersList = []
             for (const [key, value] of mockMap) {
-                if (key.startsWith("follow:")) {
-                    followersList.push(value)
+                if (key.startsWith("follow:") && value.followingId === arg.body.user_id) {
+                    followersList.push(value.followerId)
                 }
             }
             return {cursor: "end", followers: followersList, following_id: arg.body.user_id};
         case PUBLIC_GET_FOLLOWINGS:
-            let followingsList = [] // TODO pretend they're mutual
+            let followingsList = []
             for (const [key, value] of mockMap) {
-                if (key.startsWith("follow:")) {
-                    followingsList.push(value)
+                if (key.startsWith("follow:") && value.followerId === arg.body.user_id) {
+                    followingsList.push(value.followingId)
                 }
             }
             return {cursor: "end", followings: followingsList, follower_id: arg.body.user_id};
@@ -315,8 +338,10 @@ function generateResponse(arg) {
             return {code:0,message:"Accepted"};
 
         case PRIVATE_DELETE_TWEET:
-            mockMap.get("stats:"+arg.body.tweet_id) // delete from timeline
+            mockMap.delete("stats:"+arg.body.tweet_id);
             mockMap.delete("tweet:"+arg.body.tweet_id);
+            const tl = mockMap.get("timeline") || [];
+            mockMap.set("timeline", tl.filter(tw => tw.id !== arg.body.tweet_id));
             return {code:0, message:"Accepted"};
 
         case PUBLIC_POST_CHAT:
@@ -359,6 +384,7 @@ function generateResponse(arg) {
                 sender_id: arg.body.sender_id,
                 receiver_id: arg.body.receiver_id,
                 text: arg.body.text,
+                image_key: arg.body.image_key || "",
                 created_at: new Date().toISOString(),
             };
             const targetChat = mockMap.get("chat:"+arg.body.chat_id);

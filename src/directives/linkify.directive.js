@@ -29,8 +29,8 @@ import "linkify-plugin-mention";
 const options = {
   formatHref: {
     hashtag: (href) =>
-      `#/hashtag?m=Latest&hash=${Date.now()}&q=${escape("#" + href.substr(1))}`,
-    mention: (href) => `#/${href.substr(1)}`,
+      `/hashtag?m=Latest&hash=${Date.now()}&q=${encodeURIComponent("#" + href.slice(1))}`,
+    mention: (href) => `/${href.slice(1)}`,
   },
   target: (href, type) =>
     type === "mention" || type === "hashtag" ? undefined : "_blank",

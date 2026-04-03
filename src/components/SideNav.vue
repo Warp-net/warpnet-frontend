@@ -180,10 +180,10 @@ resulting from the use or misuse of this software.
       </div>
 
       <button
-        @click="open('Home')"
-        class="text-white bg-blue rounded-full font-semibold h-12 lg:h-auto w-12 xl:w-full hover:bg-darkblue p-3"
+        @click="openTweetCompose()"
+        class="text-white bg-blue rounded-full font-semibold h-12 lg:h-auto w-12 xl:w-full hover:bg-darkblue p-3 overflow-hidden whitespace-nowrap text-ellipsis"
       >
-        <p class="hidden xl:block">Tweet</p>
+        <p class="hidden xl:block truncate">Tweet</p>
         <i class="fas fa-plus xl:hidden"></i>
       </button>
     </div>
@@ -287,6 +287,12 @@ export default {
           },
         });
       }
+    },
+    async openTweetCompose() {
+      await this.$router.push({
+        name: 'Home',
+        query: { compose: Date.now().toString() },
+      });
     },
     toggleDarkMode() {
       const html = document.documentElement;

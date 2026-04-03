@@ -266,6 +266,12 @@ export const warpnetService = {
             return null
         }
 
+        const cacheKey = `image::${key}`;
+        const cached = stateMap.get(cacheKey);
+        if (cached) {
+            return cached;
+        }
+
         const request = {
             path: PUBLIC_GET_IMAGE,
             body: {
@@ -275,9 +281,10 @@ export const warpnetService = {
         }
 
         const result = await this.sendToNode(request);
-        if (!result) {
+        if (!result || !result.file) {
             return null
         }
+        stateMap.set(cacheKey, result.file);
         return result.file;
     },
 
@@ -812,7 +819,7 @@ export const warpnetService = {
         return await this.sendToNode(request);
     },
 
-    async sendDirectMessage({chatId, receiverId, text}) {
+    async sendDirectMessage({chatId, receiverId, text, imageKey}) {
         const owner = this.getOwnerProfile();
         const request = {
             path: PUBLIC_POST_MESSAGE,
@@ -821,6 +828,7 @@ export const warpnetService = {
                 receiver_id: receiverId,
                 chat_id: chatId,
                 text: text,
+                image_key: imageKey || "",
             },
         }
 
