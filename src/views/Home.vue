@@ -60,28 +60,33 @@ resulting from the use or misuse of this software.
             placeholder="What's happening?"
             class="w-full focus:outline-none mt-3 pb-3"
           ></textarea>
-          <div v-if="imageAttachment" class="relative mt-2 mb-2 inline-block">
-            <img
-                :src="imageAttachment"
-                alt="Image preview"
-                class="w-32 h-32 object-cover rounded border border-lighter"
-            />
-            <button
-                @click="removeImageAttachment"
-                type="button"
-                class="absolute top-0 right-0 mt-2 mr-2 bg-white bg-opacity-75 rounded-full p-1 hover:bg-red-500"
-                title="Remove image"
-            >
-              <i class="fas fa-times text-red-600 hover:text-white"></i>
-            </button>
+          <div v-if="imageAttachments.length > 0" class="flex flex-wrap gap-2 mt-2 mb-2">
+            <div v-for="(img, index) in imageAttachments" :key="index" class="relative inline-block">
+              <img
+                  :src="img"
+                  alt="Image preview"
+                  class="w-32 h-32 object-cover rounded border border-lighter"
+              />
+              <button
+                  @click="removeImageAttachment(index)"
+                  type="button"
+                  class="absolute top-0 right-0 mt-1 mr-1 bg-white bg-opacity-75 rounded-full p-1 hover:bg-red-500"
+                  title="Remove image"
+              >
+                <i class="fas fa-times text-red-600 hover:text-white"></i>
+              </button>
+            </div>
           </div>
           <div class="flex items-center justify-between border-t border-lighter pt-2">
             <div class="flex items-center">
               <button
                   @click="openFileInput('imageUrlFileInput')"
                   class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center hover:bg-lightblue"
+                  :class="{'opacity-50 cursor-not-allowed': imageAttachments.length >= 4}"
                   type="button"
+                  :disabled="imageAttachments.length >= 4"
                   aria-label="Attach image"
+                  :title="imageAttachments.length >= 4 ? 'Maximum 4 images' : 'Attach image'"
               >
                 <i class="far fa-image" aria-hidden="true"></i>
               </button>
@@ -90,6 +95,7 @@ resulting from the use or misuse of this software.
                   ref="imageUrlFileInput"
                   accept="image/*"
                   type="file"
+                  multiple
                   class="hidden"
               />
               <button type="button" disabled class="text-lg text-blue mr-3 rounded-full w-9 h-9 flex items-center justify-center opacity-50 cursor-not-allowed" aria-label="Attach video (coming soon)" title="Coming soon">
@@ -172,7 +178,7 @@ export default {
       tweet: {
         text: "",
         root_id: "",
-        image_key: "",
+        image_keys: [],
       },
       loading: true,
       profile: {},
@@ -180,7 +186,7 @@ export default {
       showInfo: false,
       infoContent: '',
       infoPosition: { top: '0px', left: '0px' },
-      imageAttachment: undefined,
+      imageAttachments: [],
       videoAttachment: undefined,
       toastMessage: '',
       toastType: 'error',
@@ -201,32 +207,42 @@ export default {
       this.$refs[ref].click();
     },
     async fileChange(ref) {
-      const file = this.$refs[ref].files[0];
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => this.imageAttachment = reader.result;
-      reader.onerror = (error) => {
-        console.error("Error reading file", error);
-        this.showToast('Error reading file. Please try again.', 'error');
-      };
-    },
-    async removeImageAttachment() {
-      this.imageAttachment = undefined
-      if (this.$refs.imageUrlFileInput) {
-        this.$refs.imageUrlFileInput.value = '';
+      const files = Array.from(this.$refs[ref].files);
+      const remaining = 4 - this.imageAttachments.length;
+      const toAdd = files.slice(0, remaining);
+      for (const file of toAdd) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          if (this.imageAttachments.length < 4) {
+            this.imageAttachments.push(reader.result);
+          }
+        };
+        reader.onerror = (error) => {
+          console.error("Error reading file", error);
+          this.showToast('Error reading file. Please try again.', 'error');
+        };
       }
+      if (this.$refs[ref]) {
+        this.$refs[ref].value = '';
+      }
+    },
+    removeImageAttachment(index) {
+      this.imageAttachments.splice(index, 1);
     },
     async addNewTweet() {
       if (!this.tweet.text) return;
-      if (this.imageAttachment) {
-        this.tweet.image_key = await warpnetService.uploadImage(this.imageAttachment)
+      const imageKeys = [];
+      for (const img of this.imageAttachments) {
+        const key = await warpnetService.uploadImage(img);
+        if (key) imageKeys.push(key);
       }
 
-      const newTweet = await warpnetService.createTweet({text: this.tweet.text, imageKey: this.tweet.image_key});
+      await warpnetService.createTweet({text: this.tweet.text, imageKeys});
 
       this.tweet.text = "";
-      this.tweet.image_key = "";
-      this.imageAttachment = undefined;
+      this.tweet.image_keys = [];
+      this.imageAttachments = [];
 
       window.location.reload();
     },

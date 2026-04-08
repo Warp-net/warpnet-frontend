@@ -368,7 +368,7 @@ export const warpnetService = {
         return tweetsResp.tweets;
     },
 
-    async createTweet({text, imageKey}) {
+    async createTweet({text, imageKeys}) {
         const owner = this.getOwnerProfile()
 
         const request ={
@@ -377,7 +377,8 @@ export const warpnetService = {
                 user_id: owner.user_id,
                 username: owner.username,
                 text: text,
-                image_key: imageKey,
+                image_key: (imageKeys && imageKeys.length > 0) ? imageKeys[0] : "",
+                image_keys: imageKeys || [],
                 created_at: new Date().toISOString(),
             },
         }
