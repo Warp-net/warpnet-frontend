@@ -423,8 +423,8 @@ export const warpnetService = {
         const request = {
             path: PUBLIC_POST_FOLLOW,
             body: {
-                followingId: profileId,
-                followerId: owner.user_id,
+                following_id: profileId,
+                follower_id: owner.user_id,
             },
         }
 
@@ -461,8 +461,8 @@ export const warpnetService = {
         const request = {
             path: PUBLIC_POST_UNFOLLOW,
             body: {
-                followingId: profileId,
-                followerId: owner.user_id,
+                following_id: profileId,
+                follower_id: owner.user_id,
             },
         }
 
@@ -591,12 +591,13 @@ export const warpnetService = {
         return repliesResp.replies;
     },
 
-    async getReply({rootId, replyId}) {
+    async getReply({rootId, replyId, userId}) {
         const request = {
             path: PUBLIC_GET_REPLY,
             body: {
                 root_id: rootId,
                 reply_id: replyId,
+                user_id: userId,
             },
         }
 
@@ -685,6 +686,7 @@ export const warpnetService = {
                 text: text,
                 retweeted_by: owner.user_id,
                 created_at: new Date().toISOString(),
+                root_id: "",
             },
         }
 
@@ -808,7 +810,6 @@ export const warpnetService = {
                 receiver_id: receiverId,
                 chat_id: chatId,
                 text: text,
-                // image_key: imageKey || "",
             },
         }
 
@@ -853,10 +854,8 @@ export const warpnetService = {
             path: PRIVATE_POST_USER,
             body: {
                 bio: newProfile.bio,
-                avatar: newProfile.avatar,
                 avatar_key: newProfile.avatar_key,
                 username: newProfile.username,
-                background_image: newProfile.background_image,
                 background_image_key: newProfile.background_image_key,
                 website: newProfile.website,
                 birthdate: newProfile.birthdate,

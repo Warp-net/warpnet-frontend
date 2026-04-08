@@ -204,6 +204,7 @@ export default {
         const getObject = {
           rootId: this.tweet.root_id,
           replyId: this.tweet.id,
+          userId: this.tweet.user_id,
         }
         t =  await warpnetService.getReply(getObject);
       }
