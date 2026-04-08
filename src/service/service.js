@@ -215,30 +215,30 @@ export const warpnetService = {
         if (!imgFile) {
             return ''
         }
-
-        const request = {
-            path: PRIVATE_POST_UPLOAD_IMAGE,
-            timestamp: new Date().toISOString(),
-            body: {
-                file: imgFile,
-            },
-        }
-
-        const result = await this.sendToNode(request);
-        const hashKey = result.key
-        if (!hashKey || hashKey.length === 0) {
-            return ''
-        }
-
-        return hashKey;
+        const keys = await this.uploadImages([imgFile]);
+        return keys.length > 0 ? keys[0] : '';
     },
 
     async uploadImages(imgFiles) {
         if (!imgFiles || imgFiles.length === 0) {
             return []
         }
-        const keys = await Promise.all(imgFiles.map(file => this.uploadImage(file)));
-        return keys.filter(key => key && key.length > 0);
+
+        const request = {
+            path: PRIVATE_POST_UPLOAD_IMAGE,
+            timestamp: new Date().toISOString(),
+            body: {
+                image1: imgFiles[0] || "",
+                image2: imgFiles[1] || "",
+                image3: imgFiles[2] || "",
+                image4: imgFiles[3] || "",
+            },
+        }
+
+        const result = await this.sendToNode(request);
+        const keys = [result.key1, result.key2, result.key3, result.key4]
+            .filter(key => key && key.length > 0);
+        return keys;
     },
 
     async getImage({userId, key}) {
