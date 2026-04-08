@@ -282,12 +282,15 @@ export default {
 
     this.profile = warpnetService.getOwnerProfile();
 
-    this.profile.background_image = await warpnetService.getImage(
-        {userId:this.profile.user_id, key:this.profile.background_image_key},
-    );
-    this.profile.avatar = await warpnetService.getImage(
-        {userId:this.profile.user_id, key:this.profile.avatar_key},
-    )
+    const fullProfile = await warpnetService.getProfile(this.profile.user_id);
+    if (fullProfile) {
+      this.profile.background_image = await warpnetService.getImage(
+          {userId:this.profile.user_id, key:fullProfile.background_image_key},
+      );
+      this.profile.avatar = await warpnetService.getImage(
+          {userId:this.profile.user_id, key:fullProfile.avatar_key},
+      );
+    }
 
     this.timeline = await warpnetService.getMyTimeline(true);
     this.loading = false;

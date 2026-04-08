@@ -316,7 +316,10 @@ export default {
     console.log("loading component:", this.$options.name);
     this.profile = warpnetService.getOwnerProfile();
 
-    this.profile.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:this.profile.avatar_key})
+    const fullProfile = await warpnetService.getProfile(this.profile.user_id);
+    if (fullProfile) {
+      this.profile.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:fullProfile.avatar_key});
+    }
 
     this.unsubscribeNotifications = warpnetService.subscribeNotifications((resp) => {
       this.newNotifications = resp.unread_count || 0;
