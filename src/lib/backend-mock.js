@@ -107,6 +107,7 @@ function generateResponse(arg) {
                 username : arg.body.username || "",
                 text : arg.body.text || "",
                 image_key : arg.body.image_key || "",
+                image_keys : arg.body.image_keys || [],
                 created_at : arg.body.created_at || Date.now().toString(),
                 parent_id: null,
                 retweeted_by: null,
