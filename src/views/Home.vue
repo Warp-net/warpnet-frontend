@@ -61,7 +61,7 @@ resulting from the use or misuse of this software.
             class="w-full focus:outline-none mt-3 pb-3"
           ></textarea>
           <div v-if="imageAttachments.length > 0" class="flex flex-wrap gap-2 mt-2 mb-2">
-            <div v-for="(img, index) in imageAttachments" :key="index" class="relative inline-block">
+            <div v-for="(img, index) in imageAttachments" :key="img" class="relative inline-block">
               <img
                   :src="img"
                   alt="Image preview"
@@ -112,8 +112,8 @@ resulting from the use or misuse of this software.
               @click="addNewTweet"
               type="button"
               class="h-10 px-4 text-white font-semibold bg-blue hover:bg-darkblue rounded-full"
-              :class="tweet.text ? '' : 'opacity-50 cursor-not-allowed'"
-              :disabled="!tweet.text"
+              :class="(tweet.text && pendingReads === 0) ? '' : 'opacity-50 cursor-not-allowed'"
+              :disabled="!tweet.text || pendingReads > 0"
             >
               Tweet
             </button>
@@ -186,6 +186,7 @@ export default {
       infoContent: '',
       infoPosition: { top: '0px', left: '0px' },
       imageAttachments: [],
+      pendingReads: 0,
       videoAttachment: undefined,
       toastMessage: '',
       toastType: 'error',
@@ -210,16 +211,19 @@ export default {
       const remaining = 4 - this.imageAttachments.length;
       const toAdd = files.slice(0, remaining);
       for (const file of toAdd) {
+        this.pendingReads++;
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => {
           if (this.imageAttachments.length < 4) {
             this.imageAttachments.push(reader.result);
           }
+          this.pendingReads--;
         };
         reader.onerror = (error) => {
           console.error("Error reading file", error);
           this.showToast('Error reading file. Please try again.', 'error');
+          this.pendingReads--;
         };
       }
       if (this.$refs[ref]) {

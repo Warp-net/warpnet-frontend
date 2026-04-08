@@ -215,22 +215,8 @@ export const warpnetService = {
         if (!imgFile) {
             return ''
         }
-
-        const request = {
-            path: PRIVATE_POST_UPLOAD_IMAGE,
-            timestamp: new Date().toISOString(),
-            body: {
-                file: imgFile,
-            },
-        }
-
-        const result = await this.sendToNode(request);
-        const hashKey = result.key
-        if (!hashKey || hashKey.length === 0) {
-            return ''
-        }
-
-        return hashKey;
+        const keys = await this.uploadImages([imgFile]);
+        return keys.length > 0 ? keys[0] : '';
     },
 
     async uploadImages(imgFiles) {
