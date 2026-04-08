@@ -107,6 +107,7 @@ function generateResponse(arg) {
                 username : arg.body.username || "",
                 text : arg.body.text || "",
                 image_key : arg.body.image_key || "",
+                image_keys : arg.body.image_keys || [],
                 created_at : arg.body.created_at || Date.now().toString(),
                 parent_id: null,
                 retweeted_by: null,
@@ -180,9 +181,18 @@ function generateResponse(arg) {
             return {cursor: "end", user_id: arg.body.user_id, users: usersList}
 
         case PRIVATE_POST_UPLOAD_IMAGE:
-            const imageKey = "img_"+generateUUID();
-            mockMap.set("image:"+imageKey, arg.body.file);
-            return {key: imageKey};
+            const imgResult = {};
+            for (let i = 1; i <= 4; i++) {
+                const img = arg.body["image" + i];
+                if (img) {
+                    const imageKey = "img_"+generateUUID();
+                    mockMap.set("image:"+imageKey, img);
+                    imgResult["key" + i] = imageKey;
+                } else {
+                    imgResult["key" + i] = "";
+                }
+            }
+            return imgResult;
 
         case PUBLIC_GET_IMAGE:
             const gotImg = mockMap.get("image:"+arg.body.key);

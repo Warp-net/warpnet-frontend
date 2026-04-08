@@ -215,22 +215,30 @@ export const warpnetService = {
         if (!imgFile) {
             return ''
         }
+        const keys = await this.uploadImages([imgFile]);
+        return keys.length > 0 ? keys[0] : '';
+    },
+
+    async uploadImages(imgFiles) {
+        if (!imgFiles || imgFiles.length === 0) {
+            return []
+        }
 
         const request = {
             path: PRIVATE_POST_UPLOAD_IMAGE,
             timestamp: new Date().toISOString(),
             body: {
-                file: imgFile,
+                image1: imgFiles[0] || "",
+                image2: imgFiles[1] || "",
+                image3: imgFiles[2] || "",
+                image4: imgFiles[3] || "",
             },
         }
 
         const result = await this.sendToNode(request);
-        const hashKey = result.key
-        if (!hashKey || hashKey.length === 0) {
-            return ''
-        }
-
-        return hashKey;
+        const keys = [result.key1, result.key2, result.key3, result.key4]
+            .filter(key => key && key.length > 0);
+        return keys;
     },
 
     async getImage({userId, key}) {
@@ -368,7 +376,7 @@ export const warpnetService = {
         return tweetsResp.tweets;
     },
 
-    async createTweet({text, imageKey}) {
+    async createTweet({text, imageKeys}) {
         const owner = this.getOwnerProfile()
 
         const request ={
@@ -377,7 +385,8 @@ export const warpnetService = {
                 user_id: owner.user_id,
                 username: owner.username,
                 text: text,
-                image_key: imageKey,
+                image_key: (imageKeys && imageKeys.length > 0) ? imageKeys[0] : "",
+                image_keys: imageKeys || [],
                 created_at: new Date().toISOString(),
             },
         }

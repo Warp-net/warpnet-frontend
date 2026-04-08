@@ -70,12 +70,23 @@ resulting from the use or misuse of this software.
       <p v-else class="pb-2 bg-red-300">
         Moderated: {{ tweet.moderation.reason }}.
       </p>
-      <div v-if="tweet.image" class="mt-2">
+      <div v-if="tweetImages.length === 1" class="mt-2">
         <img
-            :src="tweet.image"
+            :src="tweetImages[0]"
             alt="Tweet image"
             class="rounded-lg max-w-full border border-lighter"
         />
+      </div>
+      <div v-else-if="tweetImages.length === 2" class="mt-2 grid grid-cols-2 gap-1 rounded-lg overflow-hidden border border-lighter">
+        <img v-for="(img, i) in tweetImages" :key="i" :src="img" alt="Tweet image" class="w-full h-48 object-cover" />
+      </div>
+      <div v-else-if="tweetImages.length === 3" class="mt-2 grid grid-cols-2 gap-1 rounded-lg overflow-hidden border border-lighter" style="height:300px">
+        <img :src="tweetImages[0]" alt="Tweet image" class="row-span-2 w-full h-full object-cover" style="grid-row: span 2" />
+        <img :src="tweetImages[1]" alt="Tweet image" class="w-full h-full object-cover" />
+        <img :src="tweetImages[2]" alt="Tweet image" class="w-full h-full object-cover" />
+      </div>
+      <div v-else-if="tweetImages.length >= 4" class="mt-2 grid grid-cols-2 gap-1 rounded-lg overflow-hidden border border-lighter">
+        <img v-for="(img, i) in tweetImages.slice(0, 4)" :key="i" :src="img" alt="Tweet image" class="w-full h-36 object-cover" />
       </div>
       <div class="flex w-full mt-1">
         <div class="flex items-center text-sm text-dark w-1/4">
@@ -157,6 +168,7 @@ export default {
       likesCount: new Map(),
       retweetsCount: new Map(),
       repliesCount: new Map(),
+      tweetImages: [],
     };
   },
   methods: {
@@ -306,7 +318,13 @@ export default {
       this.label = `${retweeter.username} Retweeted`;
     }
 
-    this.tweet.image = await warpnetService.getImage({userId: this.tweet.user_id, key: this.tweet.image_key})
+    const imageKeys = (this.tweet.image_keys && this.tweet.image_keys.length > 0)
+        ? this.tweet.image_keys
+        : (this.tweet.image_key ? [this.tweet.image_key] : []);
+    const loadedImages = await Promise.all(
+        imageKeys.map(key => warpnetService.getImage({userId: this.tweet.user_id, key}))
+    );
+    this.tweetImages = loadedImages.filter(img => img);
     this.profile.avatar = await warpnetService.getImage({userId: this.profile.id, key: this.profile.avatar_key})
 
     console.log("final tweet:", JSON.stringify(this.tweet));
