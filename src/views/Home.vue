@@ -178,7 +178,6 @@ export default {
       tweet: {
         text: "",
         root_id: "",
-        image_keys: [],
       },
       loading: true,
       profile: {},
@@ -237,7 +236,6 @@ export default {
       await warpnetService.createTweet({text: this.tweet.text, imageKeys});
 
       this.tweet.text = "";
-      this.tweet.image_keys = [];
       this.imageAttachments = [];
 
       window.location.reload();

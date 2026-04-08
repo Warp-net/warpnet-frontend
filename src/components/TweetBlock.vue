@@ -321,10 +321,10 @@ export default {
     const imageKeys = (this.tweet.image_keys && this.tweet.image_keys.length > 0)
         ? this.tweet.image_keys
         : (this.tweet.image_key ? [this.tweet.image_key] : []);
-    for (const key of imageKeys) {
-      const img = await warpnetService.getImage({userId: this.tweet.user_id, key});
-      if (img) this.tweetImages.push(img);
-    }
+    const loadedImages = await Promise.all(
+        imageKeys.map(key => warpnetService.getImage({userId: this.tweet.user_id, key}))
+    );
+    this.tweetImages = loadedImages.filter(img => img);
     this.profile.avatar = await warpnetService.getImage({userId: this.profile.id, key: this.profile.avatar_key})
 
     console.log("final tweet:", JSON.stringify(this.tweet));
