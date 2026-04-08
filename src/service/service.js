@@ -57,7 +57,7 @@ export const PRIVATE_GET_CHAT = "/private/get/chat/0.0.0"
 export const PRIVATE_GET_MESSAGES = "/private/get/messages/0.0.0"
 export const PUBLIC_POST_MESSAGE = "/public/post/message/0.0.0"
 export const PRIVATE_GET_MESSAGE = "/private/get/message/0.0.0"
-export const PUBLIC_DELETE_MESSAGE = "/public/delete/message/0.0.0"
+export const PRIVATE_DELETE_MESSAGE = "/private/delete/message/0.0.0"
 export const PRIVATE_POST_UPLOAD_IMAGE = "/private/post/image/0.0.0"
 export const PUBLIC_GET_IMAGE = "/public/get/image/0.0.0"
 export const PRIVATE_POST_LOGIN = "/private/post/login/0.0.0"
@@ -385,7 +385,6 @@ export const warpnetService = {
                 user_id: owner.user_id,
                 username: owner.username,
                 text: text,
-                image_key: (imageKeys && imageKeys.length > 0) ? imageKeys[0] : "",
                 image_keys: imageKeys || [],
                 created_at: new Date().toISOString(),
             },

@@ -320,7 +320,7 @@ export default {
 
     const imageKeys = (this.tweet.image_keys && this.tweet.image_keys.length > 0)
         ? this.tweet.image_keys
-        : (this.tweet.image_key ? [this.tweet.image_key] : []);
+        : [];
     const loadedImages = await Promise.all(
         imageKeys.map(key => warpnetService.getImage({userId: this.tweet.user_id, key}))
     );
