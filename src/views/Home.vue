@@ -232,11 +232,7 @@ export default {
     },
     async addNewTweet() {
       if (!this.tweet.text) return;
-      const imageKeys = [];
-      for (const img of this.imageAttachments) {
-        const key = await warpnetService.uploadImage(img);
-        if (key) imageKeys.push(key);
-      }
+      const imageKeys = await warpnetService.uploadImages(this.imageAttachments);
 
       await warpnetService.createTweet({text: this.tweet.text, imageKeys});
 

@@ -233,6 +233,14 @@ export const warpnetService = {
         return hashKey;
     },
 
+    async uploadImages(imgFiles) {
+        if (!imgFiles || imgFiles.length === 0) {
+            return []
+        }
+        const keys = await Promise.all(imgFiles.map(file => this.uploadImage(file)));
+        return keys.filter(key => key && key.length > 0);
+    },
+
     async getImage({userId, key}) {
         if (!key || key.length === 0) {
             return null
