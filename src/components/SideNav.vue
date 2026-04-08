@@ -317,7 +317,7 @@ export default {
     this.profile = warpnetService.getOwnerProfile();
 
     const fullProfile = await warpnetService.getProfile(this.profile.user_id);
-    if (fullProfile) {
+    if (fullProfile && !fullProfile.code && fullProfile.avatar_key) {
       this.profile.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:fullProfile.avatar_key});
     }
 

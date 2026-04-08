@@ -95,9 +95,11 @@ export default {
       this.followingStatus.set(profileId, false)
     },
     async loadAvatars(profiles) {
-      for (const p of profiles) {
-        p.avatar = await warpnetService.getImage({userId: p.id, key: p.avatar_key});
-      }
+      await Promise.all(
+        profiles.map(async (p) => {
+          p.avatar = await warpnetService.getImage({userId: p.id, key: p.avatar_key});
+        })
+      );
       this.profiles = [...this.profiles];
     },
     async loadMore() {
@@ -109,7 +111,7 @@ export default {
         this.followingStatus.set(p.id, status);
       }
       this.profiles = [...this.profiles, ...users];
-      this.loadAvatars(users);
+      await this.loadAvatars(users);
     },
    },
   async created() {
@@ -122,7 +124,7 @@ export default {
       const status = await warpnetService.isFollowing(p.id);
       this.followingStatus.set(p.id, status);
     }
-    this.loadAvatars(this.profiles);
+    await this.loadAvatars(this.profiles);
   },
 };
 </script>
