@@ -317,8 +317,15 @@ export default {
     this.profile = warpnetService.getOwnerProfile();
 
     const fullProfile = await warpnetService.getProfile(this.profile.user_id);
-    if (fullProfile && !fullProfile.code && fullProfile.avatar_key) {
-      this.profile.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:fullProfile.avatar_key});
+    try {
+      if (fullProfile && !fullProfile.code && fullProfile.avatar_key) {
+        this.profile.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:fullProfile.avatar_key});
+      } else {
+        this.profile.avatar = null;
+      }
+    } catch (error) {
+      console.error("Failed to load full profile:", error);
+      this.profile.avatar = null;
     }
 
     this.unsubscribeNotifications = warpnetService.subscribeNotifications((resp) => {

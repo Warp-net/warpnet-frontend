@@ -130,15 +130,6 @@ export default {
   async created() {
     console.log("loading component:", this.$options.name);
     this.profile = warpnetService.getOwnerProfile();
-    const fullProfile = await warpnetService.getProfile(this.profile.user_id);
-    if (fullProfile && !fullProfile.code) {
-      if (fullProfile.background_image_key) {
-        this.profile.background_image = await warpnetService.getImage({userId:this.profile.user_id, key:fullProfile.background_image_key});
-      }
-      if (fullProfile.avatar_key) {
-        this.profile.avatar = await warpnetService.getImage({userId:this.profile.user_id, key:fullProfile.avatar_key});
-      }
-    }
     this.user.avatar = await warpnetService.getImage({userId:this.user.id, key:this.user.avatar_key})
 
     const status = await warpnetService.isFollowing(this.user.id);
