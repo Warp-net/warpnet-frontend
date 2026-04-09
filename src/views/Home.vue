@@ -282,12 +282,19 @@ export default {
 
     this.profile = warpnetService.getOwnerProfile();
 
-    this.profile.background_image = await warpnetService.getImage(
-        {userId:this.profile.user_id, key:this.profile.background_image_key},
-    );
-    this.profile.avatar = await warpnetService.getImage(
-        {userId:this.profile.user_id, key:this.profile.avatar_key},
-    )
+    try {
+      const fullProfile = await warpnetService.getProfile(this.profile.user_id);
+      if (fullProfile && !fullProfile.code) {
+        this.profile.background_image = fullProfile.background_image_key
+            ? await warpnetService.getImage({userId:this.profile.user_id, key:fullProfile.background_image_key})
+            : null;
+        this.profile.avatar = fullProfile.avatar_key
+            ? await warpnetService.getImage({userId:this.profile.user_id, key:fullProfile.avatar_key})
+            : null;
+      }
+    } catch (error) {
+      console.error("Failed to load profile assets:", error);
+    }
 
     this.timeline = await warpnetService.getMyTimeline(true);
     this.loading = false;

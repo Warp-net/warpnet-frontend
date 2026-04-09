@@ -29,7 +29,7 @@ resulting from the use or misuse of this software.
     <div v-if="profile" v-for="profile in profiles" :key="profile.id" class="w-full flex hover:bg-lighter p-3 border-t border-lighter">
       <img 
         @click="pushToProfilePage(profile.id)" 
-        :src="getAvatar(profile.id, profile.avatar_key) || '/default_profile.png'"
+        :src="profile.avatar || '/default_profile.png'"
         class="w-12 h-12 rounded-full cursor-pointer object-cover bg-transparent"
         :alt="profile.username"
       />
@@ -71,7 +71,6 @@ export default {
     return {
       ownerProfile: undefined,
       profiles: [],
-      profilesAvatars: new Map(),
       followingStatus: new Map(),
     };
   },
@@ -95,13 +94,13 @@ export default {
       await warpnetService.unfollowUser(profileId);
       this.followingStatus.set(profileId, false)
     },
-    getAvatar(userId, avatarKey) {
-      this.loadAvatar(userId, avatarKey)
-      return this.profilesAvatars.get(userId)
-    },
-    async loadAvatar(userId, avatarKey) {
-      const img  = await warpnetService.getImage({userId:userId, key:avatarKey})
-      this.profilesAvatars.set(userId, img)
+    async loadAvatars(profiles) {
+      await Promise.all(
+        profiles.map(async (p) => {
+          p.avatar = await warpnetService.getImage({userId: p.id, key: p.avatar_key});
+        })
+      );
+      this.profiles = [...this.profiles];
     },
     async loadMore() {
       const effectiveProfile = this.profile || this.ownerProfile;
@@ -112,7 +111,7 @@ export default {
         this.followingStatus.set(p.id, status);
       }
       this.profiles = [...this.profiles, ...users];
-
+      await this.loadAvatars(users);
     },
    },
   async created() {
@@ -125,6 +124,7 @@ export default {
       const status = await warpnetService.isFollowing(p.id);
       this.followingStatus.set(p.id, status);
     }
+    await this.loadAvatars(this.profiles);
   },
 };
 </script>
