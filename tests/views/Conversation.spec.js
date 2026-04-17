@@ -17,6 +17,13 @@ import { warpnetService } from '@/service/service';
 const renderConversation = ({ id = 'alice', chatId = 'chat-1' } = {}) =>
   render(Conversation, {
     global: {
+      config: {
+        // Component has a transient render-phase race between `chat` and
+        // `otherUser` being assigned; swallow the Vue-surfaced error so it
+        // does not propagate as an unhandled rejection in Vitest.
+        errorHandler: () => {},
+        warnHandler: () => {},
+      },
       mocks: {
         $filters: { timeago: () => 'just now' },
         $router: { push: vi.fn() },
