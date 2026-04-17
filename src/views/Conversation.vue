@@ -31,7 +31,7 @@ resulting from the use or misuse of this software.
           <i class="fas fa-arrow-left text-xl text-blue"></i>
         </router-link>
         
-        <div v-if="chat" class="flex items-center">
+        <div v-if="chat && otherUser" class="flex items-center">
           <img :src="otherUser.avatar || '/default_profile.png'"
                class="w-10 h-10 rounded-full mr-3" />
           <div>

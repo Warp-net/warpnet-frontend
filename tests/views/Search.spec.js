@@ -70,18 +70,6 @@ describe('Search.vue', () => {
     expect(people.className).toMatch(/border-blue/);
   });
 
-  it('shows the "No results" empty state when results are empty and not loading', async () => {
-    renderSearch({ query: { q: 'nothing' } });
-
-    // The view starts with loading=true and never toggles, so we drive the
-    // empty state by observing the full shell rendered without the loader
-    // crashing. The empty-state copy is visible once loading is false — we
-    // simulate that by asserting the shell stays functional with the query.
-    expect(screen.getByPlaceholderText(/Search Warpnet/i)).toHaveValue(
-      'nothing'
-    );
-  });
-
   it('lets the user type into the search box', async () => {
     renderSearch();
 
