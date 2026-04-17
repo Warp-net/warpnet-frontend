@@ -97,7 +97,7 @@ describe('Messages.vue reactivity', () => {
     expect(await screen.findByText('hi there')).toBeInTheDocument();
   });
 
-  it('reactively appends a sent message without reload', async () => {
+  it('reactively reflects a sent message from the backend without reload', async () => {
     const chat = {
       id: 'chat-1',
       owner_id: 'alice',
@@ -110,7 +110,20 @@ describe('Messages.vue reactivity', () => {
       .mockResolvedValueOnce({ id: 'alice', username: 'alice', avatar_key: '' })
       .mockResolvedValueOnce({ id: 'alice', username: 'alice', avatar_key: '' })
       .mockResolvedValueOnce({ id: 'bob', username: 'bob', avatar_key: '' });
-    warpnetService.getDirectMessages.mockResolvedValue([]);
+    // First call: initial load is empty. Second call: after send, the backend
+    // returns the persisted message with its own ULID.
+    warpnetService.getDirectMessages
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          id: '01HZXYZ000000000000000ABCD',
+          chat_id: 'chat-1',
+          sender_id: 'alice',
+          receiver_id: 'bob',
+          text: 'hello bob',
+          created_at: new Date().toISOString(),
+        },
+      ]);
 
     renderMessages({ chatId: 'chat-1' });
 
@@ -123,9 +136,16 @@ describe('Messages.vue reactivity', () => {
     await waitFor(() => {
       expect(screen.getByText('hello bob')).toBeInTheDocument();
     });
+    // The backend's message is rendered exactly once (no local duplicate).
+    expect(screen.getAllByText('hello bob')).toHaveLength(1);
     // The input clears reactively after send.
     expect(input.value).toBe('');
     expect(warpnetService.sendDirectMessage).toHaveBeenCalled();
+    // Reloaded from backend with a cursor reset after send.
+    expect(warpnetService.getDirectMessages).toHaveBeenLastCalledWith({
+      chatId: 'chat-1',
+      cursorReset: true,
+    });
   });
 
   it('reactively removes the active chat after deleting it', async () => {

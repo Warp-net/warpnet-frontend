@@ -276,24 +276,24 @@ export default {
           imageKey: imageKey,
         });
 
-        const sentMessage = {
-          id: `local-${Date.now()}`,
-          chat_id: this.active.id,
-          sender_id: this.ownerProfile.user_id,
-          receiver_id: this.active.other_user_id,
-          text: this.text,
-          image: this.imageAttachment || undefined,
-          image_key: imageKey || undefined,
-          created_at: new Date().toISOString(),
-        };
-        this.messages = [...this.messages, sentMessage];
+        const sentText = this.text;
+        const refreshed = await warpnetService.getDirectMessages(
+          { chatId: this.active.id, cursorReset: true },
+        );
+        await Promise.all(refreshed.map(async (msg) => {
+          if (msg.image_key) {
+            msg.image = await warpnetService.getImage({ userId: msg.sender_id, key: msg.image_key });
+          }
+        }));
+        refreshed.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        this.messages = refreshed;
 
         const chatIndex = this.chats.findIndex((c) => c.id === this.active.id);
         if (chatIndex !== -1) {
           this.chats.splice(chatIndex, 1, {
             ...this.chats[chatIndex],
-            last_message: this.text,
-            updated_at: sentMessage.created_at,
+            last_message: sentText,
+            updated_at: new Date().toISOString(),
           });
         }
 
