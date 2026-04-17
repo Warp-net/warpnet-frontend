@@ -242,7 +242,7 @@ export default {
       this.tweet.text = "";
       this.imageAttachments = [];
 
-      window.location.reload();
+      this.timeline = await warpnetService.getMyTimeline(true);
     },
     async loadMore() {
       const timeline = await warpnetService.getMyTimeline(false);

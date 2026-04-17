@@ -226,7 +226,6 @@ export default {
           });
         }
         this.deleted = true;
-        window.location.reload();
       } catch (err) {
         console.error('Failed to delete tweet:', err);
       }
@@ -259,7 +258,7 @@ export default {
       } catch (err) {
         console.error(`failed to retweet/unretweet tweet [${this.tweet.id}]`, err);
       }
-      window.location.reload();
+      await this.loadTweetStats(this.tweet.id, this.tweet.user_id);
     },
     async like() {
       if (this.tweet.network && this.tweet.network !== "warpnet") {
@@ -289,7 +288,6 @@ export default {
       }
 
       this.likesCount.set(this.tweet.id, likesNum);
-      window.location.reload();
     },
     getLikesCount(tweetId) {
       return this.likesCount.get(tweetId);

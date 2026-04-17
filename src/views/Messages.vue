@@ -275,7 +275,35 @@ export default {
           text: this.text,
           imageKey: imageKey,
         });
-        window.location.reload();
+
+        const sentMessage = {
+          id: `local-${Date.now()}`,
+          chat_id: this.active.id,
+          sender_id: this.ownerProfile.user_id,
+          receiver_id: this.active.other_user_id,
+          text: this.text,
+          image: this.imageAttachment || undefined,
+          image_key: imageKey || undefined,
+          created_at: new Date().toISOString(),
+        };
+        this.messages = [...this.messages, sentMessage];
+
+        const chatIndex = this.chats.findIndex((c) => c.id === this.active.id);
+        if (chatIndex !== -1) {
+          this.chats.splice(chatIndex, 1, {
+            ...this.chats[chatIndex],
+            last_message: this.text,
+            updated_at: sentMessage.created_at,
+          });
+        }
+
+        this.text = '';
+        this.imageAttachment = undefined;
+        if (this.$refs.messageImageInput) {
+          this.$refs.messageImageInput.value = '';
+        }
+        this.disabled = false;
+        this.scrollToEnd();
       } catch (err) {
         console.error('Failed to send message:', err);
         this.disabled = false;
@@ -342,8 +370,11 @@ export default {
     async deleteCurrentChat() {
       if (!this.active || !this.active.id) return;
       try {
-        await warpnetService.deleteChat(this.active.id);
-        window.location.reload();
+        const deletedId = this.active.id;
+        await warpnetService.deleteChat(deletedId);
+        this.chats = this.chats.filter((c) => c.id !== deletedId);
+        this.messages = [];
+        this.active = undefined;
       } catch (err) {
         console.error('Failed to delete chat:', err);
       }

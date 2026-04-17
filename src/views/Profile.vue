@@ -361,7 +361,6 @@ export default {
         return
       }
       this.followingStatus.set(this.profile.id, true)
-      window.location.reload();
     },
     async unfollow() {
       try {
@@ -371,7 +370,6 @@ export default {
         return
       }
       this.followingStatus.set(this.profile.id, false)
-      window.location.reload();
     },
     async loadMore() {
       const tweets = await warpnetService.getTweets({userId:this.profile.id, cursorReset:false});
