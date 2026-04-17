@@ -235,14 +235,20 @@ export default {
     },
     async addNewTweet() {
       if (!this.tweet.text) return;
-      const imageKeys = await warpnetService.uploadImages(this.imageAttachments);
+      const draftText = this.tweet.text;
+      const draftImages = this.imageAttachments;
+      try {
+        const imageKeys = await warpnetService.uploadImages(draftImages);
+        await warpnetService.createTweet({text: draftText, imageKeys});
 
-      await warpnetService.createTweet({text: this.tweet.text, imageKeys});
+        this.tweet.text = "";
+        this.imageAttachments = [];
 
-      this.tweet.text = "";
-      this.imageAttachments = [];
-
-      this.timeline = await warpnetService.getMyTimeline(true);
+        this.timeline = await warpnetService.getMyTimeline(true);
+      } catch (err) {
+        console.error('Failed to post tweet:', err);
+        this.showToast('Failed to post tweet. Please try again.', 'error');
+      }
     },
     async loadMore() {
       const timeline = await warpnetService.getMyTimeline(false);

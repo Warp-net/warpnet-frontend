@@ -277,22 +277,16 @@ export default {
         });
 
         const sentText = this.text;
-        const refreshed = await warpnetService.getDirectMessages(
-          { chatId: this.active.id, cursorReset: true },
-        );
-        await Promise.all(refreshed.map(async (msg) => {
-          if (msg.image_key) {
-            msg.image = await warpnetService.getImage({ userId: msg.sender_id, key: msg.image_key });
-          }
-        }));
-        refreshed.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-        this.messages = refreshed;
+        const sentHadImage = !!imageKey;
+
+        await this.selectChat(this.active);
 
         const chatIndex = this.chats.findIndex((c) => c.id === this.active.id);
         if (chatIndex !== -1) {
+          const preview = sentText || (sentHadImage ? '[image]' : this.chats[chatIndex].last_message);
           this.chats.splice(chatIndex, 1, {
             ...this.chats[chatIndex],
-            last_message: sentText,
+            last_message: preview,
             updated_at: new Date().toISOString(),
           });
         }
@@ -303,7 +297,6 @@ export default {
           this.$refs.messageImageInput.value = '';
         }
         this.disabled = false;
-        this.scrollToEnd();
       } catch (err) {
         console.error('Failed to send message:', err);
         this.disabled = false;

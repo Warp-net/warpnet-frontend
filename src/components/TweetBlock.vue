@@ -258,7 +258,11 @@ export default {
       } catch (err) {
         console.error(`failed to retweet/unretweet tweet [${this.tweet.id}]`, err);
       }
-      await this.loadTweetStats(this.tweet.id, this.tweet.user_id);
+      try {
+        await this.loadTweetStats(this.tweet.id, this.tweet.user_id);
+      } catch (err) {
+        console.error(`failed to refresh tweet stats [${this.tweet.id}]`, err);
+      }
     },
     async like() {
       if (this.tweet.network && this.tweet.network !== "warpnet") {
