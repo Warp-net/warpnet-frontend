@@ -39,7 +39,7 @@ resulting from the use or misuse of this software.
           <div class="lg:block ml-4">
             <h1 class="text-xl font-bold">{{ profile.username || "Anonymous" }}</h1>
             <p v-if="!noUser" class="text-left text-sm leading-tight text-dark">
-              {{ profile.tweets_count || 0}} Tweets
+              {{ profile.tweets_count || tweets.length}} Tweets
             </p>
           </div>
         </div>
@@ -166,14 +166,14 @@ resulting from the use or misuse of this software.
                 @click="goToFollowing()"
                 class="mr-4 flex flex-row hover:underline"
               >
-                <span class="font-bold">{{ profile.followings_count || 0 }}</span>
+                <span class="font-bold">{{ profile.followings_count || followings.length }}</span>
                 <span class="text-dark whitespace-pre"> Following</span>
               </button>
               <button
                 @click="goToFollowers()"
                 class="flex flex-row hover:underline"
               >
-                <span class="font-bold">{{ profile.followers_count || 0 }}</span>
+                <span class="font-bold">{{ profile.followers_count || followings.length }}</span>
                 <span class="text-dark whitespace-pre"> Followers</span>
               </button>
             </div>
